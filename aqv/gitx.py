@@ -40,7 +40,14 @@ def matching(paths, patterns):
 
 
 def under(path, prefixes):
-    return any(path.startswith(p) for p in prefixes)
+    """True when `path` starts with one of `prefixes`, or matches one that is a glob (`*_test.go`)."""
+    for p in prefixes:
+        if "*" in p or "?" in p:
+            if fnmatch.fnmatch(path, p) or fnmatch.fnmatch(path.rsplit("/", 1)[-1], p):
+                return True
+        elif path.startswith(p):
+            return True
+    return False
 
 
 @dataclass

@@ -26,6 +26,9 @@ def id_token(req_id):
 
 
 def mentions(name, req_id):
+    """True when a test name contains the requirement ID, in any of the usual spellings:
+    test_AC_auth_002_x, TestAC_auth_002X (Go), ac_auth_002_x (Rust), "AC-auth-002 x" (JS, Kotlin)."""
+    name = re.sub(r"(?<=[a-z0-9])(?=[A-Z])", "_", name)  # camelCase boundary: TestAC → Test_AC
     norm = re.sub(r"[-_ ]", "_", name).lower()
     tok = id_token(req_id)
     return re.search(r"(?<![a-z0-9])" + re.escape(tok) + r"(?![0-9])", norm) is not None
@@ -108,3 +111,13 @@ def word_diff(old, new):
         o, n = " ".join(a[i1:i2]), " ".join(b[j1:j2])
         parts.append(f"{o} → {n}" if o and n else (f"+{n}" if n else f"−{o}"))
     return ", ".join(parts)
+
+
+def word_segments(old, new):
+    """`new` split into [{"t": text, "m": changed}] against `old`, for underlining changed words."""
+    a, b = old.split(), new.split()
+    segs = []
+    for op, i1, i2, j1, j2 in difflib.SequenceMatcher(None, a, b).get_opcodes():
+        if j2 > j1:
+            segs.append({"t": " ".join(b[j1:j2]), "m": op != "equal"})
+    return segs

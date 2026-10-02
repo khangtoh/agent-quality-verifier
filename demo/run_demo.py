@@ -4,8 +4,8 @@ Each scenario runs in its own copy of the baseline repo and is checked like a pu
 request against main. The clean scenarios must pass every check; each attack must
 be caught by the check named in its `# expect:` line.
 
-    python demo/run_demo.py [--jobs 4] [--only T3,A6]
-    python demo/run_demo.py --html-only     # rebuild the HTML pages from the last run
+    python demo/run_demo.py [--lang python,go] [--jobs 4] [--only T3,A6]
+    python demo/run_demo.py --html-only     # rebuild the HTML pages from the last runs
 """
 import argparse
 import concurrent.futures as cf
@@ -19,10 +19,15 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DEMO = ROOT / "demo"
-WORK = DEMO / ".work"
+WORK_ROOT = DEMO / ".work"
+RESULTS = DEMO / "results"
 sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(DEMO))
 from aqv import html  # noqa: E402
 from aqv.engine import CHECKS  # noqa: E402
+from build_baseline import LANGS, load_lang  # noqa: E402
+
+WORK = WORK_ROOT  # set per language in run_language()
 
 
 def header(path):
@@ -35,12 +40,12 @@ def header(path):
     return meta
 
 
-def verify(repo, out, base=None):
+def verify(repo, out, base=None, env=None):
     cmd = [sys.executable, "-m", "aqv", "check", "--repo", str(repo), "--out", str(out)]
     if base:
         cmd += ["--base", base]
     t = time.time()
-    r = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
+    r = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True, env=env)
     rep = json.loads((out / "results.json").read_text()) if (out / "results.json").exists() else None
     if rep is None:
         raise RuntimeError(f"verifier crashed on {repo}:\n{r.stdout}\n{r.stderr}")
@@ -60,7 +65,7 @@ def run_scenario(path, env):
     if s.returncode:
         return {"name": name, "title": meta.get("title", ""), "expect": meta["expect"], "error":
                 f"scenario script failed:\n{s.stdout}\n{s.stderr}"}
-    rep, secs = verify(repo, d / "out", base="main")
+    rep, secs = verify(repo, d / "out", base="main", env=env)
     failing = sorted(k for k, v in rep["checks"].items() if v in ("fail", "error"))
     ok = set(meta["expect"]) <= set(failing) if meta["expect"] else not failing
     return {"name": name, "title": meta.get("title", ""), "expect": meta["expect"], "failing": failing,
@@ -71,85 +76,137 @@ def run_scenario(path, env):
 EXAMPLES = ["baseline", "T7-weak-tests", "A6-leaked-field"]
 
 
-def write_html(results):
-    """demo/examples/demo.html for the whole run, plus report.html for a few sample runs."""
-    out_dir = DEMO / "examples"
-    out_dir.mkdir(exist_ok=True)
+def write_html(lang, results):
+    """demo/results/<lang>/demo.html for the whole run, plus single-run reports for a few samples."""
+    L = load_lang(lang)
+    out_dir = RESULTS / lang
+    out_dir.mkdir(parents=True, exist_ok=True)
     scenarios = []
     for r in results:
         if "error" in r:
             continue
-        rep = json.loads((Path(r["out"]) / "results.json").read_text())
+        rep = scrub(json.loads((Path(r["out"]) / "results.json").read_text()))
         scenarios.append({**r, "report": rep})
+        (out_dir / "runs").mkdir(exist_ok=True)
+        (out_dir / "runs" / f"{r['name']}.html").write_text(html.run_report(rep))
         if r["name"] in EXAMPLES:
-            (out_dir / f"{r['name']}.html").write_text(html.run_report(scrub(rep)))
-    (out_dir / "demo.html").write_text(html.demo_report([{**s, "report": scrub(s["report"])} for s in scenarios]))
+            (out_dir / f"{r['name']}.html").write_text(html.run_report(rep))
+            (out_dir / f"{r['name']}.txt").write_text(scrub_text((Path(r["out"]) / "report.txt").read_text()))
+    (out_dir / "demo.html").write_text(html.demo_report(scenarios, language=f"{L.NAME} ({L.STACK})"))
+
+
+def write_index():
+    langs = []
+    for lang in LANGS:
+        f = WORK_ROOT / lang / "demo-results.json"
+        if f.exists():
+            L = load_lang(lang)
+            langs.append({"lang": lang, "name": L.NAME, "stack": L.STACK, "mechanisms": getattr(L, "MECHANISMS", {}),
+                          "results": json.loads(f.read_text())})
+    RESULTS.mkdir(exist_ok=True)
+    (RESULTS / "index.html").write_text(html.languages_report(langs))
+
+
+def scrub_text(text):
+    return text.replace(str(WORK_ROOT) + "/", "")
 
 
 def scrub(rep):
     """Drop local paths so the committed pages don't show this machine's directories."""
-    return json.loads(json.dumps(rep).replace(str(WORK) + "/", ""))
+    return json.loads(json.dumps(rep).replace(str(WORK_ROOT) + "/", ""))
 
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--jobs", type=int, default=4)
-    ap.add_argument("--only", default="")
-    ap.add_argument("--html-only", action="store_true")
-    a = ap.parse_args()
-
-    if a.html_only:
-        write_html(json.loads((WORK / "demo-results.json").read_text()))
-        print(f"Wrote {DEMO / 'examples' / 'demo.html'}")
-        return 0
-
+def run_language(lang, jobs, only):
+    global WORK
+    L = load_lang(lang)
+    WORK = WORK_ROOT / lang
     WORK.mkdir(parents=True, exist_ok=True)
-    env = dict(os.environ, GNUPGHOME=str(WORK / "gnupg"), DEMO=str(DEMO))
-    os.environ["GNUPGHOME"] = env["GNUPGHOME"]
-    print("Building the baseline repo ...", flush=True)
-    subprocess.run([sys.executable, str(DEMO / "build_baseline.py"), str(WORK / "baseline"),
-                    "--gnupg", env["GNUPGHOME"]], check=True, capture_output=True)
+    gnupg = WORK_ROOT / "gnupg"
+    env = dict(os.environ, GNUPGHOME=str(gnupg), DEMO=str(DEMO), AQV_LANG=lang)
+    shared = WORK / "shared"
+    shared.mkdir(exist_ok=True)
+    env.update(getattr(L, "env", lambda shared: {})(shared))
+    os.environ.update({k: v for k, v in env.items() if k not in os.environ or k in ("GNUPGHOME", "AQV_LANG")})
+    print(f"[{lang}] building the baseline repo ...", flush=True)
+    b = subprocess.run([sys.executable, str(DEMO / "build_baseline.py"), str(WORK / "baseline"),
+                        "--gnupg", str(gnupg), "--lang", lang, "--shared", str(shared)],
+                       capture_output=True, text=True, env=env)
+    if b.returncode:
+        print(b.stdout + b.stderr)
+        raise SystemExit(f"[{lang}] baseline build failed")
 
     results = []
-    only = [x for x in a.only.split(",") if x]
     if not only:
-        print("Checking the baseline (all history) ...", flush=True)
-        rep, secs = verify(WORK / "baseline", WORK / "runs" / "baseline", base=None)
+        print(f"[{lang}] checking the baseline (all history) ...", flush=True)
+        rep, secs = verify(WORK / "baseline", WORK / "runs" / "baseline", base=None, env=env)
         failing = sorted(k for k, v in rep["checks"].items() if v in ("fail", "error"))
         results.append({"name": "baseline", "title": "Baseline: six requirements built the right way, all history",
                         "expect": [], "failing": failing, "statuses": {r["id"]: r["status"] for r in rep["requirements"]},
                         "checks": rep["checks"], "ok": not failing, "seconds": round(secs),
                         "out": str(WORK / "runs" / "baseline")})
-        print(f"  baseline: {'ok' if not failing else 'FAILED ' + ', '.join(failing)} ({round(secs)}s)", flush=True)
+        print(f"  [{lang}] baseline: {'ok' if not failing else 'FAILED ' + ', '.join(failing)} ({round(secs)}s)",
+              flush=True)
 
     scenarios = sorted((DEMO / "scenarios").glob("*.sh"))
     if only:
         scenarios = [p for p in scenarios if any(p.stem.startswith(o) for o in only)]
-    with cf.ThreadPoolExecutor(max_workers=a.jobs) as pool:
+    with cf.ThreadPoolExecutor(max_workers=min(jobs, getattr(L, "JOBS", jobs))) as pool:
         futs = {pool.submit(run_scenario, p, env): p for p in scenarios}
         for f in cf.as_completed(futs):
             r = f.result()
             results.append(r)
             if "error" in r:
-                print(f"  {r['name']}: SCRIPT ERROR\n{r['error']}", flush=True)
+                print(f"  [{lang}] {r['name']}: SCRIPT ERROR\n{r['error']}", flush=True)
             else:
                 mark = "ok" if r["ok"] else "MISSED"
-                print(f"  {r['name']}: {mark}; failing checks: {', '.join(r['failing']) or 'none'} ({r['seconds']}s)",
-                      flush=True)
+                print(f"  [{lang}] {r['name']}: {mark}; failing checks: {', '.join(r['failing']) or 'none'} "
+                      f"({r['seconds']}s)", flush=True)
 
     results.sort(key=lambda r: (r["name"] != "baseline", r["name"]))
-    (WORK / "demo-results.json").write_text(json.dumps(results, indent=2))
     if not only:
-        write_markdown(results)
-        write_html(results)
+        (WORK / "demo-results.json").write_text(json.dumps(results, indent=2))
+        write_markdown(lang, results)
+        write_html(lang, results)
     bad = [r for r in results if not r.get("ok")]
-    print(f"\n{len(results) - len(bad)} of {len(results)} scenarios behaved as expected.")
-    return 1 if bad else 0
+    print(f"[{lang}] {len(results) - len(bad)} of {len(results)} scenarios behaved as expected.", flush=True)
+    return results
 
 
-def write_markdown(results):
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--lang", default="python", help="comma-separated, or 'all'")
+    ap.add_argument("--jobs", type=int, default=4)
+    ap.add_argument("--only", default="")
+    ap.add_argument("--html-only", action="store_true")
+    a = ap.parse_args()
+    langs = LANGS if a.lang == "all" else [x for x in a.lang.split(",") if x]
+
+    if a.html_only:
+        global WORK
+        for lang in langs:
+            WORK = WORK_ROOT / lang
+            if (WORK / "demo-results.json").exists():
+                results = json.loads((WORK / "demo-results.json").read_text())
+                write_markdown(lang, results)
+                write_html(lang, results)
+        write_index()
+        print(f"Wrote {RESULTS}")
+        return 0
+
+    only = [x for x in a.only.split(",") if x]
+    ok = True
+    for lang in langs:
+        results = run_language(lang, a.jobs, only)
+        ok = ok and all(r.get("ok") for r in results)
+    if not only:
+        write_index()
+    return 0 if ok else 1
+
+
+def write_markdown(lang, results):
     clean = [r for r in results if not r["expect"] and "error" not in r]
-    lines = ["# Demo results", "",
+    L = load_lang(lang)
+    lines = [f"# Demo results: {L.NAME}", "", f"Stack: {L.STACK}.", "",
              "Generated by `python demo/run_demo.py`. Each attack runs in its own copy of the baseline repo and "
              "is checked like a pull request against `main`.", "",
              "## Every check, clean and attacked", "",
@@ -171,7 +228,8 @@ def write_markdown(results):
         changed = ", ".join(f"{k}: {v}" for k, v in r["statuses"].items() if v != "Sync") or "all Sync"
         lines.append(f"| `{r['name']}` | {r['title']} | {', '.join(r['expect']) or 'all pass'} | "
                      f"{', '.join(r['failing']) or 'none'} | {changed} | {'✅' if r['ok'] else '❌'} |")
-    (DEMO / "RESULTS.md").write_text("\n".join(lines) + "\n")
+    (RESULTS / lang).mkdir(parents=True, exist_ok=True)
+    (RESULTS / lang / "RESULTS.md").write_text("\n".join(lines) + "\n")
 
 
 if __name__ == "__main__":

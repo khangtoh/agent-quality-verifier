@@ -33,6 +33,7 @@ CSS = """
   --font-display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
   --font-body: "Source Sans 3", "Segoe UI", Roboto, Arial, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -94,6 +95,7 @@ td.name { font-weight: 600; }
 .matrix td.gap, .matrix th.gap { border-left: 2px solid var(--line); }
 .cell { display: inline-block; width: 16px; height: 16px; border-radius: 4px; vertical-align: middle; }
 .cell.hit { background: var(--bad-fg); }
+.cell.good { background: var(--ok-fg); }
 .cell.also { border: 2px solid var(--bad-fg); }
 .cell.pass { width: 6px; height: 6px; border-radius: 50%; background: var(--ok-fg); opacity: 0.55; }
 .cell.skip { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); opacity: 0.4; }
@@ -132,13 +134,13 @@ footer { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line)
 FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">'
          '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
          '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700'
-         '&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">')
+         '&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap">')
 
 
-def page(title, body):
+def page(title, body, extra_css=""):
     return (f"<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n"
             f"<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n"
-            f"<title>{escape(title)}</title>\n{FONTS}\n<style>{CSS}</style>\n</head>\n<body>\n"
+            f"<title>{escape(title)}</title>\n{FONTS}\n<style>{CSS}{extra_css}</style>\n</head>\n<body>\n"
             f"<main class=\"page\">\n{body}\n</main>\n</body>\n</html>\n")
 
 
@@ -182,35 +184,137 @@ def findings(results, limit=None):
 
 # ---------------------------------------------------------------------------- one run
 
+VIEW_CSS = """
+.sheet { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.clause { display: grid; grid-template-columns: 28px 1fr; border-bottom: 1px solid var(--line); }
+.clause:last-child { border-bottom: 0; }
+.rail { display: flex; flex-direction: column; gap: 3px; padding: 18px 0 18px 12px; }
+.rail span { flex: 1; width: 6px; border-radius: 3px; min-height: 10px; }
+.v-ok { background: var(--ok-fg); } .v-warn { background: var(--warn-fg); }
+.v-bad { background: var(--bad-fg); } .v-none { background: var(--muted-bg); }
+.clause details > summary { list-style: none; cursor: pointer; padding: 14px 20px 14px 10px; }
+.clause details > summary::-webkit-details-marker { display: none; }
+.clause details[open] > summary { padding-bottom: 4px; }
+.clause .head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.clause .rid { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+.vitals { display: flex; gap: 10px; font-size: 12px; color: var(--muted); flex-wrap: wrap; }
+.vitals span { display: inline-flex; align-items: center; gap: 5px; }
+.vitals i { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+.clause .text { font: 19px/1.5 var(--font-serif); margin: 6px 0 0; }
+.clause .text mark { background: none; color: inherit; text-decoration: underline wavy var(--warn-fg);
+  text-decoration-thickness: 2px; text-underline-offset: 4px; }
+.clause .inner { padding: 0 20px 14px 10px; }
+.clause .note { font-size: 14px; margin: 8px 0 8px; }
+.note.ok { color: var(--ok-fg); } .note.warn { color: var(--warn-fg); } .note.bad { color: var(--bad-fg); }
+.tl { list-style: none; margin: 0; padding: 0 0 4px 3px; border-left: 1px solid var(--line); }
+.tl li { position: relative; padding: 4px 0 4px 18px; font-size: 14px; color: var(--muted); overflow-wrap: anywhere; }
+.tl li::before { content: ""; position: absolute; left: -5px; top: 12px; width: 9px; height: 9px; border-radius: 50%;
+  background: var(--dot, var(--muted-bg)); }
+.tl li.now-sep { padding: 8px 0 2px 18px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .07em;
+  text-transform: uppercase; }
+.tl li.now-sep::before { display: none; }
+.tl code { font-family: var(--font-mono); font-size: 12px; margin-right: 8px; color: var(--fg); background: none; padding: 0; }
+.orow { display: flex; align-items: baseline; gap: 10px; padding: 11px 18px; border-bottom: 1px solid var(--line);
+  font-size: 15px; flex-wrap: wrap; }
+.orow:last-child { border-bottom: 0; }
+.orow .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; align-self: center; }
+.orow code { font-family: var(--font-mono); font-size: 13px; background: none; padding: 0; }
+.orow span.msg { color: var(--muted); }
+.vlegend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.vlegend span { display: inline-flex; align-items: center; gap: 6px; }
+.vlegend i { width: 6px; height: 14px; border-radius: 3px; display: inline-block; }
+details.all > summary { cursor: pointer; font-family: var(--font-display); font-size: 20px; font-weight: 700; }
+"""
+
+DOT = {"ok": "var(--ok-fg)", "warn": "var(--warn-fg)", "bad": "var(--bad-fg)", "none": "var(--muted-bg)",
+       "neutral": "var(--muted-bg)"}
+VITALS = ["spec", "code", "api", "tests"]
+PHRASE = {"Missing": "not implemented", "Gone": "with their code gone", "Untested": "untested",
+          "Failing": "failing", "Unexercised": "not exercised by their tests", "Weak": "with weak tests",
+          "Contract": "breaking the API contract", "Drift": "changed in the spec since implemented"}
+
+
+def requirement_block(r, open_=None):
+    """One requirement in the viewer style: vital-sign rail, text, plain note, history in order."""
+    v = r.get("vitals") or {}
+    tone = STATUS_TONE.get(r["status"], "muted")
+    tone = {"muted": "bad"}.get(tone, tone)
+    rail = "".join(f'<span class="v-{v.get(k, "none")}" title="{k}: {v.get(k, "none")}"></span>' for k in VITALS)
+    chips = "".join(f'<span><i style="background:{DOT[v.get(k, "none")]}"></i>{k}</span>' for k in VITALS)
+    segs = r.get("segments") or [{"t": r.get("text", ""), "m": False}]
+    text = " ".join(f"<mark>{escape(x['t'])}</mark>" if x["m"] else escape(x["t"]) for x in segs)
+    items = []
+    for e in r.get("timeline", []):
+        items.append(f'<li style="--dot:{DOT.get(e["state"], DOT["none"])}"><code>{escape(e["sha"])}</code>'
+                     f'{escape(e["label"])}</li>')
+    if r.get("now"):
+        items.append('<li class="now-sep">Now</li>')
+        items += [f'<li style="--dot:{DOT.get(e["state"], DOT["none"])}">{escape(e["label"])}</li>' for e in r["now"]]
+    if open_ is None:
+        open_ = r["status"] != "Sync"
+    return (f'<div class="clause" id="{escape(r["id"])}"><div class="rail" aria-hidden="true">{rail}</div>'
+            f'<details{" open" if open_ else ""}><summary><div class="head"><span class="rid">{escape(r["id"])}'
+            f'{" · " + escape(", ".join(r["api"])) if r.get("api") else ""}</span>'
+            f'<span class="vitals">{chips}</span></div><p class="text">{text}</p></summary>'
+            f'<div class="inner"><p class="note {tone}">{escape(r.get("note", ""))}</p>'
+            f'<ol class="tl">{"".join(items)}</ol></div></details></div>')
+
+
+def headline(reqs):
+    proven = sum(1 for r in reqs if r["status"] == "Sync")
+    counts = {}
+    for r in reqs:
+        if r["status"] != "Sync":
+            counts[r["status"]] = counts.get(r["status"], 0) + 1
+    h = f"{proven} of {len(reqs)} requirements are proven by running code."
+    sub = ", ".join(f"{n} {PHRASE.get(st, st.lower())}" for st, n in counts.items())
+    return h, (sub[0].upper() + sub[1:] + ".") if sub else "Every requirement is implemented, tested and matches the contract."
+
 
 def run_report(rep):
     rng = f'{rep["base"][:7]}..{rep["head"][:7]}' if rep.get("base") else f'all history to {rep["head"][:7]}'
-    failing = [k for k, v in rep["checks"].items() if v in ("fail", "error")]
-    counts = {}
-    for r in rep["requirements"]:
-        counts[r["status"]] = counts.get(r["status"], 0) + 1
-    body = [f'<header class="top"><span class="eyebrow">Agent Quality Verifier · {escape(rep["head_branch"])} · {rng}</span>'
-            f'<h1>{"All checks pass" if not failing else str(len(failing)) + " check" + ("s" if len(failing) > 1 else "") + " failing"}</h1>'
-            f'<p class="lede">{len(rep["requirements"])} requirements: '
-            + ", ".join(f"{n} {s}" for s, n in sorted(counts.items(), key=lambda x: -x[1])) + ".</p></header>"]
-    body.append('<section><h2>Requirements</h2>' + requirement_cards(rep["requirements"]) + "</section>")
+    reqs = rep["requirements"]
+    h, sub = headline(reqs)
+    body = [f'<header class="top"><span class="eyebrow">{escape(rep["head_branch"])} · {rng} · specs/</span>'
+            f'<h1>{escape(h)}</h1><p class="lede muted">{escape(sub)}</p></header>']
+    body.append('<section><div class="sheet">' + "".join(requirement_block(r) for r in reqs) + "</div>"
+                '<div class="vlegend"><span>Rail, top to bottom: spec, code, api, tests</span>'
+                '<span><i class="v-ok"></i>Proven</span><span><i class="v-warn"></i>Needs attention</span>'
+                '<span><i class="v-bad"></i>Missing or failing</span><span><i class="v-none"></i>Not applicable</span>'
+                '</div></section>')
+
+    outside = rep.get("outside") or []
+    rows = "".join(f'<div class="orow"><span class="dot" style="background:var(--bad-fg)"></span>'
+                   f'<code>{escape(o["check"])}</code><span>{escape(o["summary"])}</span></div>' for o in outside)
+    body.append('<section><h2>Outside the spec</h2>'
+                + (f'<div class="sheet">{rows}</div>' if rows else
+                   '<p class="muted small">Nothing outside the spec: every route and operation is accounted for.</p>')
+                + "</section>")
+
+    git = [(c, rep["checks"][c]) for c in CHECKS if c.startswith("H")]
+    bad = [r for r in rep["results"] if r["check"].startswith("H") and r["verdict"] in ("fail", "error")]
+    passing = sum(1 for _, v in git if v in ("pass", "skip"))
+    grows = "".join(f'<div class="orow"><span class="dot" style="background:var(--bad-fg)"></span>'
+                    f'<code>{escape(r["check"])}</code><span>{escape(CHECKS[r["check"]])}:</span>'
+                    f'<span class="msg">{escape(r["summary"])}</span></div>' for r in bad)
+    body.append(f'<section><h2>Git practices · {passing} of {len(git)} rules pass</h2>'
+                + (f'<div class="sheet">{grows}</div>' if grows else
+                   '<p class="muted small">Conventional Commits, Refs trailers, one requirement per commit, '
+                   'commit size, branch names, history, attribution and signatures all pass.</p>')
+                + "</section>")
+
+    rows = []
     for prefix, title in GOALS:
-        rows = []
         for chk, name in CHECKS.items():
             if not chk.startswith(prefix):
                 continue
             v = rep["checks"][chk]
             msgs = [r for r in rep["results"] if r["check"] == chk and r["verdict"] in ("fail", "error", "not_covered")]
-            if not msgs:
-                ok = [r for r in rep["results"] if r["check"] == chk and r["verdict"] == "pass"]
-                msgs_html = f'<span class="msg">{escape(ok[0]["summary"])}</span>' if len(ok) == 1 else ""
-            else:
-                msgs_html = "".join(
-                    f'<span class="msg">{escape(("" if m["subject"] in ("history", "project", "spec", "contract", "routes", "service") else m["subject"] + ": ") + m["summary"])}</span>'
-                    for m in msgs[:6])
+            msg_html = "".join(f'<span class="msg">{escape(m["summary"])}</span>' for m in msgs[:4])
             rows.append(f'<div class="row"><span class="ck">{chk}</span><span>{verdict_chip(v)}</span>'
-                        f'<span>{escape(name)}{msgs_html}</span></div>')
-        body.append(f'<section><h2>{escape(title)}</h2><div class="panel goal-list">{"".join(rows)}</div></section>')
+                        f'<span>{escape(name)}{msg_html}</span></div>')
+    body.append(f'<section><details class="all"><summary>All {len(CHECKS)} checks</summary>'
+                f'<div class="panel goal-list" style="margin-top:12px">{"".join(rows)}</div></details></section>')
     if rep.get("scorecard"):
         rows = "".join(
             f'<tr><td class="name">{escape(who)}</td><td>{a["commits"]}</td><td>{a["git_rule_pass_rate"]:.0%}</td>'
@@ -221,13 +325,13 @@ def run_report(rep):
                     f"<tbody>{rows}</tbody></table></div></section>")
     body.append('<footer>Generated by <code>aqv check</code>. Every result is repeatable: rerun the same command on '
                 'the same commit to get the same answer.</footer>')
-    return page("Agent Quality Report", "\n".join(body))
+    return page("Spec Health", "\n".join(body), extra_css=VIEW_CSS)
 
 
 # ---------------------------------------------------------------------------- the demo
 
 
-def demo_report(scenarios):
+def demo_report(scenarios, language=None):
     """`scenarios`: dicts with name, title, expect, ok, checks, failing, report (full results.json)."""
     total = len(scenarios)
     ok = sum(1 for s in scenarios if s.get("ok"))
@@ -237,7 +341,8 @@ def demo_report(scenarios):
     clean_ok = all(not s["failing"] for s in clean)
 
     body = [
-        '<header class="top"><span class="eyebrow">Agent Quality Verifier · demo results</span>'
+        '<header class="top"><span class="eyebrow">Agent Quality Verifier · demo results'
+        + (f' · {escape(language)}' if language else '') + '</span>'
         f'<h1>{ok} of {total} scenarios behave as expected</h1>'
         '<p class="lede">A small auth service is built the right way, then an agent gets it wrong in '
         f'{len(attacks)} different ways. Each attack runs in its own copy of the repo and is checked like a '
@@ -307,14 +412,90 @@ def demo_report(scenarios):
         exp = ", ".join(s["expect"]) or "all pass"
         result = chip("as expected", "ok") if s.get("ok") else chip("missed", "bad")
         changed = [r for r in rep["requirements"] if r["status"] != "Sync"]
+        blocks = ('<div class="sheet">' + "".join(requirement_block(r, open_=True) for r in changed) + "</div>"
+                  if changed else '<p class="small muted">Every requirement stays proven.</p>')
+        link = f'<a class="small" href="runs/{escape(s["name"])}.html">Open the full report for this run</a>'
         det.append(
             f'<details class="scenario" id="{escape(s["name"])}"><summary><span class="nm">{escape(s["name"])}</span>'
             f'<span class="tt">{escape(s["title"])}</span><span class="small muted">expects {escape(exp)}</span>{result}'
-            '</summary><div class="inner">'
-            + (requirement_cards(changed) if changed else '<p class="small muted">Every requirement stays Sync.</p>')
-            + "<h3>What the verifier reported</h3>" + findings(rep["results"]) + "</div></details>")
+            '</summary><div class="inner">' + blocks
+            + "<h3>Every failing result</h3>" + findings(rep["results"]) + link + "</div></details>")
     body.append('<section><h2>Scenarios</h2><p class="small muted">Open a scenario to see the requirement '
                 'statuses it changed and every failing result.</p>' + "".join(det) + "</section>")
     body.append('<footer>Generated by <code>python demo/run_demo.py</code>. Rerun it to rebuild the demo repo, '
                 'replay every scenario and regenerate this page.</footer>')
-    return page("Agent Quality Demo", "\n".join(body))
+    return page("Agent Quality Demo", "\n".join(body), extra_css=VIEW_CSS)
+
+
+# ---------------------------------------------------------------------------- all languages
+
+
+def languages_report(langs):
+    """`langs`: dicts with lang, name, stack, mechanisms, results (the demo-results.json rows)."""
+    checks = list(CHECKS)
+    body = []
+    total = sum(len(l["results"]) for l in langs)
+    good = sum(1 for l in langs for r in l["results"] if r.get("ok"))
+    body.append(
+        '<header class="top"><span class="eyebrow">Agent Quality Verifier · every language</span>'
+        f'<h1>{good} of {total} scenarios behave as expected across {len(langs)} languages</h1>'
+        '<p class="lede">The same spec, the same OpenAPI contract and the same 26 attacks, built in each '
+        'language with the stack an agent would usually pick. Each language must pass every check on its clean '
+        'runs and catch every attack with the check written for it.</p></header>')
+
+    rows = []
+    for l in langs:
+        res = l["results"]
+        ok = sum(1 for r in res if r.get("ok"))
+        cells = []
+        for i, c in enumerate(checks):
+            gap = ' class="gap"' if i and checks[i - 1][0] != c[0] else ""
+            attacks = [r for r in res if c in r.get("expect", [])]
+            clean = [r for r in res if not r.get("expect")]
+            clean_ok = all(r["checks"].get(c) in ("pass", "skip") for r in clean if "checks" in r)
+            caught = attacks and all(r.get("ok") for r in attacks)
+            if caught and clean_ok:
+                mark = '<span class="cell good" title="caught its attack; clean runs pass"></span>'
+            elif not clean_ok:
+                mark = '<span class="cell also" title="failed on a clean run"></span>'
+            else:
+                mark = '<span class="cell also" title="missed its attack"></span>'
+            cells.append(f"<td{gap}>{mark}</td>")
+        rows.append(f'<tr><td class="scn"><a href="{escape(l["lang"])}/demo.html">{escape(l["name"])}</a></td>'
+                    f'<td class="small">{ok}/{len(res)}</td>{"".join(cells)}</tr>')
+    head = '<th class="scn">Language</th><th>OK</th>' + "".join(
+        f'<th class="check{" gap" if i and checks[i - 1][0] != c[0] else ""}">{c}</th>' for i, c in enumerate(checks))
+    body.append('<section><h2>Every check in every language</h2>'
+                '<div class="legend"><span><span class="cell good"></span>caught its attack, clean runs pass</span>'
+                '<span><span class="cell also"></span>missed, or failed a clean run</span></div>'
+                f'<div class="table-wrap"><table class="matrix"><thead><tr>{head}</tr></thead>'
+                f'<tbody>{"".join(rows)}</tbody></table></div></section>')
+
+    mech_checks = []
+    for l in langs:
+        for c in l.get("mechanisms", {}):
+            if c not in mech_checks:
+                mech_checks.append(c)
+    mech_checks.sort(key=checks.index)
+    if mech_checks:
+        hdr = "<th>Check</th>" + "".join(f"<th>{escape(l['name'])}</th>" for l in langs)
+        mrows = []
+        for c in mech_checks:
+            mrows.append(f'<tr><td class="id">{c}<br><span class="small muted" style="font-family:var(--font-body);'
+                         f'font-weight:400">{escape(CHECKS[c])}</span></td>'
+                         + "".join(f'<td class="small">{escape(l.get("mechanisms", {}).get(c, "—"))}</td>' for l in langs)
+                         + "</tr>")
+        body.append('<section><h2>How each language does it</h2><p class="small muted">Only the checks that '
+                    'depend on the stack. Every other check works the same way in every language: it reads the '
+                    'spec, the contract and git history.</p>'
+                    f'<div class="table-wrap"><table><thead><tr>{hdr}</tr></thead><tbody>{"".join(mrows)}</tbody>'
+                    '</table></div></section>')
+
+    cards = "".join(
+        f'<div class="req ok"><div class="top"><span class="id">{escape(l["name"])}</span>'
+        f'{chip(str(sum(1 for r in l["results"] if r.get("ok"))) + "/" + str(len(l["results"])), "ok" if all(r.get("ok") for r in l["results"]) else "bad")}'
+        f'</div><p>{escape(l["stack"])}</p><a class="small" href="{escape(l["lang"])}/demo.html">Scenario details</a></div>'
+        for l in langs)
+    body.append(f'<section><h2>Languages</h2><div class="reqs">{cards}</div></section>')
+    body.append('<footer>Generated by <code>python demo/run_demo.py --lang all</code>.</footer>')
+    return page("Agent Quality Across Languages", "\n".join(body))

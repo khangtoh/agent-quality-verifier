@@ -64,7 +64,7 @@ class Result:
 
 class Engine:
     def __init__(self, repo, head="HEAD", base=None, skip=(), only=None, light=False, workdir=None,
-                 head_branch=None):
+                 head_branch=None, cfg=None):
         self.repo = str(Path(repo).resolve())
         self.head = gitx.rev(self.repo, head)
         if self.head != gitx.rev(self.repo, "HEAD"):
@@ -82,7 +82,7 @@ class Engine:
         os.makedirs(self.workdir, exist_ok=True)
         self.head_branch = head_branch or gitx.git(self.repo, "rev-parse", "--abbrev-ref", "HEAD").strip()
         # Config comes from the base when there is one, so a PR can't loosen its own checks.
-        self.cfg = cfgmod.load(gitx.show(self.repo, self.base or self.head, ".aqv.yml"))
+        self.cfg = cfg or cfgmod.load(gitx.show(self.repo, self.base or self.head, ".aqv.yml"))
         self.results = []
 
     # ------------------------------------------------------------------ helpers
@@ -97,7 +97,18 @@ class Engine:
     def range_args(self):
         return [f"{self.base}..{self.head}"] if self.base else [self.head]
 
+    def comment_prefixes(self):
+        p = self.cfg["runner"].get("comment_prefix", "#")
+        return tuple(p) if isinstance(p, list) else (p,)
+
+    def is_code(self, path):
+        return gitx.under(path, self.code_paths) and not gitx.under(path, self.code_exclude)
+
     def touches(self, commit, prefixes):
+        if prefixes is self.code_paths:
+            return any(self.is_code(f) for f in commit.files)
+        if prefixes == self.code_paths + self.test_paths:
+            return any(self.is_code(f) or gitx.under(f, self.test_paths) for f in commit.files)
         return any(gitx.under(f, prefixes) for f in commit.files)
 
     # ------------------------------------------------------------------ load
@@ -116,6 +127,7 @@ class Engine:
         self.history = gitx.commits(self.repo, [self.head], trailer)
         self.range = gitx.commits(self.repo, self.range_args(), trailer)
         self.code_paths, self.test_paths = c["code_paths"], c["test_paths"]
+        self.code_exclude = c.get("code_exclude", [])
         self.linked_code, self.linked_any = {}, {}
         for cm in self.history:
             if cm.is_merge:
@@ -136,23 +148,33 @@ class Engine:
         self.suite = None
         if needs_suite:
             self.run_suite()
-        self.lines = {}
+        self.lines, self.surviving, self.owners_cache = {}, {}, {}
         for rid, req in self.active.items():
             self.check_requirement(rid, req)
         if self.want("T8"):
             self.check_t8()
-        self.check_contract()
+        try:
+            self.check_contract()
+        finally:
+            self.stop_service()
         self.check_history()
         return self.report()
 
     def run_suite(self):
         extra, env = "", {}
-        self.capture_path = os.path.join(self.workdir, "capture.json")
-        if self.cfg["api"].get("capture") == "pytest-testclient":
-            extra = "-p aqv.pytest_capture"
+        self.capture_path = os.path.join(self.workdir, "capture.jsonl")
+        if os.path.exists(self.capture_path):
+            os.remove(self.capture_path)
+        if self.capture_enabled():
+            extra = runner.fill(self.cfg["api"].get("capture_extra", ""))
+            if self.cfg["api"].get("capture") == "pytest-testclient":
+                extra = "-p aqv.pytest_capture"
             env["AQV_CAPTURE_OUT"] = self.capture_path
         self.suite = runner.full_suite(self.cfg, self.repo, self.workdir, extra=extra, env=env)
         self.import_only = None
+
+    def capture_enabled(self):
+        return bool(self.cfg["api"].get("capture"))
 
     def import_lines(self):
         if self.import_only is None:
@@ -212,13 +234,20 @@ class Engine:
         linked = {}
         if code_commits:
             shas = {cm.sha for cm in code_commits}
+            surviving = {sha: 0 for sha in shas}
             for path in gitx.files_at(self.repo, self.head):
-                if not path or not gitx.under(path, self.code_paths):
+                if not path or not self.is_code(path):
                     continue
-                owners = gitx.blame_owners(self.repo, path, self.head, c["runner"].get("comment_prefix", "#"))
+                owners = self.owners_cache.get(path)
+                if owners is None:
+                    owners = self.owners_cache[path] = gitx.blame_owners(
+                        self.repo, path, self.head, self.comment_prefixes())
+                for sha in shas:
+                    surviving[sha] += len(owners.get(sha, []))
                 lines = sorted(l for sha, ls in owners.items() if sha in shas for l in ls)
                 if lines:
                     linked[path] = lines
+            self.surviving[rid] = surviving
             n = sum(len(v) for v in linked.values())
             if n:
                 self.add("T3", "requirement", rid, "pass", f"{n} line(s) from its commits still exist",
@@ -293,34 +322,48 @@ class Engine:
         return any(rid in cm.refs for cm in self.range if not cm.is_merge)
 
     def check_t7(self, rid, executed):
+        """Mutates the requirement's executed lines in place, one at a time, and restores each file."""
         m = self.cfg["mutation"]
-        tmp = tempfile.mkdtemp(prefix="aqv-mut-", dir=self.workdir)
-        work = os.path.join(tmp, "tree")
-        shutil.copytree(self.repo, work, ignore=shutil.ignore_patterns(".git", "__pycache__", ".coverage*"))
+        family = m.get("family") or ("python" if self.comment_prefixes() == ("#",) else "c")
+        build = m.get("build")
+        env = runner.profile_env(self.cfg, self.repo)
         flt = runner.filter_for(self.cfg, rid)
-        tried, killed, survivors = 0, 0, []
+        tried, killed, survivors, invalid = 0, 0, [], 0
         for path in sorted(executed):
-            fpath = os.path.join(work, path)
+            fpath = os.path.join(self.repo, path)
             original = open(fpath).read()
             src_lines = original.splitlines(True)
-            for ln in executed[path]:
-                for desc, new_line in mutate.mutants(src_lines[ln - 1]):
-                    if tried >= m["max_mutants"]:
-                        break
-                    candidate = src_lines[:ln - 1] + [new_line if new_line.endswith("\n") else new_line + "\n"] + src_lines[ln:]
-                    source = "".join(candidate)
-                    if not mutate.compiles(source):
-                        continue
-                    tried += 1
-                    with open(fpath, "w") as f:
-                        f.write(source)
-                    if runner.tests_pass(self.cfg, work, flt):
-                        survivors.append(f"{path}:{ln} {desc}")
-                    else:
-                        killed += 1
-                    with open(fpath, "w") as f:
-                        f.write(original)
-        shutil.rmtree(tmp, ignore_errors=True)
+            try:
+                for ln in executed[path]:
+                    for desc, new_line in mutate.mutants(src_lines[ln - 1], family):
+                        if tried >= m["max_mutants"]:
+                            break
+                        if not new_line.endswith("\n"):
+                            new_line += "\n"
+                        source = "".join(src_lines[:ln - 1] + [new_line] + src_lines[ln:])
+                        if family == "python" and not build and not mutate.compiles_python(source):
+                            continue
+                        with open(fpath, "w") as f:
+                            f.write(source)
+                        if build:
+                            code, _ = runner.run(runner.fill(build, file=path), self.repo, env=env)
+                            if code != 0:
+                                invalid += 1
+                                continue
+                        code = runner.run_selected(self.cfg, self.repo, flt)
+                        if code in m.get("invalid_exit_codes", []):
+                            invalid += 1  # the runner says it didn't build: not a real mutant
+                            continue
+                        tried += 1
+                        if code == 0:
+                            survivors.append(f"{path}:{ln} {desc}")
+                        else:
+                            killed += 1
+            finally:
+                with open(fpath, "w") as f:
+                    f.write(original)
+        if build:
+            runner.run(runner.fill(build, file=sorted(executed)[0]), self.repo, env=env)
         if not tried:
             self.add("T7", "requirement", rid, "skip", "No mutants could be made from its lines")
             return
@@ -328,12 +371,17 @@ class Engine:
         verdict = "pass" if ratio >= m["min_kill_ratio"] else "fail"
         self.add("T7", "requirement", rid, verdict,
                  f"Its tests caught {killed} of {tried} broken versions ({ratio:.0%}; needs {m['min_kill_ratio']:.0%})",
-                 survivors=survivors)
+                 survivors=survivors, uncompilable=invalid)
 
     # ------------------------------------------------------------------ T8
 
+    def spec_history(self):
+        if getattr(self, "_hist", None) is None:
+            self._hist = spec.history(self.repo, self.head, self.cfg["specs"])
+        return self._hist
+
     def check_t8(self):
-        hist = spec.history(self.repo, self.head, self.cfg["specs"])
+        hist = self.spec_history()
         for rid, req in self.active.items():
             impl = self.linked_any.get(rid, [])
             if not impl:
@@ -468,30 +516,115 @@ class Engine:
             self.add("A4", "project", "contract", "fail",
                      "Breaking API change with no requirement change: " + "; ".join(changes[:3]), changes=changes)
 
-    def check_a5(self, api_reqs):
-        cmd = self.cfg["api"].get("openapi_from_code")
-        if not cmd:
-            self.add("A5", "project", "routes", "not_covered", "No way to list the service's routes for this stack")
+    # The running service, started once and shared by A5 (route listing by URL) and A7.
+
+    def start_service(self):
+        if getattr(self, "_service", None) is not None:
+            return self._service
+        serve = self.cfg["api"].get("serve")
+        if not serve:
+            self._service = False
+            return False
+        with socket.socket() as s:
+            s.bind(("127.0.0.1", 0))
+            port = s.getsockname()[1]
+        env = dict(os.environ, PYTHONPATH=os.path.join(self.repo, "src"), PORT=str(port))
+        env.update(runner.profile_env(self.cfg, self.repo))
+        log = open(os.path.join(self.workdir, "service.log"), "w")
+        proc = subprocess.Popen(runner.fill(serve, port=port), shell=True, cwd=self.repo, env=env,
+                                stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
+        deadline = time.time() + float(self.cfg["api"].get("serve_timeout", 60))
+        while time.time() < deadline:
+            if proc.poll() is not None:
+                break
+            try:
+                socket.create_connection(("127.0.0.1", port), timeout=0.2).close()
+                self._service = (proc, port)
+                return self._service
+            except OSError:
+                time.sleep(0.2)
+        self.stop_service(proc)
+        self._service = False
+        return False
+
+    def stop_service(self, proc=None):
+        svc = getattr(self, "_service", None)
+        proc = proc or (svc[0] if svc else None)
+        if proc is None:
             return
-        code, out = runner.run(runner.fill(cmd), self.repo)
         try:
-            served_doc = json.loads(out.strip().splitlines()[-1])
+            os.killpg(proc.pid, 15)
+            proc.wait(timeout=20)
         except Exception:
-            self.add("A5", "project", "routes", "error", f"Couldn't read routes from the code: {out[-300:]}")
+            try:
+                os.killpg(proc.pid, 9)
+            except Exception:
+                pass
+
+    def served_routes(self):
+        """{"METHOD /path"} the service actually serves, or (None, reason)."""
+        api = self.cfg["api"]
+        if api.get("openapi_from_code") or api.get("routes_from_code"):
+            cmd = api.get("openapi_from_code") or api.get("routes_from_code")
+            code, out = runner.run(runner.fill(cmd), self.repo, env=runner.profile_env(self.cfg, self.repo))
+            line = next((l for l in reversed(out.strip().splitlines()) if l.strip().startswith(("{", "["))), "")
+            try:
+                doc = json.loads(line)
+            except Exception:
+                return None, f"couldn't read routes from the code: {out[-300:]}"
+            return parse_routes(doc), None
+        if api.get("openapi_url"):
+            svc = self.start_service()
+            if not svc:
+                return None, "the service didn't start"
+            import urllib.request
+            try:
+                with urllib.request.urlopen(f"http://127.0.0.1:{svc[1]}{api['openapi_url']}", timeout=30) as r:
+                    doc = json.loads(r.read())
+            except Exception as e:
+                return None, f"couldn't fetch {api['openapi_url']}: {e}"
+            return parse_routes(doc), None
+        if api.get("routes_scan"):
+            return scan_routes(self.repo, api["routes_scan"]), None
+        return None, "no way to list the service's routes for this stack"
+
+    def check_a5(self, api_reqs):
+        served, why = self.served_routes()
+        if served is None:
+            verdict = "not_covered" if why.startswith("no way") else "error"
+            self.add("A5", "project", "routes", verdict, why[0].upper() + why[1:])
             return
-        served = {op.key for op in oas.operations(served_doc)}
         documented = {op.key for op in self.ops}
-        for key in sorted(served - documented):
-            self.add("A5", "operation", key, "fail", f"{key} is served but not in the contract")
+        served_n = {normalize_route(k): k for k in served}
+        documented_n = {normalize_route(k): k for k in documented}
+        for key in sorted(set(served_n) - set(documented_n)):
+            self.add("A5", "operation", served_n[key], "fail", f"{served_n[key]} is served but not in the contract")
         for rid, r in api_reqs.items():
-            missing = [f"{m} {p}" for m, p in r.api_ops if f"{m} {p}" in documented and f"{m} {p}" not in served]
+            missing = [f"{m} {p}" for m, p in r.api_ops
+                       if f"{m} {p}" in documented and normalize_route(f"{m} {p}") not in served_n]
             if missing:
                 self.add("A5", "requirement", rid, "fail", "Documented but not served: " + ", ".join(missing))
             else:
                 self.add("A5", "requirement", rid, "pass", "Its operations are served")
 
+    def read_capture(self):
+        calls = []
+        if not os.path.exists(self.capture_path):
+            return calls
+        text = open(self.capture_path).read().strip()
+        if text.startswith("["):
+            return json.loads(text)
+        for line in text.splitlines():
+            line = line.strip()
+            if line:
+                try:
+                    calls.append(json.loads(line))
+                except json.JSONDecodeError:
+                    pass
+        return calls
+
     def check_a6(self, api_reqs):
-        if self.cfg["api"].get("capture") != "pytest-testclient":
+        if not self.capture_enabled():
             for rid in api_reqs:
                 self.add("A6", "requirement", rid, "not_covered", "No test-traffic adapter for this framework")
             return
@@ -499,62 +632,51 @@ class Engine:
             for rid in api_reqs:
                 self.add("A6", "requirement", rid, "skip", "Test suite didn't run")
             return
-        calls = json.load(open(self.capture_path)) if os.path.exists(self.capture_path) else []
+        calls = self.read_capture()
         for rid, r in api_reqs.items():
-            names = {tc.name for tc in self.tagged.get(rid, [])}
-            mine = [c for c in calls if c["test"] in names]
+            mine = [c for c in calls if spec.mentions(str(c.get("test", "")), rid)]
             own_ops = {f"{m} {p}" for m, p in r.api_ops}
             problems, hit = [], set()
             for c in mine:
-                op = oas.find(self.ops, c["method"], c["path"])
+                path = c["path"].split("?")[0]
+                op = oas.find(self.ops, c["method"], path)
                 if op is None:
-                    problems.append(f"{c['test']} called {c['method']} {c['path']}, which the contract doesn't have")
+                    problems.append(f"{c['test']} called {c['method']} {path}, which the contract doesn't have")
                     continue
                 hit.add(op.key)
-                for p in oas.check_response(self.contract, op, c["status"], c["body"]):
+                body = c.get("body")
+                if isinstance(body, str):
+                    try:
+                        body = json.loads(body)
+                    except json.JSONDecodeError:
+                        pass
+                for p in oas.check_response(self.contract, op, c["status"], body):
                     problems.append(f"{c['test']}: {p}")
             problems = sorted(set(problems))
             if problems:
                 self.add("A6", "requirement", rid, "fail", "; ".join(problems[:3]), violations=problems)
             elif not (own_ops & hit):
-                self.add("A6", "requirement", rid, "fail",
-                         f"No tagged test calls {', '.join(sorted(own_ops))}")
+                self.add("A6", "requirement", rid, "fail", f"No tagged test calls {', '.join(sorted(own_ops))}")
             else:
                 self.add("A6", "requirement", rid, "pass", f"{len(mine)} call(s) from tagged tests match the contract")
 
     def check_a7(self, api_reqs):
-        serve = self.cfg["api"].get("serve")
         st = self.tool("schemathesis", "../.venv/bin/schemathesis")
-        if not serve or not st:
+        if not self.cfg["api"].get("serve") or not st:
             self.add("A7", "project", "service", "not_covered", "No way to start the service or Schemathesis missing")
             return
-        with socket.socket() as s:
-            s.bind(("127.0.0.1", 0))
-            port = s.getsockname()[1]
-        env = dict(os.environ, PYTHONPATH=os.path.join(self.repo, "src"))
-        proc = subprocess.Popen(runner.fill(serve, port=port), shell=True, cwd=self.repo, env=env,
-                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, start_new_session=True)
-        try:
-            for _ in range(100):
-                try:
-                    socket.create_connection(("127.0.0.1", port), timeout=0.2).close()
-                    break
-                except OSError:
-                    time.sleep(0.1)
-            else:
-                self.add("A7", "project", "service", "error", "The service didn't start")
-                return
-            junit = os.path.join(self.workdir, "schemathesis.xml")
-            args = [st, "run", os.path.join(self.repo, self.cfg["contract"]), "--url", f"http://127.0.0.1:{port}",
-                    "--mode", "positive", "--seed", "1", "--max-examples", "30",
-                    "--checks", "not_a_server_error,status_code_conformance,response_schema_conformance",
-                    "--report", "junit", "--report-junit-path", junit, "--no-shrink", "--warnings", "off"]
-            r = subprocess.run(args, capture_output=True, text=True, timeout=300, cwd=self.workdir)
-        finally:
-            try:
-                os.killpg(proc.pid, 15)
-            except ProcessLookupError:
-                pass
+        svc = self.start_service()
+        if not svc:
+            tail = open(os.path.join(self.workdir, "service.log")).read()[-300:]
+            self.add("A7", "project", "service", "error", f"The service didn't start: {tail}")
+            return
+        port = svc[1]
+        junit = os.path.join(self.workdir, "schemathesis.xml")
+        args = [st, "run", os.path.join(self.repo, self.cfg["contract"]), "--url", f"http://127.0.0.1:{port}",
+                "--mode", "positive", "--seed", "1", "--max-examples", "30", "--workers", "1",
+                "--checks", "not_a_server_error,status_code_conformance,response_schema_conformance",
+                "--report", "junit", "--report-junit-path", junit, "--no-shrink", "--warnings", "off"]
+        r = subprocess.run(args, capture_output=True, text=True, timeout=600, cwd=self.workdir)
         failed_ops = {}
         if os.path.exists(junit):
             import xml.etree.ElementTree as ET
@@ -563,8 +685,7 @@ class Engine:
                 if f is None:
                     f = tc.find("error")
                 if f is not None:
-                    name = tc.get("name", "")
-                    failed_ops[name] = ((f.get("message") or "") + " " + (f.text or "")).strip()[:400]
+                    failed_ops[tc.get("name", "")] = ((f.get("message") or "") + " " + (f.text or "")).strip()[:400]
         elif r.returncode:
             self.add("A7", "project", "service", "error", f"Schemathesis didn't run: {(r.stdout + r.stderr)[-300:]}")
             return
@@ -663,10 +784,17 @@ class Engine:
         if not cands:
             self.add("H4", "project", "history", "pass", "No refactor or chore commits change code")
             return
-        offenders = []
+        offenders, broken = [], []
+        links = self.cfg["runner"].get("worktree_links", [])
         for cm in cands:
-            before = light_statuses(self.repo, cm.parents[0], self.workdir)
-            after = light_statuses(self.repo, cm.sha, self.workdir)
+            before = light_statuses(self.repo, cm.parents[0], self.workdir, links, self.cfg)
+            after = light_statuses(self.repo, cm.sha, self.workdir, links, self.cfg)
+            had_code = any(v != "Missing" for k, v in before.items() if k != "__suite_broken__")
+            if before.get("__suite_broken__") and had_code:
+                broken.append(f"{cm.short}: the tests don't load at its parent, so it can't be compared")
+                continue
+            before.pop("__suite_broken__", None)
+            after.pop("__suite_broken__", None)
             changed = [f"{rid} {before.get(rid)} → {after.get(rid)}" for rid in sorted(set(before) | set(after))
                        if before.get(rid) != after.get(rid)]
             if changed:
@@ -674,6 +802,8 @@ class Engine:
         if offenders:
             self.add("H4", "project", "history", "fail", "Behavior changed in no-behavior commits: " + "; ".join(offenders),
                      offenders=offenders)
+        elif broken:
+            self.add("H4", "project", "history", "error", "; ".join(broken))
         else:
             self.add("H4", "project", "history", "pass",
                      f"{len(cands)} refactor/chore commit(s) left every status unchanged")
@@ -717,6 +847,7 @@ class Engine:
             else:
                 summary[chk] = "skip"
         not_covered = sorted(c for c, v in summary.items() if v == "not_covered")
+        views = {} if self.light else self.requirement_views(statuses)
         return {
             "repo": self.repo,
             "head": self.head,
@@ -727,11 +858,139 @@ class Engine:
                 {"id": rid, "text": r.text, "api": [f"{m} {p}" for m, p in r.api_ops], "status": statuses[rid],
                  "not_covered": not_covered,
                  "failing_checks": sorted({x.check for x in self.results if x.subject == rid
-                                           and x.verdict in ("fail", "error")})}
+                                           and x.verdict in ("fail", "error")}),
+                 **views.get(rid, {})}
                 for rid, r in self.active.items()],
+            "outside": [] if self.light else self.outside_the_spec(),
             "results": [asdict(r) for r in self.results],
             "scorecard": self.scorecard(),
         }
+
+    # ------------------------------------------------------------------ the requirement view
+
+    NOTES = {
+        "Missing": "Exists only in the spec. No commit references it.",
+        "Gone": "A commit claims it, but none of its code exists now.",
+        "Untested": "The code exists, but no test is tagged to it.",
+        "Failing": "Its tests are failing, or the test suite didn't load.",
+        "Unexercised": "A tagged test passes, but it never runs this requirement's code.",
+        "Weak": "Its tests run the code but don't catch broken versions of it.",
+        "Contract": "The API doesn't honor its OpenAPI contract for this requirement.",
+        "Drift": "The spec changed after the code that implements it.",
+        "Sync": "Implemented, tested, and matching the contract.",
+    }
+
+    def _res(self, check, rid):
+        return [r for r in self.results if r.check == check and r.subject == rid]
+
+    def _verdicts(self, checks, rid):
+        return {r.verdict for c in checks for r in self._res(c, rid)}
+
+    def vitals(self, rid, req):
+        v = {}
+        t1 = [p for r in self.results if r.check == "T1" for p in r.details.get("problems", []) if p.startswith(rid + ":")]
+        v["spec"] = "bad" if t1 else ("warn" if "fail" in self._verdicts(["T8"], rid) else "ok")
+        code = self._verdicts(["T2", "T3"], rid)
+        v["code"] = "bad" if "fail" in code else ("ok" if "pass" in code else "none")
+        if req.api_ops:
+            api = self._verdicts(["A1", "A5", "A6", "A7"], rid)
+            v["api"] = "bad" if ("fail" in api or "error" in api) else ("ok" if "pass" in api else "none")
+        else:
+            v["api"] = "none"
+        t = self._verdicts(["T4", "T5", "T6", "T7"], rid)
+        if "error" in t or "fail" in self._verdicts(["T5"], rid):
+            v["tests"] = "bad"
+        elif "fail" in t:
+            v["tests"] = "warn"
+        elif "pass" in t:
+            v["tests"] = "ok"
+        else:
+            v["tests"] = "none"
+        return v
+
+    def requirement_views(self, statuses):
+        order = {cm.sha: i for i, cm in enumerate(self.history)}
+        by_sha = {cm.sha: cm for cm in self.history}
+        git_rules = {}
+        for r in self.results:
+            if r.check.startswith("H") and r.verdict == "fail":
+                for off in r.details.get("offenders", []):
+                    git_rules.setdefault(off.split(" ")[0].rstrip(":"), set()).add(r.check)
+        hist = self.spec_history()
+        views = {}
+        for rid, req in self.active.items():
+            status = statuses[rid]
+            events = []
+            prev, prev_text = None, None
+            drift_sha = next((r.details.get("changed_in") for r in self._res("T8", rid) if r.verdict == "fail"), None)
+            segments = [{"t": req.text, "m": False}]
+            for sha, reqs in hist:
+                r = reqs.get(rid)
+                body = r.body if r else None
+                if body is not None and body != prev:
+                    label = "Spec added" if prev is None else "Spec changed: " + spec.word_diff(prev, body)
+                    events.append({"order": order.get(sha, -1), "sha": sha[:7], "label": label,
+                                   "state": "warn" if sha == drift_sha else "neutral"})
+                    if sha == drift_sha and prev_text is not None:
+                        segments = spec.word_segments(prev_text, req.text)
+                prev, prev_text = body, (r.text if r else prev_text)
+            for cm in self.linked_any.get(rid, []):
+                n = self.surviving.get(rid, {}).get(cm.sha)
+                if n is None:
+                    label, state = f"{cm.subject} (tests)", "ok"
+                else:
+                    label = f"{cm.subject} ({n} line{'s' if n != 1 else ''} still in the code)"
+                    state = "ok" if n else "bad"
+                broke = git_rules.get(cm.short)
+                if broke:
+                    label += " · breaks " + ", ".join(sorted(broke))
+                    state = "bad" if state == "bad" else "warn"
+                events.append({"order": order.get(cm.sha, -1), "sha": cm.short, "label": label, "state": state})
+            events.sort(key=lambda e: e["order"])
+            now = []
+            for r in self._res("T5", rid) + self._res("T4", rid):
+                if r.verdict == "error":
+                    now.append({"label": r.summary, "state": "bad"})
+                    break
+            for tc in getattr(self, "tagged", {}).get(rid, []):
+                now.append({"label": f"{tc.name}: {tc.outcome}", "state": "ok" if tc.outcome == "pass" else "bad"})
+            for r in self._res("T4", rid):
+                if r.verdict == "fail":
+                    now.append({"label": "No tagged test", "state": "warn"})
+            for chk in ("T6", "T7"):
+                for r in self._res(chk, rid):
+                    if r.verdict in ("pass", "fail"):
+                        now.append({"label": r.summary, "state": "ok" if r.verdict == "pass" else "warn"})
+                        for sv in r.details.get("survivors", [])[:2]:
+                            now.append({"label": f"Not caught: {sv}", "state": "warn"})
+            for m, p in req.api_ops:
+                key = f"{m} {p}"
+                for chk in ("A1", "A5", "A6", "A7"):
+                    for r in self._res(chk, rid):
+                        if r.verdict in ("fail", "error"):
+                            for line in (r.details.get("violations") or [r.summary])[:3]:
+                                now.append({"label": f"{chk}: {line}", "state": "bad"})
+                        elif r.verdict == "pass" and chk in ("A6", "A7"):
+                            now.append({"label": f"{key}: {r.summary[0].lower() + r.summary[1:]}", "state": "ok"})
+            # De-duplicate API lines shared by requirements with several operations.
+            seen, uniq = set(), []
+            for e in now:
+                if e["label"] not in seen:
+                    seen.add(e["label"])
+                    uniq.append(e)
+            views[rid] = {"vitals": self.vitals(rid, req), "note": self.NOTES[status], "segments": segments,
+                          "timeline": [{k: v for k, v in e.items() if k != "order"} for e in events],
+                          "now": uniq}
+        return views
+
+    def outside_the_spec(self):
+        out = []
+        for r in self.results:
+            if r.verdict not in ("fail", "error"):
+                continue
+            if r.scope == "operation" or r.check in ("A3", "A4", "T1") or (r.check == "A7" and r.scope != "requirement"):
+                out.append({"check": r.check, "subject": r.subject, "summary": r.summary, "state": "bad"})
+        return out
 
     def scorecard(self):
         agents = {}
@@ -766,18 +1025,63 @@ def first_line(text):
 _LIGHT_CACHE = {}
 
 
-def light_statuses(repo, sha, workdir):
-    """Requirement statuses at `sha`, using only the fast checks. Used by H4."""
+def light_statuses(repo, sha, workdir, links=(), cfg=None):
+    """Requirement statuses at `sha`, using only the fast checks. Used by H4.
+
+    `links` names untracked dependency folders (node_modules, for example) to link
+    into the temporary worktree so its tests can run.
+    """
     key = (repo, sha)
     if key in _LIGHT_CACHE:
-        return _LIGHT_CACHE[key]
+        return dict(_LIGHT_CACHE[key])
     wt = tempfile.mkdtemp(prefix="aqv-wt-", dir=workdir)
     gitx.git(repo, "worktree", "add", "--detach", "-f", wt, sha)
     try:
-        eng = Engine(wt, head=sha, light=True, workdir=os.path.join(wt, ".aqv-work"))
+        for name in links:
+            src = os.path.join(repo, name)
+            if os.path.exists(src) and not os.path.exists(os.path.join(wt, name)):
+                os.symlink(os.path.realpath(src), os.path.join(wt, name))
+        # Old commits may predate .aqv.yml; compare both sides under the current, trusted config.
+        eng = Engine(wt, head=sha, light=True, workdir=os.path.join(wt, ".aqv-work"), cfg=cfg)
         report = eng.run()
         result = {r["id"]: r["status"] for r in report["requirements"]}
+        result["__suite_broken__"] = bool(eng.suite and eng.suite.broken)
     finally:
         gitx.git(repo, "worktree", "remove", "--force", wt, check=False)
     _LIGHT_CACHE[key] = result
-    return result
+    return dict(result)
+
+
+def parse_routes(doc):
+    """Routes from an OpenAPI document, or from {"routes": ["GET /x", ...]} / ["GET /x", ...]."""
+    if isinstance(doc, dict) and "paths" in doc:
+        return {op.key for op in oas.operations(doc)}
+    items = doc.get("routes", []) if isinstance(doc, dict) else doc
+    return {" ".join(str(x).split()).upper().split(" ", 1)[0] + " " + str(x).split()[1] for x in items}
+
+
+def normalize_route(key):
+    """'GET /users/:id' and 'GET /users/{user_id}' compare equal."""
+    method, _, path = key.partition(" ")
+    path = re.sub(r"\{[^/}]+\}|:[A-Za-z_][\w]*|<[^/>]+>", "{}", path.rstrip("/") or "/")
+    return f"{method.upper()} {path}"
+
+
+def scan_routes(repo, conf):
+    """Routes found by reading source files: a declared, partial fallback for frameworks
+    that can't list their routes (for example axum). Unusual registrations are missed."""
+    import glob as _glob
+    route_rx = re.compile(conf["route"])
+    method_rx = re.compile(conf["methods"])
+    found = set()
+    for pattern in conf.get("files", ["src/**/*"]):
+        for path in _glob.glob(os.path.join(repo, pattern), recursive=True):
+            text = open(path, errors="ignore").read()
+            matches = list(route_rx.finditer(text))
+            for i, m in enumerate(matches):
+                end = matches[i + 1].start() if i + 1 < len(matches) else len(text)
+                seg = text[m.end():end]
+                seg = seg[: seg.find(";")] if ";" in seg else seg
+                for mm in method_rx.finditer(seg):
+                    found.add(f"{mm.group(1).upper()} {m.group(1)}")
+    return found

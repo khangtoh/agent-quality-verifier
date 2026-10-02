@@ -9,6 +9,5 @@ s = s.replace("required: [token]", "required: [access_token]").replace("        
 open(p, "w").write(s)
 PY
 agent_commit "feat(contract): rename token to access_token" AC-auth-001
-replace src/app/main.py 'return {"token": result}' 'return {"access_token": result}'
-replace tests/test_login.py 'r.json()["token"]' 'r.json()["access_token"]'
+e_rename_token
 agent_commit "feat(auth): return access_token" AC-auth-001

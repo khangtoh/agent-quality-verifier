@@ -2,8 +2,5 @@
 # expect: A7
 source "$DEMO/lib.sh"
 branch feat/AC-auth-004-reset-domain
-replace src/app/main.py "        store.request_reset(body.email)
-" "        domain = body.email.split(\"@\")[1]
-        store.request_reset(body.email)
-"
+e_reset_crash
 agent_commit "feat(auth): read the email domain on reset requests" AC-auth-004

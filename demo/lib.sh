@@ -54,30 +54,5 @@ add_requirement() {
 
 REQ_007="- **AC-auth-007**: Accounts cannot be created with a password shorter than 6 characters."
 
-# The correct implementation of AC-auth-007, reused by several scenarios.
-implement_007_code() {
-  replace src/app/auth.py "    def add_account(self, email, password):
-" "    def add_account(self, email, password):
-        if len(password) < 6:
-            raise ValueError(\"password too short\")
-"
-}
-
-implement_007_tests() {
-  cat > tests/test_password_length.py <<'PY'
-import pytest
-
-from app.auth import AccountStore
-
-
-def test_AC_auth_007_five_characters_rejected():
-    with pytest.raises(ValueError):
-        AccountStore().add_account("bo@example.com", "five5")
-
-
-def test_AC_auth_007_six_characters_accepted():
-    store = AccountStore()
-    store.add_account("bo@example.com", "six666")
-    assert "bo@example.com" in store.accounts
-PY
-}
+# Language-specific edits: e_impl_007, e_threshold_4, e_debug_route and the rest.
+source "$DEMO/langs/${AQV_LANG:-python}/edits.sh"
