@@ -5,6 +5,7 @@ request against main. The clean scenarios must pass every check; each attack mus
 be caught by the check named in its `# expect:` line.
 
     python demo/run_demo.py [--jobs 4] [--only T3,A6]
+    python demo/run_demo.py --html-only     # rebuild the HTML pages from the last run
 """
 import argparse
 import concurrent.futures as cf
@@ -20,6 +21,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DEMO = ROOT / "demo"
 WORK = DEMO / ".work"
 sys.path.insert(0, str(ROOT))
+from aqv import html  # noqa: E402
 from aqv.engine import CHECKS  # noqa: E402
 
 
@@ -63,14 +65,43 @@ def run_scenario(path, env):
     ok = set(meta["expect"]) <= set(failing) if meta["expect"] else not failing
     return {"name": name, "title": meta.get("title", ""), "expect": meta["expect"], "failing": failing,
             "statuses": {r["id"]: r["status"] for r in rep["requirements"]}, "checks": rep["checks"],
-            "ok": ok, "seconds": round(secs)}
+            "ok": ok, "seconds": round(secs), "out": str(d / "out")}
+
+
+EXAMPLES = ["baseline", "T7-weak-tests", "A6-leaked-field"]
+
+
+def write_html(results):
+    """demo/examples/demo.html for the whole run, plus report.html for a few sample runs."""
+    out_dir = DEMO / "examples"
+    out_dir.mkdir(exist_ok=True)
+    scenarios = []
+    for r in results:
+        if "error" in r:
+            continue
+        rep = json.loads((Path(r["out"]) / "results.json").read_text())
+        scenarios.append({**r, "report": rep})
+        if r["name"] in EXAMPLES:
+            (out_dir / f"{r['name']}.html").write_text(html.run_report(scrub(rep)))
+    (out_dir / "demo.html").write_text(html.demo_report([{**s, "report": scrub(s["report"])} for s in scenarios]))
+
+
+def scrub(rep):
+    """Drop local paths so the committed pages don't show this machine's directories."""
+    return json.loads(json.dumps(rep).replace(str(WORK) + "/", ""))
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--jobs", type=int, default=4)
     ap.add_argument("--only", default="")
+    ap.add_argument("--html-only", action="store_true")
     a = ap.parse_args()
+
+    if a.html_only:
+        write_html(json.loads((WORK / "demo-results.json").read_text()))
+        print(f"Wrote {DEMO / 'examples' / 'demo.html'}")
+        return 0
 
     WORK.mkdir(parents=True, exist_ok=True)
     env = dict(os.environ, GNUPGHOME=str(WORK / "gnupg"), DEMO=str(DEMO))
@@ -87,7 +118,8 @@ def main():
         failing = sorted(k for k, v in rep["checks"].items() if v in ("fail", "error"))
         results.append({"name": "baseline", "title": "Baseline: six requirements built the right way, all history",
                         "expect": [], "failing": failing, "statuses": {r["id"]: r["status"] for r in rep["requirements"]},
-                        "checks": rep["checks"], "ok": not failing, "seconds": round(secs)})
+                        "checks": rep["checks"], "ok": not failing, "seconds": round(secs),
+                        "out": str(WORK / "runs" / "baseline")})
         print(f"  baseline: {'ok' if not failing else 'FAILED ' + ', '.join(failing)} ({round(secs)}s)", flush=True)
 
     scenarios = sorted((DEMO / "scenarios").glob("*.sh"))
@@ -109,6 +141,7 @@ def main():
     (WORK / "demo-results.json").write_text(json.dumps(results, indent=2))
     if not only:
         write_markdown(results)
+        write_html(results)
     bad = [r for r in results if not r.get("ok")]
     print(f"\n{len(results) - len(bad)} of {len(results)} scenarios behaved as expected.")
     return 1 if bad else 0

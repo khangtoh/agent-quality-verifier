@@ -7,7 +7,7 @@ import json
 import os
 import sys
 
-from . import gitx
+from . import gitx, html
 from .engine import CHECKS, Engine
 
 MARK = {"pass": "pass", "fail": "FAIL", "error": "ERROR", "skip": "skip", "not_covered": "not covered",
@@ -51,7 +51,7 @@ def main(argv=None):
     c = sub.add_parser("check", help="run the checks")
     c.add_argument("--repo", default=".")
     c.add_argument("--base", help="base ref; checks the range base..HEAD like a pull request")
-    c.add_argument("--out", help="directory for results.json and report.txt")
+    c.add_argument("--out", help="directory for results.json, report.txt and report.html")
     c.add_argument("--skip", default="", help="comma-separated checks to skip")
     c.add_argument("--only", default="", help="comma-separated checks to run")
     c.add_argument("--record", action="store_true",
@@ -68,6 +68,8 @@ def main(argv=None):
     txt = text_report(rep)
     with open(os.path.join(out, "report.txt"), "w") as f:
         f.write(txt + "\n")
+    with open(os.path.join(out, "report.html"), "w") as f:
+        f.write(html.run_report(rep))
     print(txt)
     failed = [k for k, v in rep["checks"].items() if v in ("fail", "error")]
     if a.record and not failed:

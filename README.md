@@ -12,8 +12,11 @@ must be caught by the check designed for it.
 
 **Result: 28 of 28 scenarios behave as expected.** The clean baseline and a clean
 pull request pass every check, and each of the 26 attacks is caught by its check.
-See [demo/RESULTS.md](demo/RESULTS.md) for the full table and
-[demo/examples/](demo/examples/) for sample reports.
+See [demo/RESULTS.md](demo/RESULTS.md) for the full table. Open
+[demo/examples/demo.html](demo/examples/demo.html) for the same results as a page: which
+check caught each attack, a scenario-by-check grid, and every failing result.
+[demo/examples/](demo/examples/) also has single-run reports (`baseline`, `T7-weak-tests`,
+`A6-leaked-field`) as HTML and text.
 
 ## Quick start
 
@@ -32,7 +35,7 @@ To check your own repo, add a `.aqv.yml` (see the demo's, in
 .venv/bin/python -m aqv check --repo path/to/repo --base main   # like a pull request
 ```
 
-It prints a report, writes `results.json`, and exits non-zero when a check fails.
+It prints a report, writes `results.json`, `report.txt` and `report.html`, and exits non-zero when a check fails.
 
 ## What "quality" means here
 
@@ -147,11 +150,12 @@ aqv/                 the verifier
   runner.py          runs the project's tools through the runner profile
   gitx.py spec.py contract.py mutate.py
   pytest_capture.py  A6 adapter for pytest + TestClient
+  html.py            report.html and demo.html
 demo/
   build_baseline.py  builds the clean demo repo
   scenarios/         one clean PR and one attack per check (T5 and A6 have two)
   run_demo.py        runs everything and writes RESULTS.md
-  examples/          sample reports: baseline, weak tests, leaked field
+  examples/          demo.html for the whole run, plus sample single-run reports
 ```
 
 Based on the evidence-gated verification prototype (`trace.py`) and the design
