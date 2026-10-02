@@ -1,0 +1,8 @@
+coverage==7.16.2
+fastapi==0.142.2
+httpx==0.28.1
+jsonschema==4.26.0
+pytest==9.1.1
+PyYAML==6.0.3
+schemathesis==4.29.0
+uvicorn==0.54.0

@@ -1,0 +1,6 @@
+demo/.work/
+.aqv-out/
+.venv/
+.tools/
+__pycache__/
+.schemathesis/
