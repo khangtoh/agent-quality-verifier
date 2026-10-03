@@ -17,6 +17,10 @@ everything.
 [demo/results/index.html](demo/results/index.html) for every language against every
 check, and `demo/results/<language>/demo.html` for each scenario.
 
+**New here?** Read [docs/framework.md](docs/framework.md) (or
+[the HTML version](docs/framework.html)): why the checks come in three families
+(T, A, H), what each one guards against, and what the demo simulates.
+
 | Language | Stack | Scenarios as expected |
 |---|---|---|
 | [Python](demo/results/python/RESULTS.md) | FastAPI · pytest · coverage.py | 28 of 28 |

@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agent Quality Verifier Framework</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700&family=Source+Sans+3:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a contents rail beside one reading column; tables break out to the column's full width.
+   Palette and faces match the verifier's own reports; T, A and H each get a quiet hue. */
+:root {
+  --bg: #f6f7f6; --surface: #ffffff; --fg: #1b2226; --muted: #5a666b; --line: #dde2e1; --code-bg: #eef1f0;
+  --accent: #1d5c63;
+  --t: #1d5c63; --t-bg: #ddeeed; --a: #2d4f9a; --a-bg: #e3e9f8; --h: #6a4c8c; --h-bg: #eee8f5;
+  --ok: #1f6b4a; --ok-bg: #e1f1e8; --warn: #8a5a00; --warn-bg: #fbefd6; --bad: #a5332a; --bad-bg: #fbe3e0;
+  --display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --sans: "Source Sans 3", "Segoe UI", Roboto, Arial, sans-serif;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101517; --surface: #171f22; --fg: #e3e9ea; --muted: #99a6aa; --line: #2a3437; --code-bg: #1f292c;
+    --accent: #7cc4c9;
+    --t: #7cc4c9; --t-bg: #16302f; --a: #a9bdf2; --a-bg: #1d2843; --h: #c7aef0; --h-bg: #2a2140;
+    --ok: #8fd9b2; --ok-bg: #183528; --warn: #f0c46a; --warn-bg: #3a2d12; --bad: #f3a198; --bad-bg: #41201d;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101517; --surface: #171f22; --fg: #e3e9ea; --muted: #99a6aa; --line: #2a3437; --code-bg: #1f292c;
+  --accent: #7cc4c9;
+  --t: #7cc4c9; --t-bg: #16302f; --a: #a9bdf2; --a-bg: #1d2843; --h: #c7aef0; --h-bg: #2a2140;
+  --ok: #8fd9b2; --ok-bg: #183528; --warn: #f0c46a; --warn-bg: #3a2d12; --bad: #f3a198; --bad-bg: #41201d;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font: 17px/1.62 var(--serif); }
+a { color: var(--accent); }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+code { font-family: var(--mono); font-size: 0.82em; background: var(--code-bg); padding: 0.08em 0.35em; border-radius: 4px; overflow-wrap: anywhere; }
+pre { margin: 0; overflow-x: auto; background: var(--code-bg); border-radius: 8px; padding: 16px 18px; font: 13px/1.6 var(--mono); }
+pre code { background: none; padding: 0; font-size: inherit; overflow-wrap: normal; }
+p, ul, ol { margin: 0; }
+ul, ol { padding-left: 1.25em; display: grid; gap: 6px; }
+strong { font-weight: 600; }
+
+.shell { max-width: 1160px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 72px;
+  display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 56px; }
+nav.toc { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 24px); align-self: start;
+  font: 14px/1.45 var(--sans); }
+nav.toc .label { font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+nav.toc ol { list-style: none; padding: 0; margin-top: 12px; gap: 7px; counter-reset: s; }
+nav.toc li { counter-increment: s; display: grid; grid-template-columns: 22px 1fr; }
+nav.toc li::before { content: counter(s); font: 12px/1.6 var(--mono); color: var(--muted); }
+nav.toc a { color: var(--fg); text-decoration: none; }
+nav.toc a:hover { color: var(--accent); text-decoration: underline; }
+main { min-width: 0; display: grid; gap: 56px; }
+
+.eyebrow { font: 600 12px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1, h2, h3 { font-family: var(--display); margin: 0; line-height: 1.15; text-wrap: balance; }
+h1 { font-size: clamp(32px, 5.2vw, 48px); font-weight: 700; letter-spacing: -0.015em; }
+h2 { font-size: 27px; font-weight: 700; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+h2 .n { font: 600 14px/1 var(--mono); color: var(--muted); }
+h3 { font-size: 19px; font-weight: 700; }
+section { display: grid; gap: 18px; min-width: 0; scroll-margin-top: 24px; }
+.prose { max-width: 66ch; display: grid; gap: 14px; }
+.lede { font-size: 21px; line-height: 1.5; max-width: 60ch; }
+.muted { color: var(--muted); }
+.ui { font-family: var(--sans); }
+
+header.hero { display: grid; gap: 18px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-top: 8px; }
+.fact { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 2px; }
+.fact b { font: 700 26px/1.1 var(--display); font-variant-numeric: tabular-nums; }
+.fact span { font: 14px/1.35 var(--sans); color: var(--muted); }
+
+.fam { display: inline-flex; align-items: center; justify-content: center; min-width: 26px; height: 24px; padding: 0 7px;
+  border-radius: 5px; font: 600 13px/1 var(--mono); }
+.fam.t { color: var(--t); background: var(--t-bg); }
+.fam.a { color: var(--a); background: var(--a-bg); }
+.fam.h { color: var(--h); background: var(--h-bg); }
+.families { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+.family { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 10px;
+  align-content: start; font-family: var(--sans); font-size: 15.5px; min-width: 0; }
+.family.t { border-top: 3px solid var(--t); } .family.a { border-top: 3px solid var(--a); } .family.h { border-top: 3px solid var(--h); }
+.family .top { display: flex; align-items: center; gap: 10px; }
+.family .top h3 { font-size: 18px; }
+.family dl { margin: 0; display: grid; gap: 8px; }
+.family dt { font: 600 11px/1 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.family dd { margin: 0; }
+
+.callout { border-left: 3px solid var(--accent); padding: 4px 0 4px 18px; max-width: 66ch; display: grid; gap: 8px; }
+
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font: 15px/1.45 var(--sans); }
+th, td { text-align: left; vertical-align: top; padding: 11px 14px; border-bottom: 1px solid var(--line); }
+thead th { font: 600 11px/1.2 var(--mono); letter-spacing: .07em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
+tbody tr:last-child td { border-bottom: 0; }
+td.id { font: 600 14px/1.45 var(--mono); white-space: nowrap; }
+td.q { font-weight: 600; min-width: 170px; }
+td.ex { color: var(--muted); min-width: 190px; }
+td.w { min-width: 200px; }
+.chain td.id { position: relative; padding-left: 22px; }
+.chain td.id::before { content: ""; position: absolute; left: 10px; top: 0; bottom: 0; width: 2px; background: var(--line); }
+.chain td.id::after { content: ""; position: absolute; left: 6px; top: 17px; width: 10px; height: 10px; border-radius: 50%; background: var(--dot, var(--t)); }
+.chain.a { --dot: var(--a); } .chain.h { --dot: var(--h); } .chain.t { --dot: var(--t); }
+
+.status { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 5px; font: 600 12px/1 var(--mono); white-space: nowrap; }
+.status.ok { color: var(--ok); background: var(--ok-bg); }
+.status.warn { color: var(--warn); background: var(--warn-bg); }
+.status.bad { color: var(--bad); background: var(--bad-bg); }
+.status.none { color: var(--muted); background: var(--code-bg); }
+
+.steps { list-style: none; padding: 0; display: grid; gap: 0; counter-reset: st; font-family: var(--sans); font-size: 15.5px; }
+.steps li { counter-increment: st; display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; padding: 12px 0;
+  border-bottom: 1px solid var(--line); align-items: baseline; }
+.steps li:last-child { border-bottom: 0; }
+.steps li::before { content: counter(st); font: 700 18px/1 var(--display); color: var(--accent); }
+.steps .ck { font: 13px/1.4 var(--mono); color: var(--muted); white-space: nowrap; }
+
+.split { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; display: grid; gap: 10px;
+  align-content: start; font-family: var(--sans); font-size: 15.5px; min-width: 0; }
+.answer { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--warn); border-radius: 10px;
+  padding: 18px 20px; display: grid; gap: 8px; max-width: 72ch; font-family: var(--sans); }
+.answer .big { font: 700 22px/1.25 var(--display); }
+
+footer { font: 14px/1.5 var(--sans); color: var(--muted); border-top: 1px solid var(--line); padding-top: 18px; }
+
+@media (max-width: 900px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  nav.toc { position: static; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; }
+  nav.toc ol { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+}
+@media (max-width: 520px) {
+  body { font-size: 16px; }
+  .lede { font-size: 18px; }
+  .steps li { grid-template-columns: 28px 1fr; }
+  .steps .ck { grid-column: 2; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+<nav class="toc" aria-label="Contents">
+  <div class="label">Contents</div>
+  <ol>
+    <li><a href="#problem">The problem</a></li>
+    <li><a href="#idea">The idea</a></li>
+    <li><a href="#families">T, A and H</a></li>
+    <li><a href="#rules">Rules for every check</a></li>
+    <li><a href="#t">T1–T8: tests prove the spec</a></li>
+    <li><a href="#a">A1–A7: the API contract</a></li>
+    <li><a href="#h">H1–H9: trustworthy history</a></li>
+    <li><a href="#threats">What the agent gets wrong</a></li>
+    <li><a href="#status">Status and the report</a></li>
+    <li><a href="#reach">Reach across languages</a></li>
+    <li><a href="#runs">How it runs</a></li>
+    <li><a href="#demo">Real vs simulated</a></li>
+    <li><a href="#limits">What it doesn't guarantee</a></li>
+    <li><a href="#glossary">Glossary</a></li>
+  </ol>
+</nav>
+
+<main>
+<header class="hero">
+  <span class="eyebrow">Agent Quality Verifier · framework</span>
+  <h1>Judging an agent's code without reading it</h1>
+  <p class="lede">What the 24 checks are, why they come in three families called T, A and H, what each one guards against, and what the demo does and doesn't prove.</p>
+  <div class="facts">
+    <div class="fact"><b>24</b><span>repeatable checks</span></div>
+    <div class="fact"><b>3</b><span>families: T, A, H</span></div>
+    <div class="fact"><b>6</b><span>languages in the demo</span></div>
+    <div class="fact"><b>168 / 168</b><span>demo scenarios as expected</span></div>
+  </div>
+</header>
+
+<section id="problem">
+  <h2><span class="n">1</span>The problem</h2>
+  <div class="prose">
+    <p>Coding agents write more code than people can read. Reviewing every line doesn't scale, and skimming gives a false sense of safety. Green CI isn't enough either: an agent that wants a green build can get one by weakening a test, updating a test to match a bug, or adding a commit that only claims to implement something.</p>
+    <p>So the question changes from "is this code good?" to "can I prove this code does what we asked, the way we asked, without reading it?"</p>
+  </div>
+</section>
+
+<section id="idea">
+  <h2><span class="n">2</span>The idea in one paragraph</h2>
+  <div class="prose">
+    <p>A person writes <strong>requirements</strong> with stable IDs. The agent implements them and leaves a trail that follows simple conventions: commits name the requirement they serve, tests carry the requirement ID in their name, and API operations in the OpenAPI contract list the requirements they implement. The verifier follows that trail and runs <strong>24 checks</strong>. Each one is a fixed, repeatable rule that either holds or doesn't. The result is one <strong>status per requirement</strong>: is it implemented, tested, honest to its contract, and current with the spec. A person reads the statuses and opens the code only where a check fails.</p>
+  </div>
+</section>
+
+<section id="families">
+  <h2><span class="n">3</span>Three things a person can review instead of code</h2>
+  <p class="prose">The checks are grouped by what they protect. Each group is a short artifact a person can actually read and approve.</p>
+  <div class="families">
+    <div class="family t">
+      <div class="top"><span class="fam t">T</span><h3>Tests prove the spec</h3></div>
+      <dl>
+        <div><dt>A person reviews</dt><dd>The <strong>spec</strong>: a list of requirement sentences.</dd></div>
+        <div><dt>The checks make sure</dt><dd>Every requirement is backed by code that exists, and by tests that run that code and would fail if it broke.</dd></div>
+        <div><dt>Checks</dt><dd>T1–T8</dd></div>
+      </dl>
+    </div>
+    <div class="family a">
+      <div class="top"><span class="fam a">A</span><h3>The API matches its contract</h3></div>
+      <dl>
+        <div><dt>A person reviews</dt><dd>The <strong>OpenAPI contract</strong>: endpoints, statuses and response shapes.</dd></div>
+        <div><dt>The checks make sure</dt><dd>The service does exactly what the contract says, no more and no less.</dd></div>
+        <div><dt>Checks</dt><dd>A1–A7</dd></div>
+      </dl>
+    </div>
+    <div class="family h">
+      <div class="top"><span class="fam h">H</span><h3>Git history can be trusted</h3></div>
+      <dl>
+        <div><dt>A person reviews</dt><dd>The <strong>history</strong>: who changed what, why, and when.</dd></div>
+        <div><dt>The checks make sure</dt><dd>The trail that T and A rely on is complete, honest and unaltered.</dd></div>
+        <div><dt>Checks</dt><dd>H1–H9</dd></div>
+      </dl>
+    </div>
+  </div>
+  <div class="callout">
+    <p><strong>Why H is there:</strong> T and A answer "is it right?". H answers "can we trust the evidence?". The T and A checks follow links in git history (which commit implemented which requirement, which lines it wrote), so if history can be faked, they can be fooled.</p>
+    <p><strong>Why 8, 7 and 9:</strong> the counts aren't targets. Each check closes one specific way the evidence could lie.</p>
+  </div>
+</section>
+
+<section id="rules">
+  <h2><span class="n">4</span>The rules every check follows</h2>
+  <div class="split">
+    <div class="panel">
+      <h3>A check is only allowed if it is</h3>
+      <ul>
+        <li><strong>Repeatable:</strong> the same commit and config always give the same answer.</li>
+        <li><strong>Defined in advance:</strong> the pass/fail rule is written down before it runs, with thresholds in config.</li>
+        <li><strong>Rerunnable by anyone:</strong> a developer gets the same answer locally.</li>
+        <li><strong>Honest about blind spots:</strong> a check that can't run reports <em>not covered</em>, never <em>pass</em>.</li>
+      </ul>
+      <p class="muted">That rules out LLM judges and "code quality" scores. They can help a person, but they never change a status.</p>
+    </div>
+    <div class="panel">
+      <h3>Two more design rules</h3>
+      <ul>
+        <li><strong>A commit message or a checked box is a claim, not evidence.</strong> Evidence comes from running something: blame, the tests, coverage, the service.</li>
+        <li><strong>The rules come from the base branch.</strong> When checking a pull request, the verifier reads its config from <code>main</code>, so a pull request can't loosen its own checks.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section id="t">
+  <h2><span class="n">5</span><span class="fam t">T</span> Tests prove the spec · T1–T8</h2>
+  <p class="prose">The T checks are a chain. Each link answers the next obvious question about one requirement, and each one stops a specific shortcut.</p>
+  <div class="table-wrap">
+    <table class="chain t">
+      <thead><tr><th>Check</th><th>Question</th><th>How it's checked</th><th>Guards against</th><th>Example the demo catches</th></tr></thead>
+      <tbody>
+        <tr><td class="id">T1</td><td class="q">Can we refer to this requirement reliably?</td><td class="w">IDs are valid, registered, never reused or deleted</td><td class="w">A requirement silently renumbered, duplicated or removed, so old evidence points at the wrong thing</td><td class="ex">The agent adds a rule that reuses <code>AC-auth-006</code></td></tr>
+        <tr><td class="id">T2</td><td class="q">Did anyone claim to build it?</td><td class="w">A commit that changes code references it in a <code>Refs:</code> trailer</td><td class="w">Work that can't be traced to any requirement</td><td class="ex">A requirement is added and nothing implements it</td></tr>
+        <tr><td class="id">T3</td><td class="q">Is the claimed code still there?</td><td class="w"><code>git blame</code> finds lines those commits wrote, ignoring blank and comment lines</td><td class="w">Commits that only claim, and code deleted later by unrelated changes</td><td class="ex">The "implementation" is a commit that only adds a TODO comment</td></tr>
+        <tr><td class="id">T4</td><td class="q">Is there a test for it?</td><td class="w">A test name in the JUnit report contains the ID</td><td class="w">Untested features</td><td class="ex">Code is added with no tests</td></tr>
+        <tr><td class="id">T5</td><td class="q">Do those tests pass?</td><td class="w">Every tagged test passes; a suite that won't load is an error</td><td class="w">Broken behavior, and suites that silently stop running</td><td class="ex">The lockout threshold changes to 4; a rename breaks test compilation</td></tr>
+        <tr><td class="id">T6</td><td class="q">Do the tests actually run its code?</td><td class="w">Run only its tests under coverage; they must execute its lines, not counting code that runs on load</td><td class="w">Tests that pass without touching what they claim to test</td><td class="ex">A test named for the requirement that only asserts true</td></tr>
+        <tr><td class="id">T7</td><td class="q">Would the tests notice if the code broke?</td><td class="w">Change its lines one at a time (mutation); its tests must catch at least 60%</td><td class="w">Tests that run the code but check nothing meaningful</td><td class="ex">Lockout tests "simplified" to only check for a 401</td></tr>
+        <tr><td class="id">T8</td><td class="q">Is the evidence about the current wording?</td><td class="w">Wording unchanged since its last code or test commit</td><td class="w">Old results shown as current after the spec changed</td><td class="ex">Lockout changes from 3 to 5 attempts; no code changes</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="prose muted">Read top to bottom, the chain moves from claimed (T2) to present (T3) to tested (T4–T5) to exercised (T6) to meaningful (T7). T1 and T8 make sure the requirement itself is stable and current.</p>
+</section>
+
+<section id="a">
+  <h2><span class="n">6</span><span class="fam a">A</span> The API matches its contract · A1–A7</h2>
+  <p class="prose">The contract is the API's public promise, so it's checked from both directions: does it cover the spec, and does the running service keep it?</p>
+  <div class="table-wrap">
+    <table class="chain a">
+      <thead><tr><th>Check</th><th>Question</th><th>How it's checked</th><th>Guards against</th><th>Example the demo catches</th></tr></thead>
+      <tbody>
+        <tr><td class="id">A1</td><td class="q">Does the contract cover every API requirement?</td><td class="w">Each <code>(api: POST /login)</code> in the spec has that operation, listing the requirement in <code>x-requirements</code></td><td class="w">Endpoints built without updating the contract</td><td class="ex">A sign-out endpoint ships with no contract entry</td></tr>
+        <tr><td class="id">A2</td><td class="q">Is every operation explained by the spec?</td><td class="w">Every operation lists real requirements</td><td class="w">Endpoints nobody asked for, documented to look legitimate</td><td class="ex"><code>DELETE /session</code> added to the contract with no requirement</td></tr>
+        <tr><td class="id">A3</td><td class="q">Is the contract well-formed and strict?</td><td class="w">Spectral lint: valid OpenAPI, every response has a schema, objects disallow extra fields</td><td class="w">A contract too loose to catch anything</td><td class="ex">A response schema loses <code>additionalProperties: false</code></td></tr>
+        <tr><td class="id">A4</td><td class="q">Did the API break its consumers?</td><td class="w">oasdiff against the base branch; breaking changes allowed only if a requirement changed too</td><td class="w">Breaking changes slipped in as "cleanup"</td><td class="ex"><code>token</code> renamed to <code>access_token</code> everywhere</td></tr>
+        <tr><td class="id">A5</td><td class="q">Does it serve exactly the documented routes?</td><td class="w">Routes listed from the running code, compared with the contract</td><td class="w">Hidden or debug endpoints; documented endpoints that don't exist</td><td class="ex"><code>GET /debug/users</code> ships</td></tr>
+        <tr><td class="id">A6</td><td class="q">Do the responses the tests see match?</td><td class="w">An adapter records every response during the tagged tests and validates it</td><td class="w">Leaked fields and undocumented status codes, even when tests pass</td><td class="ex">Login leaks <code>debug_password</code>; lockout switches to 423 with the test updated</td></tr>
+        <tr><td class="id">A7</td><td class="q">Does it hold up to inputs nobody tested?</td><td class="w">Schemathesis sends generated requests (fixed seed) to the running service</td><td class="w">Crashes and contract breaks the agent's own tests never tried</td><td class="ex">Password reset crashes on an email without <code>@</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="prose muted">A6 and A7 complement each other. A6 names the requirement that broke but only sees what the tests send. A7 doesn't depend on the agent's tests but reports per operation.</p>
+</section>
+
+<section id="h">
+  <h2><span class="n">7</span><span class="fam h">H</span> Git history can be trusted · H1–H9</h2>
+  <p class="prose">Each H check protects one property of the trail the other checks follow.</p>
+  <div class="table-wrap">
+    <table class="chain h">
+      <thead><tr><th>Check</th><th>Property</th><th>How it's checked</th><th>Guards against</th><th>Example the demo catches</th></tr></thead>
+      <tbody>
+        <tr><td class="id">H1</td><td class="q">Readable</td><td class="w">Subjects follow Conventional Commits (<code>feat(auth): …</code>)</td><td class="w">Unreadable history, no changelog</td><td class="ex">A commit titled <code>wip</code></td></tr>
+        <tr><td class="id">H2</td><td class="q">Traceable</td><td class="w">Code commits carry <code>Refs: &lt;ID&gt;</code> (<code>Refs: none</code> for refactor/chore)</td><td class="w">Code changes nobody can tie to a requirement</td><td class="ex">Code changed with no <code>Refs:</code></td></tr>
+        <tr><td class="id">H3</td><td class="q">Scoped</td><td class="w">At most one requirement per code commit</td><td class="w">Shared commits that let one requirement take credit for another's code</td><td class="ex">One commit cites two requirements</td></tr>
+        <tr><td class="id">H4</td><td class="q">Honest</td><td class="w">A <code>refactor</code> or <code>chore</code> commit leaves every status unchanged</td><td class="w">Behavior changes hidden in "no behavior change" commits</td><td class="ex">A "refactor" turns <code>&gt;=</code> into <code>&gt;</code> in the lockout check</td></tr>
+        <tr><td class="id">H5</td><td class="q">Reviewable</td><td class="w">No commit changes more than 400 lines (lockfiles excluded)</td><td class="w">Huge commits that hide changes</td><td class="ex">A 600-line file in one commit</td></tr>
+        <tr><td class="id">H6</td><td class="q">Organized</td><td class="w">Branch names follow <code>type/AC-xxx-nnn-slug</code></td><td class="w">Work nobody can match to a requirement</td><td class="ex">Work on a branch called <code>quick-fix</code></td></tr>
+        <tr><td class="id">H7</td><td class="q">Immutable</td><td class="w">The last verified commit is still in main's history</td><td class="w">Rewritten history that erases or changes evidence</td><td class="ex">The verified merge on main is amended</td></tr>
+        <tr><td class="id">H8</td><td class="q">Attributed</td><td class="w">Non-human commits name the agent (<code>Co-Authored-By:</code>)</td><td class="w">Agent work passed off as human work</td><td class="ex">An agent commit with no attribution</td></tr>
+        <tr><td class="id">H9</td><td class="q">Authentic</td><td class="w">Every commit has a good signature</td><td class="w">Commits forged under someone else's name</td><td class="ex">An unsigned commit</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="threats">
+  <h2><span class="n">8</span>What the agent is assumed to do wrong</h2>
+  <p class="prose">The checks assume an agent that is capable but unreliable. It doesn't have to be malicious: it may be careless, overconfident, or simply optimizing for a green build. The failures it's assumed to make are the ones that look fine on the surface.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Failure</th><th>Looks like</th><th>Caught by</th></tr></thead>
+      <tbody>
+        <tr><td class="q">Claiming without doing</td><td>A commit that cites a requirement</td><td>T3</td></tr>
+        <tr><td class="q">Testing nothing</td><td>A passing test with the right name</td><td>T6, T7</td></tr>
+        <tr><td class="q">Fixing the test instead of the bug</td><td>A test updated alongside a behavior change</td><td>A6, A4, T7</td></tr>
+        <tr><td class="q">Quietly widening the API</td><td>An extra field or endpoint</td><td>A6, A5, A2</td></tr>
+        <tr><td class="q">Hiding behavior changes</td><td>A commit called "refactor"</td><td>H4</td></tr>
+        <tr><td class="q">Ignoring a spec change</td><td>Code that still matches the old wording</td><td>T8</td></tr>
+        <tr><td class="q">Making evidence hard to follow</td><td>Mixed commits, huge commits, rewritten history</td><td>H2, H3, H5, H7</td></tr>
+        <tr><td class="q">Hiding who did the work</td><td>Unattributed or unsigned commits</td><td>H8, H9</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="prose muted">The demo turns each row into at least one concrete attack.</p>
+</section>
+
+<section id="status">
+  <h2><span class="n">9</span>Requirement status and the report</h2>
+  <p class="prose">Every requirement gets exactly one status: the first problem found, in this order.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Status</th><th>Means</th><th>Set by</th></tr></thead>
+      <tbody>
+        <tr><td><span class="status none">Missing</span></td><td>No commit references it</td><td>T2</td></tr>
+        <tr><td><span class="status bad">Gone</span></td><td>Its code was never written or was deleted</td><td>T3</td></tr>
+        <tr><td><span class="status warn">Untested</span></td><td>No tagged test</td><td>T4</td></tr>
+        <tr><td><span class="status bad">Failing</span></td><td>Tagged tests fail, or the suite won't load</td><td>T5</td></tr>
+        <tr><td><span class="status warn">Unexercised</span></td><td>Tests pass but don't run its code</td><td>T6</td></tr>
+        <tr><td><span class="status warn">Weak</span></td><td>Tests run its code but miss broken versions of it</td><td>T7</td></tr>
+        <tr><td><span class="status bad">Contract</span></td><td>The API doesn't match the contract</td><td>A1, A5, A6, A7</td></tr>
+        <tr><td><span class="status warn">Drift</span></td><td>Its wording changed since it was implemented</td><td>T8</td></tr>
+        <tr><td><span class="status ok">Sync</span></td><td>Every check passes</td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="panel">
+    <h3>What the HTML report shows for each requirement</h3>
+    <ul>
+      <li><strong>Four vital signs</strong> (spec, code, api, tests) on a colored rail: green proven, amber needs attention, red missing or failing, grey not applicable.</li>
+      <li><strong>One sentence</strong> saying what's wrong.</li>
+      <li><strong>Its history in order:</strong> spec added or changed (changed words underlined), each commit with how many of its lines are still in the code, then what's true now: tests, coverage, mutation results and every API call checked against the contract.</li>
+    </ul>
+    <p class="muted">Below the requirements: an <strong>Outside the spec</strong> panel for routes and operations no requirement accounts for, a <strong>Git practices</strong> panel, and all 24 checks.</p>
+  </div>
+</section>
+
+<section id="reach">
+  <h2><span class="n">10</span>How a check reaches across languages</h2>
+  <p class="prose">Some checks only need git; others need something from the project's tools. Each check has a reach label.</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Reach</th><th>Needs</th><th>Checks</th></tr></thead>
+      <tbody>
+        <tr><td class="id">G</td><td>Any git repo: nothing but history</td><td>T3, T8, H4, H5, H7, H9</td></tr>
+        <tr><td class="id">C</td><td>The conventions: IDs in the spec, <code>Refs:</code> trailers, IDs in test names, <code>x-requirements</code></td><td>T1, T2, T4, A1, A2, H1, H2, H3, H6, H8</td></tr>
+        <tr><td class="id">S</td><td>Standard outputs: JUnit XML, LCOV / Go cover profile / JaCoCo XML, OpenAPI</td><td>T5, T6, A3, A4, A7, and A5 where the framework generates OpenAPI</td></tr>
+        <tr><td class="id">E</td><td>A per-language step that can rebuild mutated code</td><td>T7</td></tr>
+        <tr><td class="id">F</td><td>A small per-framework adapter that records test traffic or lists routes</td><td>A6, and A5 where the framework can't generate OpenAPI</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="prose">The only per-project setup is a <strong>runner profile</strong> in <code>.aqv.yml</code>: command templates for the tests and coverage, the report formats, how to start the service, and which adapter to use. Here is how each demo language does the stack-dependent checks:</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Check</th><th>Python</th><th>JavaScript</th><th>TypeScript</th><th>Go</th><th>Rust</th><th>Kotlin</th></tr></thead>
+      <tbody>
+        <tr><td class="id">T5</td><td>pytest JUnit</td><td>jest-junit</td><td>Vitest JUnit</td><td>gotestsum</td><td>cargo-nextest</td><td>Gradle JUnit</td></tr>
+        <tr><td class="id">T6</td><td>coverage.py, LCOV</td><td>Jest, LCOV</td><td>Vitest V8, LCOV</td><td>Go cover profile</td><td>cargo-llvm-cov, LCOV</td><td>JaCoCo XML</td></tr>
+        <tr><td class="id">T7</td><td>Python compile check</td><td><code>node --check</code></td><td><code>tsc --noEmit</code></td><td><code>go test</code> build</td><td>nextest build exit code</td><td><code>compileTestKotlin</code></td></tr>
+        <tr><td class="id">A5</td><td>FastAPI OpenAPI</td><td>Express router list</td><td>@fastify/swagger</td><td><code>chi.Walk</code></td><td>Source scan (partial)</td><td>springdoc, running app</td></tr>
+        <tr><td class="id">A6</td><td>pytest plugin</td><td>Node setup file</td><td>Node setup file</td><td>Test helper</td><td>Test helper</td><td>Test base class</td></tr>
+        <tr><td class="id">A7</td><td>uvicorn</td><td>node</td><td>tsx</td><td><code>go run</code></td><td><code>cargo run</code></td><td>Spring Boot jar</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="runs">
+  <h2><span class="n">11</span>How the verifier runs</h2>
+  <p class="prose">Inputs: <code>.aqv.yml</code> (from the base branch), the spec files, the OpenAPI contract and git history. One command, <code>aqv check</code>, does this in order:</p>
+  <ol class="steps">
+    <li><span>Read the requirements, the contract, and every commit's <code>Refs:</code> and attribution trailers.</span><span class="ck">T1</span></li>
+    <li><span>Run the full test suite once, collecting JUnit results and test traffic.</span><span class="ck">T4 T5 A6</span></li>
+    <li><span>For each requirement: blame the lines its commits wrote.</span><span class="ck">T2 T3</span></li>
+    <li><span>Run only its tests under coverage, minus a run that selects no tests.</span><span class="ck">T6</span></li>
+    <li><span>Mutate the lines its tests run and rerun its tests; uncompilable mutants don't count.</span><span class="ck">T7</span></li>
+    <li><span>Compare the spec's history with the requirement's last code or test commit.</span><span class="ck">T8</span></li>
+    <li><span>Lint and diff the contract, list the served routes, start the service and send generated requests.</span><span class="ck">A1–A7</span></li>
+    <li><span>Read the commit range: subjects, trailers, size, branches, signatures; compare statuses around refactor commits.</span><span class="ck">H1–H9</span></li>
+  </ol>
+  <div class="split">
+    <div class="panel"><h3>All history</h3><p><code>aqv check --repo .</code> checks everything up to <code>HEAD</code>.</p></div>
+    <div class="panel"><h3>Pull request</h3><p><code>aqv check --repo . --base main</code>: the H checks look only at the new commits, T7 mutates only the requirements the pull request touches, and A4 compares the contract with <code>main</code>.</p></div>
+    <div class="panel"><h3>Outputs</h3><p><code>results.json</code>, <code>report.txt</code> and <code>report.html</code>. The exit code is non-zero when any check fails, so it can gate a merge.</p></div>
+  </div>
+</section>
+
+<section id="demo">
+  <h2><span class="n">12</span>The demo: what is real and what is simulated</h2>
+  <div class="answer">
+    <span class="big">The demo does not call an AI agent. It simulates one.</span>
+    <p>Everything the agent would produce is scripted; everything that judges it is real.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Part</th><th></th><th>Detail</th></tr></thead>
+      <tbody>
+        <tr><td class="q">The auth service in six languages</td><td><span class="status ok">Real</span></td><td>Real code, built and run</td></tr>
+        <tr><td class="q">Tests, coverage, mutation, Spectral, oasdiff, Schemathesis</td><td><span class="status ok">Real</span></td><td>Real tools, really run</td></tr>
+        <tr><td class="q">Git history</td><td><span class="status ok">Real</span></td><td>Real, signed commits: a human author for the spec, and an agent identity (<code>dev-agent</code> with a <code>Co-Authored-By: Claude</code> trailer) for the implementation</td></tr>
+        <tr><td class="q">The agent's work</td><td><span class="status warn">Simulated</span></td><td>The clean history is written by <code>demo/build_baseline.py</code>; each attack is a scripted edit in <code>demo/langs/&lt;language&gt;/edits.sh</code></td></tr>
+        <tr><td class="q">Pull requests and CI</td><td><span class="status warn">Simulated</span></td><td>Local branches; the verifier runs locally</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="split">
+    <div class="panel">
+      <h3>Why simulate</h3>
+      <p>The demo tests the referee, not the player. To know the verifier works, each mistake has to happen exactly the same way every run, so the result can be compared: did the right check fire, and did the clean runs stay clean? A live agent makes different mistakes each time. That's what you want when measuring agents, and what you don't want when testing the verifier.</p>
+      <p>The attacks come from the failures in section 8, most of them seen in the original prototype: comment-only commits, <code>assert True</code> tests, a test updated to expect HTTP 423, a leaked debug field, a debug endpoint.</p>
+    </div>
+    <div class="panel">
+      <h3>Result</h3>
+      <p>In each of the six languages, the clean baseline and a clean pull request pass every check, and all 26 attacks are caught by the check written for them: <strong>168 of 168 scenarios</strong>.</p>
+      <h3>Using it with real agents (next step)</h3>
+      <ol>
+        <li>Put the conventions in the agent's instructions, for example <code>CLAUDE.md</code>.</li>
+        <li>Give the agent requirements to implement on branches.</li>
+        <li>Run <code>aqv check --base main</code> on each pull request.</li>
+        <li>Track statuses and the agent scorecard across many runs to compare agents, prompts or models on the same spec.</li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<section id="limits">
+  <h2><span class="n">13</span>What it doesn't guarantee</h2>
+  <div class="prose">
+    <ul>
+      <li><strong>Meaning.</strong> The checks prove the code does what its tests and the contract check. If both miss part of what a requirement means, so does the verifier. T7 narrows this gap; it doesn't close it.</li>
+      <li><strong>Good requirements.</strong> A vague requirement can pass. Writing testable requirements is still the person's job.</li>
+      <li><strong>T8 is cleared by any later commit</strong> that references the requirement and changes code or tests. It catches untouched drift, not a wrong re-implementation; T5–T7 and A6 have to catch that.</li>
+      <li><strong>T7 is a small built-in mutator</strong>, not a full mutation tool, with a 60% threshold. It's slow in compiled languages because each mutant rebuilds.</li>
+      <li><strong>A5 in Rust is partial:</strong> axum can't list its routes, so they're read from source.</li>
+      <li><strong>A6 needs an adapter per framework.</strong> In Go, Rust and Kotlin it's a small helper kept in the repo, which the tests must use.</li>
+      <li><strong>No storage yet:</strong> results aren't kept between runs, and there's no CI workflow or hosted board.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="glossary">
+  <h2><span class="n">14</span>Glossary</h2>
+  <div class="table-wrap">
+    <table>
+      <tbody>
+        <tr><td class="q">Requirement</td><td>One line in the spec with a stable ID, for example <code>AC-auth-002</code></td></tr>
+        <tr><td class="q">Contract</td><td>The OpenAPI file describing the API</td></tr>
+        <tr><td class="q">Claim</td><td>Something asserted but not shown: a commit message, a checked box</td></tr>
+        <tr><td class="q">Evidence</td><td>Something observed by running a tool: blame, test results, coverage, responses</td></tr>
+        <tr><td class="q">Tagged test</td><td>A test whose name contains the requirement ID</td></tr>
+        <tr><td class="q">Mutation</td><td>A deliberate small change to code (<code>&gt;=</code> to <code>&gt;</code>) to see whether tests notice</td></tr>
+        <tr><td class="q">Runner profile</td><td>The <code>.aqv.yml</code> section telling the verifier how to run a project's tools</td></tr>
+        <tr><td class="q">Adapter</td><td>A small framework-specific helper that lists routes or records test traffic</td></tr>
+        <tr><td class="q">Reach</td><td>What a check needs to work: G, C, S, E or F</td></tr>
+        <tr><td class="q">Vital signs</td><td>The four per-requirement indicators: spec, code, api, tests</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<footer>The same write-up as Markdown: <code>docs/framework.md</code>. Demo results: <code>demo/results/index.html</code>.</footer>
+</main>
+</div>
+</body>
+</html>
