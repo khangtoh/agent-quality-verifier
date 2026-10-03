@@ -88,11 +88,20 @@ def write_html(lang, results):
         rep = scrub(json.loads((Path(r["out"]) / "results.json").read_text()))
         scenarios.append({**r, "report": rep})
         (out_dir / "runs").mkdir(exist_ok=True)
-        (out_dir / "runs" / f"{r['name']}.html").write_text(html.run_report(rep))
+        (out_dir / "runs" / f"{r['name']}.html").write_text(html.run_report(rep, nav="../../../../"))
         if r["name"] in EXAMPLES:
-            (out_dir / f"{r['name']}.html").write_text(html.run_report(rep))
+            (out_dir / f"{r['name']}.html").write_text(html.run_report(rep, nav="../../../"))
             (out_dir / f"{r['name']}.txt").write_text(scrub_text((Path(r["out"]) / "report.txt").read_text()))
-    (out_dir / "demo.html").write_text(html.demo_report(scenarios, language=f"{L.NAME} ({L.STACK})"))
+    (out_dir / "demo.html").write_text(html.demo_report(scenarios, language=f"{L.NAME} ({L.STACK})", nav="../../../"))
+
+
+# Comparison pages built by experiments/report.py: (html, markdown, title, description).
+COMPARE = [
+    ("docs/compare/openfasttrace.html", "experiments/openfasttrace/README.md", "OpenFastTrace",
+     "Requirement tracing through a document hierarchy, on the same 26 attacks."),
+    ("docs/compare/intentbond.html", "experiments/intentbond/README.md", "IntentBond",
+     "Links, tests and a review gate against a git baseline, with retained evidence, on the same 26 attacks."),
+]
 
 
 def write_index():
@@ -104,7 +113,9 @@ def write_index():
             langs.append({"lang": lang, "name": L.NAME, "stack": L.STACK, "mechanisms": getattr(L, "MECHANISMS", {}),
                           "results": json.loads(f.read_text())})
     RESULTS.mkdir(exist_ok=True)
-    (RESULTS / "index.html").write_text(html.languages_report(langs))
+    (RESULTS / "index.html").write_text(html.languages_report(langs, nav="../../"))
+    compare = [c for c in COMPARE if (ROOT / c[0]).exists()]
+    (ROOT / "index.html").write_text(html.site_index(langs, compare))
 
 
 def scrub_text(text):

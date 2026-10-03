@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Compared: IntentBond</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap">
+<style>
+:root {
+  --bg: #f6f7f6; --surface: #ffffff; --fg: #1b2226; --muted: #5a666b; --line: #dde2e1;
+  --accent: #1d5c63; --code-bg: #eef1f0;
+  --ok-fg: #1f6b4a; --ok-bg: #e1f1e8; --warn-fg: #8a5a00; --warn-bg: #fbefd6;
+  --bad-fg: #a5332a; --bad-bg: #fbe3e0; --muted-fg: #5a666b; --muted-bg: #eceeed;
+  --font-display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Source Sans 3", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101517; --surface: #171f22; --fg: #e3e9ea; --muted: #99a6aa; --line: #2a3437;
+    --accent: #7cc4c9; --code-bg: #1f292c;
+    --ok-fg: #8fd9b2; --ok-bg: #183528; --warn-fg: #f0c46a; --warn-bg: #3a2d12;
+    --bad-fg: #f3a198; --bad-bg: #41201d; --muted-fg: #99a6aa; --muted-bg: #222b2e;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101517; --surface: #171f22; --fg: #e3e9ea; --muted: #99a6aa; --line: #2a3437;
+  --accent: #7cc4c9; --code-bg: #1f292c;
+  --ok-fg: #8fd9b2; --ok-bg: #183528; --warn-fg: #f0c46a; --warn-bg: #3a2d12;
+  --bad-fg: #f3a198; --bad-bg: #41201d; --muted-fg: #99a6aa; --muted-bg: #222b2e;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+.page { max-width: 1160px; margin: 0 auto; padding-inline: 20px; padding-block: 36px 64px; display: grid; gap: 44px; }
+section { display: grid; gap: 16px; min-width: 0; }
+h1, h2, h3 { font-family: var(--font-display); margin: 0; line-height: 1.15; text-wrap: balance; }
+h1 { font-size: clamp(28px, 5vw, 40px); }
+h2 { font-size: 24px; }
+h3 { font-size: 17px; }
+p { margin: 0; }
+a { color: var(--accent); }
+code { font-family: var(--font-mono); font-size: 0.85em; background: var(--code-bg); padding: 0.08em 0.35em; border-radius: 4px; overflow-wrap: anywhere; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 19px; max-width: 70ch; }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+header.top { display: grid; gap: 12px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 4px; min-width: 0; }
+.stat b { font-family: var(--font-display); font-size: 28px; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 14px; color: var(--muted); }
+.chip { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 5px; font-family: var(--font-mono); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.chip.ok { color: var(--ok-fg); background: var(--ok-bg); }
+.chip.warn { color: var(--warn-fg); background: var(--warn-bg); }
+.chip.bad { color: var(--bad-fg); background: var(--bad-bg); }
+.chip.muted { color: var(--muted-fg); background: var(--muted-bg); }
+.chip.id { color: var(--fg); background: var(--code-bg); }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+thead th { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
+tbody tr:last-child td { border-bottom: 0; }
+tr.group td { font-family: var(--font-display); font-weight: 700; color: var(--accent); background: var(--bg); padding-block: 8px; }
+td.id { font-family: var(--font-mono); font-weight: 600; white-space: nowrap; }
+td.name { font-weight: 600; }
+.matrix th, .matrix td { padding: 6px 4px; text-align: center; border-bottom: 1px solid var(--line); }
+.matrix th.check { font-family: var(--font-mono); font-size: 11px; color: var(--muted); writing-mode: vertical-rl; transform: rotate(180deg); height: 44px; padding: 6px 2px; }
+.matrix th.scn, .matrix td.scn { text-align: left; position: sticky; left: 0; background: var(--surface); white-space: nowrap; padding-inline: 12px; font-family: var(--font-mono); font-size: 12.5px; z-index: 1; }
+.matrix thead th.scn { background: var(--bg); }
+.matrix td.gap, .matrix th.gap { border-left: 2px solid var(--line); }
+.cell { display: inline-block; width: 16px; height: 16px; border-radius: 4px; vertical-align: middle; }
+.cell.hit { background: var(--bad-fg); }
+.cell.good { background: var(--ok-fg); }
+.cell.also { border: 2px solid var(--bad-fg); }
+.cell.pass { width: 6px; height: 6px; border-radius: 50%; background: var(--ok-fg); opacity: 0.55; }
+.cell.skip { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); opacity: 0.4; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 14px; color: var(--muted); align-items: center; }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+details.scenario { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+details.scenario > summary { cursor: pointer; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; list-style: none; }
+details.scenario > summary::-webkit-details-marker { display: none; }
+details.scenario > summary .nm { font-family: var(--font-mono); font-weight: 600; font-size: 14px; }
+details.scenario > summary .tt { flex: 1 1 280px; min-width: 0; }
+details.scenario[open] > summary { border-bottom: 1px solid var(--line); }
+details.scenario .inner { padding: 14px 16px 16px; display: grid; gap: 12px; }
+summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 10px; }
+ul.findings { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 6px; font-size: 14.5px; }
+ul.findings li { display: grid; grid-template-columns: 44px 1fr; gap: 8px; }
+ul.findings li .ck { font-family: var(--font-mono); font-weight: 600; color: var(--bad-fg); }
+.reqs { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.req { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.req .top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.req .id { font-family: var(--font-mono); font-weight: 600; font-size: 13px; }
+.req p { font-size: 14.5px; }
+.req .why { font-size: 13px; color: var(--muted); }
+.req.ok { border-top: 3px solid var(--ok-fg); } .req.warn { border-top: 3px solid var(--warn-fg); }
+.req.bad { border-top: 3px solid var(--bad-fg); } .req.muted { border-top: 3px solid var(--muted); }
+.goal-list { display: grid; gap: 4px; }
+.goal-list .row { display: grid; grid-template-columns: 40px 100px 1fr; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--line); align-items: start; }
+.goal-list .row:last-child { border-bottom: 0; }
+.goal-list .row .ck { font-family: var(--font-mono); font-weight: 600; }
+.goal-list .msg { display: block; font-size: 13.5px; color: var(--muted); margin-top: 2px; overflow-wrap: anywhere; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.panel h3 { padding: 12px 12px 4px; }
+footer { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+@media (max-width: 640px) { .goal-list .row { grid-template-columns: 36px 1fr; } .goal-list .row > :nth-child(3) { grid-column: 1 / -1; } }
+.site-nav { position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
+.site-nav .in { max-width: 1160px; margin: 0 auto; padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: baseline; }
+.site-nav .brand { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--fg); text-decoration: none; margin-right: auto; }
+.site-nav a.lk { color: var(--muted); text-decoration: none; font-size: 14px; }
+.site-nav a.lk:hover { color: var(--accent); text-decoration: underline; }
+.site-nav a.lk[aria-current="page"] { color: var(--accent); font-weight: 600; }
+@media (max-width: 640px) { .site-nav { position: static; } }
+
+.goal { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent);
+  border-radius: 10px; padding: 18px 20px; display: grid; gap: 12px; }
+.goal .big { font-family: var(--font-display); font-size: 21px; font-weight: 700; line-height: 1.25; }
+.fams { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+.fam { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px;
+  display: grid; gap: 6px; align-content: start; min-width: 0; }
+.fam .k { font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--accent); }
+.fam h3 { font-size: 16px; }
+.fam p { font-size: 14.5px; color: var(--muted); }
+ul.plain { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+a.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px;
+  display: grid; gap: 6px; align-content: start; text-decoration: none; color: var(--fg); min-width: 0; }
+a.card:hover { border-color: var(--accent); }
+a.card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+a.card .k { font-family: var(--font-mono); font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+a.card b { font-family: var(--font-display); font-size: 18px; color: var(--accent); }
+a.card span.d { font-size: 14.5px; color: var(--muted); }
+.dir { display: grid; gap: 10px; }
+.dir .grp { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.dir .grp > h3 { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.dir ul { list-style: none; margin: 0; padding: 4px 0; }
+.dir li { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; padding: 8px 16px; border-bottom: 1px solid var(--line); }
+.dir li:last-child { border-bottom: 0; }
+.dir li .t { font-weight: 600; min-width: 0; }
+.dir li .d { color: var(--muted); font-size: 14px; flex: 1 1 260px; }
+.dir li .alt { font-family: var(--font-mono); font-size: 12px; }
+.dir details { border-top: 1px solid var(--line); }
+.dir details > summary { cursor: pointer; padding: 10px 16px; font-size: 14px; color: var(--accent); }
+.dir details ul { columns: 2 260px; column-gap: 0; padding-bottom: 8px; }
+.dir details li { break-inside: avoid; border-bottom: 0; padding: 3px 16px; font-size: 13.5px; }
+.dir details li code { background: none; padding: 0; }
+
+.quote { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--muted);
+  border-radius: 10px; padding: 16px 20px; display: grid; gap: 8px; }
+.quote blockquote { margin: 0; font-family: var(--font-serif); font-size: 18px; line-height: 1.5; }
+.quote .src { font-size: 13px; color: var(--muted); }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.two .panel { padding: 16px 18px; display: grid; gap: 8px; align-content: start; }
+.two .panel h3 { padding: 0; }
+.two .panel .k { font-family: var(--font-mono); font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.two .panel.ours { border-top: 3px solid var(--accent); }
+.two .panel.theirs { border-top: 3px solid var(--muted); }
+td.why { color: var(--muted); font-size: 14px; min-width: 240px; }
+td.scn { font-family: var(--font-mono); font-size: 12.5px; white-space: nowrap; }
+td .ttl { display: block; font-family: var(--font-body); font-size: 13.5px; color: var(--muted); white-space: normal; max-width: 300px; }
+.note { font-size: 14px; color: var(--muted); }
+ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+.kinds td:nth-child(n+3) { white-space: nowrap; }
+.two.quad { grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); }
+</style>
+</head>
+<body>
+<nav class="site-nav" aria-label="Site"><div class="in"><a class="brand" href="../../index.html">Agent Quality Verifier</a><a class="lk" href="../../index.html">Home</a><a class="lk" href="../../docs/framework.html">Framework</a><a class="lk" href="../../demo/results/index.html">Results</a><a class="lk" href="../../docs/compare/openfasttrace.html">vs OpenFastTrace</a><a class="lk" href="../../docs/compare/intentbond.html" aria-current="page">vs IntentBond</a></div></nav>
+<main class="page">
+<header class="top"><span class="eyebrow">Compared · IntentBond on the Python demo</span><h1>IntentBond keeps a change reviewable and its evidence verifiable. This verifier makes the evidence the review.</h1><p class="lede">IntentBond links requirements to code and tests with OpenFastTrace tags, runs the tests against a git baseline, keeps evidence tied to the exact source it checked, and sends every specification or test change to a person. This verifier turns the questions that review would ask into checks. We ran IntentBond on the same 26 attacks, with its documented settings and with its strictest options.</p></header>
+<div class="stats"><div class="stat"><b>30</b><span>scenarios and variants, two configurations each</span></div><div class="stat"><b>7 of 7</b><span>link and test-run questions answered by both</span></div><div class="stat"><b>matched</b><span>saved evidence matched to its commit by <code>ib verify</code>; a later edit is refused</span></div><div class="stat"><b>0</b><span>AI calls in either tool</span></div></div>
+<section><h2>Two goals</h2><div class="quote"><blockquote>“IntentBond connects intent and specifications to code, tests, and verification evidence. Follow explicit links to find what a change affects and keep the related artifacts consistent as software changes.” … “Review determines whether the linked code and checks satisfy the requirement.”</blockquote><span class="src">IntentBond README</span></div><div class="two"><div class="panel theirs"><span class="k">IntentBond answers</span><h3>Did this change keep requirements, code and tests linked and passing, and what must a person review?</h3><ul class="plain small"><li>OFT links checked on the base and the candidate, with the rules read from the base.</li><li>The project's tests run; named tests can be required to run and pass.</li><li>Every specification or test change produces a review record (<code>review.patch</code>, <code>summary.md</code>); passing checks don't approve it.</li><li>Evidence is saved with source hashes, and <code>ib verify</code> later matches a commit to it.</li></ul></div><div class="panel ours"><span class="k">This verifier answers</span><h3>Which requirements are proven, by checks alone, so review doesn't have to find the problems?</h3><ul class="plain small"><li>The same link and test-run questions, from conventions instead of tags.</li><li>Plus the questions a reviewer would otherwise ask: is the code real, do the tests run it, would they catch it breaking, has the wording moved on?</li><li>Plus the API contract and the git history.</li><li>People still decide intent; they read evidence instead of code.</li></ul></div></div></section>
+<section><h2>What this verifier is for</h2><div class="goal"><p class="big">Let a person judge an agent's work without reading its code.</p><p>For every requirement the verifier answers three questions with checks that give the same answer for the same commit every time: no AI judges, no scores, no opinions. Where a check can't see, it says <b>not covered</b>, never <b>pass</b>.</p></div><div class="fams"><div class="fam"><span class="k">T1–T8</span><h3>Tests prove the spec</h3><p>Each requirement has tagged tests that pass, run its code and fail when that code is broken, and the evidence is about its current wording.</p></div><div class="fam"><span class="k">A1–A7</span><h3>The API matches its contract</h3><p>Every API requirement is documented in OpenAPI, and the routes, test responses and the running service all match that contract.</p></div><div class="fam"><span class="k">H1–H9</span><h3>The history can be trusted</h3><p>Commits are readable, cite one requirement, are honestly labelled, attributed to the agent, signed, and main is never rewritten.</p></div></div><div class="panel" style="padding:14px 18px;display:grid;gap:8px"><h3 style="padding:0">Deliberately not its goals</h3><ul class="plain small"><li>Managing requirement documents or a feature → requirement → design hierarchy.</li><li>Approving what a requirement should say. People decide intent; the verifier checks the code against it.</li><li>Storing signed evidence for audits (not yet: results are recomputed on every run).</li><li>Formal proofs of behaviour.</li></ul><p class="small muted">Other tools are built for exactly these. The comparison pages show where they fit.</p></div></section>
+<section><h2>The same scenarios, by the question they ask</h2><p class="note">"Review" is IntentBond's deliberate answer for any change to specifications or tests: the clean pull request gets it too. It hands the question to a person rather than answering it.</p><div class="table-wrap"><table class="kinds"><thead><tr><th>Question the scenario asks</th><th>Runs</th><th>This verifier</th><th>IntentBond (default)</th></tr></thead><tbody><tr><td>Is every requirement linked to code and tests, at its current revision?</td><td class="small muted">4</td><td><span class="chip ok">4 of 4</span></td><td><span class="chip ok">4 rejected</span></td></tr><tr><td>Do the linked tests run and pass?</td><td class="small muted">3</td><td><span class="chip ok">3 of 3</span></td><td><span class="chip ok">3 rejected</span></td></tr><tr><td>Is the linked evidence real: code that exists, tests that run it and would catch it breaking?</td><td class="small muted">5</td><td><span class="chip ok">5 of 5</span></td><td><span class="chip warn">1 rejected</span> <span class="chip warn">4 to review</span> <span class="small muted">strict: 2 rejected</span></td></tr><tr><td>Is a reworded requirement noticed when nobody marks it as changed?</td><td class="small muted">1</td><td><span class="chip ok">1 of 1</span></td><td><span class="chip warn">0 rejected</span> <span class="chip warn">1 to review</span> <span class="small muted">strict: 1 rejected</span></td></tr><tr><td>Does the API match its OpenAPI contract?</td><td class="small muted">8</td><td><span class="chip ok">8 of 8</span></td><td><span class="chip muted">not its goal</span> <span class="small muted">3 sent to review</span></td></tr><tr><td>Does the history follow the conventions?</td><td class="small muted">8</td><td><span class="chip ok">8 of 8</span></td><td><span class="chip muted">not its goal</span> <span class="small muted">0 sent to review</span></td></tr></tbody></table></div></section>
+<section><h2>How it was run</h2><ol class="steps"><li>IntentBond <code>5a1200a</code> (2026-09-29) with its pinned OpenFastTrace 4.9.0.</li><li>The Python demo baseline gets IntentBond's notation the way an agent following its skill would write it: an OFT item per requirement, implementation tags, a named <code>utest</code> tag and <code>@pytest.mark.oft_id</code> marker per test, the pytest hook from IntentBond's example, and <code>scope.json</code>.</li><li>Each scenario script runs unchanged; what it added is tagged the same way. A reworded requirement gets revision 2; variant X2 leaves it at 1.</li><li><code>ib check --base &lt;main before the scenario&gt; --candidate HEAD</code> with two scopes. <b>Default</b>: the documented example (links required, JUnit execution links). <b>Strict</b>: also a required revision increase for changed content, no skipped tests, and every baseline test pinned in <code>required_artifacts</code>.</li><li>Exit 1 is <b>rejected</b>, 4 is <b>review</b> (checks passed, a person must review), 0 is <b>passed</b>.</li></ol></section>
+<section><h2>Every scenario</h2><div class="table-wrap"><table><thead><tr><th>Scenario</th><th>This verifier</th><th>IntentBond default</th><th>IntentBond strict</th><th>What IntentBond saw</th></tr></thead><tbody><tr class="group"><td colspan="5">Clean runs</td></tr><tr><td class="scn">baseline<span class="ttl">The clean baseline: six requirements, built the right way</span></td><td><span class="chip ok">passes</span></td><td><span class="chip ok">passed</span></td><td><span class="chip ok">passed</span></td><td class="why">Coverage complete; 15 linked tests pass.</td></tr><tr><td class="scn">00-clean-pr<span class="ttl">Clean PR: a human adds AC-auth-007, the agent implements it properly</span></td><td><span class="chip ok">passes</span></td><td><span class="chip ok">review</span></td><td><span class="chip ok">review</span></td><td class="why">Any specification or test change goes to a person, by design.</td></tr><tr class="group"><td colspan="5">T · tests prove the spec</td></tr><tr><td class="scn">T1-duplicate-id<span class="ttl">The agent adds a requirement that reuses the ID AC-auth-006</span></td><td><span class="chip ok">caught · T1</span></td><td><span class="chip ok">rejected</span></td><td><span class="chip ok">rejected</span></td><td class="why">Two active items for <code>req~auth-006</code>.</td></tr><tr><td class="scn">T2-not-implemented<span class="ttl">A requirement is added and nothing implements it</span></td><td><span class="chip ok">caught · T2</span></td><td><span class="chip ok">rejected</span></td><td><span class="chip ok">rejected</span></td><td class="why">No implementation or test links for the new requirement.</td></tr><tr><td class="scn">T3-comment-only<span class="ttl">The agent cites AC-auth-007 but its commit only adds a comment</span></td><td><span class="chip ok">caught · T3</span></td><td><span class="chip ok">rejected</span></td><td><span class="chip ok">rejected</span></td><td class="why">Rejected for the missing test link. The comment counts as the implementation link (see X1).</td></tr><tr><td class="scn">T4-no-tests<span class="ttl">The agent implements AC-auth-007 without any tests</span></td><td><span class="chip ok">caught · T4</span></td><td><span class="chip ok">rejected</span></td><td><span class="chip ok">rejected</span></td><td class="why">No test link for the new requirement.</td></tr><tr><td class="scn">T5-failing-test<span class="ttl">The agent changes the lockout threshold to 4; the lockout tests now fail</span></td><td><span class="chip ok">caught · T5</span></td><td><span class="chip ok">rejected</span></td><td><span class="chip ok">rejected</span></td><td class="why">The suite failed; the linked lockout test failed.</td></tr><tr><td class="scn">T5-suite-broken<span class="ttl">The agent renames something the tests depend on but doesn&#x27;t update the tests, so the suite can&#x27;t load</span></td><td><span class="chip ok">caught · T5</span></td><td><span class="chip ok">rejected</span></td><td><span class="chip ok">rejected</span></td><td class="why">Collection error; no linked test was observed.</td></tr><tr><td class="scn">T6-assert-true<span class="ttl">The agent adds a test named for AC-auth-007 that only asserts true</span></td><td><span class="chip ok">caught · T6</span></td><td><span class="chip warn">review</span></td><td><span class="chip warn">review</span></td><td class="why">The test passes and is linked. Whether it checks anything is the reviewer's call, with the diff in <code>review.patch</code>.</td></tr><tr><td class="scn">T7-weak-tests<span class="ttl">The agent &quot;simplifies&quot; the lockout tests so they only check for 401</span></td><td><span class="chip ok">caught · T7</span></td><td><span class="chip warn">review</span></td><td><span class="chip ok">rejected</span></td><td class="why">Default: the changed tests go to review. Strict: the pinned test names are gone.</td></tr><tr><td class="scn">T8-spec-changed<span class="ttl">Product changes the lockout rule from 3 to 5 attempts; no code changes</span></td><td><span class="chip ok">caught · T8</span></td><td><span class="chip ok">rejected</span></td><td><span class="chip ok">rejected</span></td><td class="why">Revision 2 leaves the links on revision 1 outdated.</td></tr><tr class="group"><td colspan="5">A · the API matches its contract</td></tr><tr><td class="scn">A1-operation-missing<span class="ttl">A sign-out requirement is implemented without adding it to the contract</span></td><td><span class="chip ok">caught · A1</span></td><td><span class="chip warn">review</span></td><td><span class="chip warn">review</span></td><td class="why">The new requirement and test go to review. The contract isn't an input.</td></tr><tr><td class="scn">A2-unlinked-operation<span class="ttl">The agent adds DELETE /session to the contract without naming a requirement</span></td><td><span class="chip ok">caught · A2</span></td><td><span class="chip muted">passed</span></td><td><span class="chip muted">passed</span></td><td class="why">API contracts are outside its scope.</td></tr><tr><td class="scn">A3-lint<span class="ttl">The agent loosens the session response schema</span></td><td><span class="chip ok">caught · A3</span></td><td><span class="chip muted">passed</span></td><td><span class="chip muted">passed</span></td><td class="why">API contracts are outside its scope.</td></tr><tr><td class="scn">A4-breaking-change<span class="ttl">The agent renames token to access_token in contract, code and tests; the spec didn&#x27;t change</span></td><td><span class="chip ok">caught · A4</span></td><td><span class="chip warn">review</span></td><td><span class="chip warn">review</span></td><td class="why">A test was edited, so the change goes to review. The contract isn't an input.</td></tr><tr><td class="scn">A5-shadow-route<span class="ttl">The agent ships GET /debug/users, which isn&#x27;t in the contract</span></td><td><span class="chip ok">caught · A5</span></td><td><span class="chip muted">passed</span></td><td><span class="chip muted">passed</span></td><td class="why">API contracts are outside its scope.</td></tr><tr><td class="scn">A6-leaked-field<span class="ttl">The login response leaks a debug_password field; tests still pass</span></td><td><span class="chip ok">caught · A6</span></td><td><span class="chip muted">passed</span></td><td><span class="chip muted">passed</span></td><td class="why">API contracts are outside its scope.</td></tr><tr><td class="scn">A6-undocumented-status<span class="ttl">Lockout switches to HTTP 423 and the test is updated to match; the contract isn&#x27;t</span></td><td><span class="chip ok">caught · A6</span></td><td><span class="chip warn">review</span></td><td><span class="chip warn">review</span></td><td class="why">A test was edited, so the change goes to review. The contract isn't an input.</td></tr><tr><td class="scn">A7-server-error<span class="ttl">Password reset crashes on emails without &quot;@&quot;; the tagged tests only use valid emails</span></td><td><span class="chip ok">caught · A7</span></td><td><span class="chip muted">passed</span></td><td><span class="chip muted">passed</span></td><td class="why">API contracts are outside its scope.</td></tr><tr class="group"><td colspan="5">H · the history can be trusted</td></tr><tr><td class="scn">H1-wip-commit<span class="ttl">The agent commits with the subject &quot;wip&quot;</span></td><td><span class="chip ok">caught · H1</span></td><td><span class="chip muted">passed</span></td><td><span class="chip muted">passed</span></td><td class="why">Git history conventions are outside its scope.</td></tr><tr><td class="scn">H2-no-refs<span class="ttl">The agent changes code without saying which requirement it serves</span></td><td><span class="chip ok">caught · H2</span></td><td><span class="chip muted">passed</span></td><td><span class="chip muted">passed</span></td><td class="why">Git history conventions are outside its scope.</td></tr><tr><td class="scn">H3-two-requirements<span class="ttl">One code commit claims two requirements</span></td><td><span class="chip ok">caught · H3</span></td><td><span class="chip muted">passed</span></td><td><span class="chip muted">passed</span></td><td class="why">Git history conventions are outside its scope.</td></tr><tr><td class="scn">H4-refactor-changes-behavior<span class="ttl">A &quot;refactor&quot; commit quietly changes the lockout comparison</span></td><td><span class="chip ok">caught · H4</span></td><td><span class="chip ok">rejected</span></td><td><span class="chip ok">rejected</span></td><td class="why">A lockout test failed: the tests caught the behaviour change.</td></tr><tr><td class="scn">H5-huge-commit<span class="ttl">The agent adds a 600-line file in one commit</span></td><td><span class="chip ok">caught · H5</span></td><td><span class="chip muted">passed</span></td><td><span class="chip muted">passed</span></td><td class="why">Git history conventions are outside its scope.</td></tr><tr><td class="scn">H6-branch-name<span class="ttl">The agent works on a branch called quick-fix</span></td><td><span class="chip ok">caught · H6</span></td><td><span class="chip muted">passed</span></td><td><span class="chip muted">passed</span></td><td class="why">Git history conventions are outside its scope.</td></tr><tr><td class="scn">H7-rewrite-main<span class="ttl">The last verified commit on main is amended, rewriting main&#x27;s history</span></td><td><span class="chip ok">caught · H7</span></td><td><span class="chip muted">passed</span></td><td><span class="chip muted">passed</span></td><td class="why">Git history conventions are outside its scope.</td></tr><tr><td class="scn">H8-no-attribution<span class="ttl">The agent commits without naming itself</span></td><td><span class="chip ok">caught · H8</span></td><td><span class="chip muted">passed</span></td><td><span class="chip muted">passed</span></td><td class="why">Git history conventions are outside its scope.</td></tr><tr><td class="scn">H9-unsigned<span class="ttl">The agent makes an unsigned commit</span></td><td><span class="chip ok">caught · H9</span></td><td><span class="chip muted">passed</span></td><td><span class="chip muted">passed</span></td><td class="why">Git history conventions are outside its scope.</td></tr><tr class="group"><td colspan="5">Isolating variants</td></tr><tr><td class="scn">X1-claims-only<span class="ttl">Isolates T3: the implementation is a comment and the tagged test is assert True</span></td><td><span class="chip ok">caught · T3</span></td><td><span class="chip warn">review</span></td><td><span class="chip warn">review</span></td><td class="why">Both links exist and the test passes. The reviewer decides.</td></tr><tr><td class="scn">X2-spec-changed-no-bump<span class="ttl">Isolates T8: the spec wording changes and nobody bumps the OFT revision</span></td><td><span class="chip ok">caught · T8</span></td><td><span class="chip warn">review</span></td><td><span class="chip ok">rejected</span></td><td class="why">Default: the spec edit goes to review. Strict: changed content without a higher revision is rejected.</td></tr><tr><td class="scn">X3-weak-tests-same-names<span class="ttl">Isolates T7: lockout tests keep their names but stop checking the lockout</span></td><td><span class="chip ok">caught · T7</span></td><td><span class="chip warn">review</span></td><td><span class="chip warn">review</span></td><td class="why">Same pinned names, still passing. The reviewer sees the weaker assertions.</td></tr></tbody></table></div></section>
+<section><h2>What IntentBond does that this verifier doesn't</h2><div class="two quad"><div class="panel"><h3>Evidence you can check later</h3><p class="small">Each check saves its results with the hashes of the source it ran on. <code>ib verify</code> on the checked commit returned <code>status: matched, review: not_needed</code>; after a later code edit it returned <code>error: Candidate contents differ from tested evidence; rerun checks</code>. This verifier recomputes everything on each run and keeps nothing.</p></div><div class="panel"><h3>Pinned tests</h3><p class="small">Named tests listed in the trusted scope must run and pass. In T7 (strict) that rejected the rewrite because the pinned tests disappeared, even though other tagged tests remained.</p></div><div class="panel"><h3>A review step built in</h3><p class="small">Every specification or test change is collected into <code>review.patch</code> with a summary of changed items, so the person reviewing sees exactly what moved.</p></div><div class="panel"><h3>More ways to prove things</h3><p class="small">An explicit revision policy (rejected X2 in strict mode), tags read with Python's tokenizer so strings don't count, and optional Alloy and Z3 checks for selected properties (not exercised here).</p></div></div></section>
+<section><h2>What the runs show</h2><ul class="plain"><li><b>On links and test runs they agree.</b> Reused ID, missing implementation, missing tests, a failing test, a broken suite, a stale revision and a "refactor" that broke a test: both reject all seven.</li><li><b>Both distrust the change being checked.</b> IntentBond reads its scope from the base, as this verifier reads its config from the base branch, so an agent can't relax the rules in its own pull request.</li><li><b>Where the answer needs judgement, IntentBond asks a person.</b> Code that is only a comment, an <code>assert True</code> test and weakened tests (T6, X1, X3) pass its checks and go to review, as designed. This verifier answers those with T3, T6 and T7, so the reviewer reads a finding instead of hunting for it.</li><li><b>Revisions are a policy.</b> Strict mode rejects reworded content without a higher revision (X2); the default sends it to review. This verifier reads the change from git.</li><li><b>The API contract and git history</b> are outside IntentBond's scope.</li></ul></section>
+<section><h2>Using them together</h2><ol class="steps"><li><b>This verifier's findings in IntentBond's review.</b> IntentBond decides what a person must review; this verifier tells them what's wrong before they start.</li><li><b>IntentBond's evidence for this verifier's results.</b> Saving results tied to source hashes is this verifier's open gap. IntentBond's bundle and <code>verify</code> are a model for it.</li><li><b>Pinned tests as a T4 option.</b> "These named tests must exist and pass" is a stronger rule than "at least one tagged test" and would suit critical requirements.</li></ol><p class="note">When to pick which: IntentBond when people review every change and you want that review focused and its evidence kept. This verifier when you need to know what's wrong without reading the code. Both when you want both.</p></section>
+<section><h2>Limits of this comparison</h2><ul class="plain small"><li>Python only. The tags were written by a script acting as a careful agent, not by a real agent.</li><li>The scenarios were written to test this verifier, so most of them ask its questions. The probes above ask IntentBond's.</li><li>Exit 4 counts as "review", not as a detection or a miss: a careful reviewer may well catch T6, X1 and X3 in <code>review.patch</code>.</li><li>In some containers Java prints a notice when <code>JAVA_TOOL_OPTIONS</code> is set, and IntentBond treats it as an OpenFastTrace error. The runner removes that variable for <code>ib</code>.</li></ul></section>
+<footer>Markdown version: <a href="../../experiments/intentbond/README.md">experiments/intentbond/README.md</a>. Raw results: <a href="../../experiments/intentbond/results/intentbond.json"><code>experiments/intentbond/results/intentbond.json</code></a>, <a href="../../experiments/intentbond/results/probes.json"><code>experiments/intentbond/results/probes.json</code></a>, <a href="../../experiments/ours-variants.json"><code>experiments/ours-variants.json</code></a>. Rebuild with <code>python experiments/report.py</code>.</footer>
+</main>
+</body>
+</html>

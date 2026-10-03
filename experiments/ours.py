@@ -1,7 +1,7 @@
 """Runs this repo's verifier on the isolating variants, on the plain Python baseline
 (no OFT notation), the same way demo/run_demo.py runs a scenario.
 
-    .venv/bin/python experiments/intentbond/ours.py --work <dir used by run.py> --gnupg <dir>
+    .venv/bin/python experiments/ours.py --work <dir with a baseline/ from either run.py> --out <json> --gnupg <dir>
 """
 import argparse
 import json
@@ -12,13 +12,14 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parents[1]
+ROOT = HERE.parent
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--work", required=True)
     ap.add_argument("--gnupg", required=True)
+    ap.add_argument("--out", required=True, help="where to write the results JSON")
     a = ap.parse_args()
     work = Path(a.work).resolve()
     env = dict(os.environ, GNUPGHOME=a.gnupg, DEMO=str(ROOT / "demo"), AQV_LANG="python")
@@ -38,7 +39,7 @@ def main():
             "statuses": {r["id"]: r["status"] for r in rep["requirements"] if r["status"] != "Sync"},
         }
         print(script.stem, results[script.stem], flush=True)
-    (work / "ours-results.json").write_text(json.dumps(results, indent=2))
+    Path(a.out).write_text(json.dumps(results, indent=2) + "\n")
 
 
 if __name__ == "__main__":

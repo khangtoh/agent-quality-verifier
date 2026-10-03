@@ -1,0 +1,17 @@
+{
+  "verify": {
+    "same_commit": {
+      "exit": 0,
+      "output": [
+        "\"status\": \"matched\",",
+        "\"review\": \"not_needed\","
+      ]
+    },
+    "after_code_edit": {
+      "exit": 2,
+      "output": [
+        "error: Candidate contents differ from tested evidence; rerun checks"
+      ]
+    }
+  }
+}

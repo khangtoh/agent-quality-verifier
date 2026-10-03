@@ -19,7 +19,8 @@ check, and `demo/results/<language>/demo.html` for each scenario.
 
 **New here?** Read [docs/framework.md](docs/framework.md) (or
 [the HTML version](docs/framework.html)): why the checks come in three families
-(T, A, H), what each one guards against, and what the demo simulates.
+(T, A, H), what each one guards against, and what the demo simulates. Every HTML page is
+listed on [index.html](index.html), the site home (also the GitHub Pages root).
 
 | Language | Stack | Scenarios as expected |
 |---|---|---|
@@ -184,14 +185,21 @@ the Rust capture helper writes each record in one call so parallel tests don't i
 - **T8 clears** when any later commit for the requirement changes code or tests.
 - **Results aren't stored between runs** (no git notes or service yet).
 
-## Compared with IntentBond
+## Compared with other tools
 
-[experiments/intentbond](experiments/intentbond/README.md) runs
-[IntentBond](https://github.com/kbak/intentbond), the closest existing tool (OpenFastTrace
-links plus tests against a git baseline), on the same Python scenarios. It blocks 8 of the
-26 attacks (9 with its strictest options), including 7 of the 9 T attacks. It sends
-claims-only code, `assert True` tests and weakened tests to human review, where this
-verifier's T3, T6 and T7 reject them.
+Two tools work near this one and were run on the same Python scenarios. They have
+different goals, so each page starts with what each tool is for:
+
+- **[OpenFastTrace](docs/compare/openfasttrace.html)** ([Markdown](experiments/openfasttrace/README.md))
+  traces a written specification through its levels (feature → requirement → design →
+  code and tests). It agrees with this verifier on every link question and adds the
+  hierarchy and explicit revisions; it doesn't run tests or check that a tagged line is
+  real code.
+- **[IntentBond](docs/compare/intentbond.html)** ([Markdown](experiments/intentbond/README.md))
+  checks OpenFastTrace links and runs the tests against a git baseline, sends every spec or
+  test change to a person, and keeps evidence `ib verify` can match later. It agrees on
+  every link and test-run question; the questions T3, T6 and T7 answer, it leaves to that
+  review by design.
 
 ## Layout
 
@@ -208,7 +216,11 @@ demo/
   scenarios/            one clean PR and 26 attacks, shared by every language
   run_demo.py           runs everything and writes demo/results/
   results/              index.html, and per language: RESULTS.md, demo.html, runs/*.html
-experiments/intentbond/ IntentBond on the same scenarios
+index.html              site home: goals, start here, and every HTML page
+docs/                   framework.md/.html, compare/ (OpenFastTrace and IntentBond pages)
+experiments/            oft_layer.py, variants/, ours.py, report.py (builds docs/compare/)
+  openfasttrace/        OpenFastTrace on the same scenarios
+  intentbond/           IntentBond on the same scenarios
 ```
 
 Based on the evidence-gated verification prototype (`trace.py`) and the design

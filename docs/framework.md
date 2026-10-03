@@ -293,6 +293,12 @@ every check, and all 26 attacks are caught by the check written for them. That's
 - **No storage yet:** results aren't kept between runs, and there's no CI workflow or
   hosted board.
 
+Some of these are other tools' goals. [OpenFastTrace](compare/openfasttrace.html) traces a
+multi-level specification, and [IntentBond](compare/intentbond.html) keeps verifiable
+evidence and a built-in review step. Both comparisons run those tools on the same scenarios
+(Markdown: [OpenFastTrace](../experiments/openfasttrace/README.md),
+[IntentBond](../experiments/intentbond/README.md)).
+
 ## 14. Glossary
 
 | Term | Meaning |

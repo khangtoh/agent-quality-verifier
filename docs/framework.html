@@ -143,9 +143,16 @@ footer { font: 14px/1.5 var(--sans); color: var(--muted); border-top: 1px solid 
   .steps li { grid-template-columns: 28px 1fr; }
   .steps .ck { grid-column: 2; }
 }
+.site-nav { background: var(--bg); border-bottom: 1px solid var(--line); }
+.site-nav .in { max-width: 1160px; margin: 0 auto; padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: baseline; }
+.site-nav .brand { font-family: var(--display); font-weight: 700; font-size: 15px; color: var(--fg); text-decoration: none; margin-right: auto; }
+.site-nav a.lk { font-family: var(--sans); color: var(--muted); text-decoration: none; font-size: 14px; }
+.site-nav a.lk:hover { color: var(--accent); text-decoration: underline; }
+.site-nav a.lk[aria-current="page"] { color: var(--accent); font-weight: 600; }
 </style>
 </head>
 <body>
+<nav class="site-nav" aria-label="Site"><div class="in"><a class="brand" href="../index.html">Agent Quality Verifier</a><a class="lk" href="../index.html">Home</a><a class="lk" href="framework.html" aria-current="page">Framework</a><a class="lk" href="../demo/results/index.html">Results</a><a class="lk" href="compare/openfasttrace.html">vs OpenFastTrace</a><a class="lk" href="compare/intentbond.html">vs IntentBond</a></div></nav>
 <div class="shell">
 <nav class="toc" aria-label="Contents">
   <div class="label">Contents</div>
@@ -467,6 +474,7 @@ footer { font: 14px/1.5 var(--sans); color: var(--muted); border-top: 1px solid 
       <li><strong>A6 needs an adapter per framework.</strong> In Go, Rust and Kotlin it's a small helper kept in the repo, which the tests must use.</li>
       <li><strong>No storage yet:</strong> results aren't kept between runs, and there's no CI workflow or hosted board.</li>
     </ul>
+    <p>Some of these are other tools' goals. <a href="compare/openfasttrace.html">OpenFastTrace</a> traces a multi-level specification, and <a href="compare/intentbond.html">IntentBond</a> keeps verifiable evidence and a built-in review step. Both comparisons run those tools on the same scenarios.</p>
   </div>
 </section>
 

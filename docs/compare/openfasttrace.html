@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Compared: OpenFastTrace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap">
+<style>
+:root {
+  --bg: #f6f7f6; --surface: #ffffff; --fg: #1b2226; --muted: #5a666b; --line: #dde2e1;
+  --accent: #1d5c63; --code-bg: #eef1f0;
+  --ok-fg: #1f6b4a; --ok-bg: #e1f1e8; --warn-fg: #8a5a00; --warn-bg: #fbefd6;
+  --bad-fg: #a5332a; --bad-bg: #fbe3e0; --muted-fg: #5a666b; --muted-bg: #eceeed;
+  --font-display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Source Sans 3", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101517; --surface: #171f22; --fg: #e3e9ea; --muted: #99a6aa; --line: #2a3437;
+    --accent: #7cc4c9; --code-bg: #1f292c;
+    --ok-fg: #8fd9b2; --ok-bg: #183528; --warn-fg: #f0c46a; --warn-bg: #3a2d12;
+    --bad-fg: #f3a198; --bad-bg: #41201d; --muted-fg: #99a6aa; --muted-bg: #222b2e;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101517; --surface: #171f22; --fg: #e3e9ea; --muted: #99a6aa; --line: #2a3437;
+  --accent: #7cc4c9; --code-bg: #1f292c;
+  --ok-fg: #8fd9b2; --ok-bg: #183528; --warn-fg: #f0c46a; --warn-bg: #3a2d12;
+  --bad-fg: #f3a198; --bad-bg: #41201d; --muted-fg: #99a6aa; --muted-bg: #222b2e;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+.page { max-width: 1160px; margin: 0 auto; padding-inline: 20px; padding-block: 36px 64px; display: grid; gap: 44px; }
+section { display: grid; gap: 16px; min-width: 0; }
+h1, h2, h3 { font-family: var(--font-display); margin: 0; line-height: 1.15; text-wrap: balance; }
+h1 { font-size: clamp(28px, 5vw, 40px); }
+h2 { font-size: 24px; }
+h3 { font-size: 17px; }
+p { margin: 0; }
+a { color: var(--accent); }
+code { font-family: var(--font-mono); font-size: 0.85em; background: var(--code-bg); padding: 0.08em 0.35em; border-radius: 4px; overflow-wrap: anywhere; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 19px; max-width: 70ch; }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+header.top { display: grid; gap: 12px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 4px; min-width: 0; }
+.stat b { font-family: var(--font-display); font-size: 28px; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 14px; color: var(--muted); }
+.chip { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 5px; font-family: var(--font-mono); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.chip.ok { color: var(--ok-fg); background: var(--ok-bg); }
+.chip.warn { color: var(--warn-fg); background: var(--warn-bg); }
+.chip.bad { color: var(--bad-fg); background: var(--bad-bg); }
+.chip.muted { color: var(--muted-fg); background: var(--muted-bg); }
+.chip.id { color: var(--fg); background: var(--code-bg); }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+thead th { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
+tbody tr:last-child td { border-bottom: 0; }
+tr.group td { font-family: var(--font-display); font-weight: 700; color: var(--accent); background: var(--bg); padding-block: 8px; }
+td.id { font-family: var(--font-mono); font-weight: 600; white-space: nowrap; }
+td.name { font-weight: 600; }
+.matrix th, .matrix td { padding: 6px 4px; text-align: center; border-bottom: 1px solid var(--line); }
+.matrix th.check { font-family: var(--font-mono); font-size: 11px; color: var(--muted); writing-mode: vertical-rl; transform: rotate(180deg); height: 44px; padding: 6px 2px; }
+.matrix th.scn, .matrix td.scn { text-align: left; position: sticky; left: 0; background: var(--surface); white-space: nowrap; padding-inline: 12px; font-family: var(--font-mono); font-size: 12.5px; z-index: 1; }
+.matrix thead th.scn { background: var(--bg); }
+.matrix td.gap, .matrix th.gap { border-left: 2px solid var(--line); }
+.cell { display: inline-block; width: 16px; height: 16px; border-radius: 4px; vertical-align: middle; }
+.cell.hit { background: var(--bad-fg); }
+.cell.good { background: var(--ok-fg); }
+.cell.also { border: 2px solid var(--bad-fg); }
+.cell.pass { width: 6px; height: 6px; border-radius: 50%; background: var(--ok-fg); opacity: 0.55; }
+.cell.skip { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); opacity: 0.4; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 14px; color: var(--muted); align-items: center; }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+details.scenario { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+details.scenario > summary { cursor: pointer; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; list-style: none; }
+details.scenario > summary::-webkit-details-marker { display: none; }
+details.scenario > summary .nm { font-family: var(--font-mono); font-weight: 600; font-size: 14px; }
+details.scenario > summary .tt { flex: 1 1 280px; min-width: 0; }
+details.scenario[open] > summary { border-bottom: 1px solid var(--line); }
+details.scenario .inner { padding: 14px 16px 16px; display: grid; gap: 12px; }
+summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 10px; }
+ul.findings { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 6px; font-size: 14.5px; }
+ul.findings li { display: grid; grid-template-columns: 44px 1fr; gap: 8px; }
+ul.findings li .ck { font-family: var(--font-mono); font-weight: 600; color: var(--bad-fg); }
+.reqs { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.req { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.req .top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.req .id { font-family: var(--font-mono); font-weight: 600; font-size: 13px; }
+.req p { font-size: 14.5px; }
+.req .why { font-size: 13px; color: var(--muted); }
+.req.ok { border-top: 3px solid var(--ok-fg); } .req.warn { border-top: 3px solid var(--warn-fg); }
+.req.bad { border-top: 3px solid var(--bad-fg); } .req.muted { border-top: 3px solid var(--muted); }
+.goal-list { display: grid; gap: 4px; }
+.goal-list .row { display: grid; grid-template-columns: 40px 100px 1fr; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--line); align-items: start; }
+.goal-list .row:last-child { border-bottom: 0; }
+.goal-list .row .ck { font-family: var(--font-mono); font-weight: 600; }
+.goal-list .msg { display: block; font-size: 13.5px; color: var(--muted); margin-top: 2px; overflow-wrap: anywhere; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.panel h3 { padding: 12px 12px 4px; }
+footer { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+@media (max-width: 640px) { .goal-list .row { grid-template-columns: 36px 1fr; } .goal-list .row > :nth-child(3) { grid-column: 1 / -1; } }
+.site-nav { position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
+.site-nav .in { max-width: 1160px; margin: 0 auto; padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: baseline; }
+.site-nav .brand { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--fg); text-decoration: none; margin-right: auto; }
+.site-nav a.lk { color: var(--muted); text-decoration: none; font-size: 14px; }
+.site-nav a.lk:hover { color: var(--accent); text-decoration: underline; }
+.site-nav a.lk[aria-current="page"] { color: var(--accent); font-weight: 600; }
+@media (max-width: 640px) { .site-nav { position: static; } }
+
+.goal { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent);
+  border-radius: 10px; padding: 18px 20px; display: grid; gap: 12px; }
+.goal .big { font-family: var(--font-display); font-size: 21px; font-weight: 700; line-height: 1.25; }
+.fams { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+.fam { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px;
+  display: grid; gap: 6px; align-content: start; min-width: 0; }
+.fam .k { font-family: var(--font-mono); font-size: 12px; font-weight: 600; color: var(--accent); }
+.fam h3 { font-size: 16px; }
+.fam p { font-size: 14.5px; color: var(--muted); }
+ul.plain { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; }
+a.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px;
+  display: grid; gap: 6px; align-content: start; text-decoration: none; color: var(--fg); min-width: 0; }
+a.card:hover { border-color: var(--accent); }
+a.card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+a.card .k { font-family: var(--font-mono); font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+a.card b { font-family: var(--font-display); font-size: 18px; color: var(--accent); }
+a.card span.d { font-size: 14.5px; color: var(--muted); }
+.dir { display: grid; gap: 10px; }
+.dir .grp { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.dir .grp > h3 { padding: 12px 16px; border-bottom: 1px solid var(--line); }
+.dir ul { list-style: none; margin: 0; padding: 4px 0; }
+.dir li { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; padding: 8px 16px; border-bottom: 1px solid var(--line); }
+.dir li:last-child { border-bottom: 0; }
+.dir li .t { font-weight: 600; min-width: 0; }
+.dir li .d { color: var(--muted); font-size: 14px; flex: 1 1 260px; }
+.dir li .alt { font-family: var(--font-mono); font-size: 12px; }
+.dir details { border-top: 1px solid var(--line); }
+.dir details > summary { cursor: pointer; padding: 10px 16px; font-size: 14px; color: var(--accent); }
+.dir details ul { columns: 2 260px; column-gap: 0; padding-bottom: 8px; }
+.dir details li { break-inside: avoid; border-bottom: 0; padding: 3px 16px; font-size: 13.5px; }
+.dir details li code { background: none; padding: 0; }
+
+.quote { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--muted);
+  border-radius: 10px; padding: 16px 20px; display: grid; gap: 8px; }
+.quote blockquote { margin: 0; font-family: var(--font-serif); font-size: 18px; line-height: 1.5; }
+.quote .src { font-size: 13px; color: var(--muted); }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; }
+.two .panel { padding: 16px 18px; display: grid; gap: 8px; align-content: start; }
+.two .panel h3 { padding: 0; }
+.two .panel .k { font-family: var(--font-mono); font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.two .panel.ours { border-top: 3px solid var(--accent); }
+.two .panel.theirs { border-top: 3px solid var(--muted); }
+td.why { color: var(--muted); font-size: 14px; min-width: 240px; }
+td.scn { font-family: var(--font-mono); font-size: 12.5px; white-space: nowrap; }
+td .ttl { display: block; font-family: var(--font-body); font-size: 13.5px; color: var(--muted); white-space: normal; max-width: 300px; }
+.note { font-size: 14px; color: var(--muted); }
+ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
+.kinds td:nth-child(n+3) { white-space: nowrap; }
+.two.quad { grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); }
+</style>
+</head>
+<body>
+<nav class="site-nav" aria-label="Site"><div class="in"><a class="brand" href="../../index.html">Agent Quality Verifier</a><a class="lk" href="../../index.html">Home</a><a class="lk" href="../../docs/framework.html">Framework</a><a class="lk" href="../../demo/results/index.html">Results</a><a class="lk" href="../../docs/compare/openfasttrace.html" aria-current="page">vs OpenFastTrace</a><a class="lk" href="../../docs/compare/intentbond.html">vs IntentBond</a></div></nav>
+<main class="page">
+<header class="top"><span class="eyebrow">Compared · OpenFastTrace 4.10.0 on the Python demo</span><h1>OpenFastTrace traces what you planned. This verifier tests what the agent delivered.</h1><p class="lede">Both start from requirements with stable IDs. OpenFastTrace (OFT) checks that every planned requirement is linked through the levels of your specification to code and tests. This verifier checks that the evidence behind each requirement holds up when you run it. We ran OFT on the same 26 attacks the verifier is tested against, to show where the two overlap and where they answer different questions.</p></header>
+<div class="stats"><div class="stat"><b>30</b><span>scenarios and variants, run unchanged</span></div><div class="stat"><b>4 of 4</b><span>link questions answered by both</span></div><div class="stat"><b>3 levels</b><span>feature → requirement → design, traced by OFT only</span></div><div class="stat"><b>13 of 14</b><span>file types OFT reads tags from out of the box</span></div></div>
+<section><h2>Two goals</h2><div class="quote"><blockquote>“Requirement tracing keeps track of whether you actually implemented everything you planned to in your specifications. It also identifies obsolete parts of your product and helps you to get rid of them.”</blockquote><span class="src">OpenFastTrace README</span></div><div class="two"><div class="panel theirs"><span class="k">OpenFastTrace answers</span><h3>Is everything we specified covered, at every level, at its current revision?</h3><ul class="plain small"><li>Features, requirements, designs, code and tests as linked items, each with a revision.</li><li><code>Needs:</code> says what must cover an item; <code>Covers:</code> links it upward.</li><li>Missing coverage, outdated revisions, duplicates and orphaned tags are defects.</li><li>Works on any file type, as a CLI, Maven or Gradle plugin, with HTML and XML reports.</li></ul></div><div class="panel ours"><span class="k">This verifier answers</span><h3>Does the evidence behind each requirement hold up, so nobody has to read the code?</h3><ul class="plain small"><li>The links come from conventions (commit trailers, test names, OpenAPI <code>x-requirements</code>), not tags.</li><li>Each claim is then tested: the code exists, the tests pass, run it and catch broken versions of it.</li><li>The API is checked against its contract, and the history against git conventions.</li><li>A wording change is read from git, without anyone marking it.</li></ul></div></div></section>
+<section><h2>What this verifier is for</h2><div class="goal"><p class="big">Let a person judge an agent's work without reading its code.</p><p>For every requirement the verifier answers three questions with checks that give the same answer for the same commit every time: no AI judges, no scores, no opinions. Where a check can't see, it says <b>not covered</b>, never <b>pass</b>.</p></div><div class="fams"><div class="fam"><span class="k">T1–T8</span><h3>Tests prove the spec</h3><p>Each requirement has tagged tests that pass, run its code and fail when that code is broken, and the evidence is about its current wording.</p></div><div class="fam"><span class="k">A1–A7</span><h3>The API matches its contract</h3><p>Every API requirement is documented in OpenAPI, and the routes, test responses and the running service all match that contract.</p></div><div class="fam"><span class="k">H1–H9</span><h3>The history can be trusted</h3><p>Commits are readable, cite one requirement, are honestly labelled, attributed to the agent, signed, and main is never rewritten.</p></div></div><div class="panel" style="padding:14px 18px;display:grid;gap:8px"><h3 style="padding:0">Deliberately not its goals</h3><ul class="plain small"><li>Managing requirement documents or a feature → requirement → design hierarchy.</li><li>Approving what a requirement should say. People decide intent; the verifier checks the code against it.</li><li>Storing signed evidence for audits (not yet: results are recomputed on every run).</li><li>Formal proofs of behaviour.</li></ul><p class="small muted">Other tools are built for exactly these. The comparison pages show where they fit.</p></div></section>
+<section><h2>The same scenarios, by the question they ask</h2><p class="note">Each scenario attacks one question. "Not its goal" means OFT isn't designed to answer it, so a clean trace there says nothing against OFT.</p><div class="table-wrap"><table class="kinds"><thead><tr><th>Question the scenario asks</th><th>Runs</th><th>This verifier</th><th>OpenFastTrace</th></tr></thead><tbody><tr><td>Is every requirement linked to code and tests, at its current revision?</td><td class="small muted">4</td><td><span class="chip ok">4 of 4</span></td><td><span class="chip ok">4 of 4</span></td></tr><tr><td>Do the linked tests run and pass?</td><td class="small muted">3</td><td><span class="chip ok">3 of 3</span></td><td><span class="chip muted">not its goal</span> <span class="small muted">0 reported</span></td></tr><tr><td>Is the linked evidence real: code that exists, tests that run it and would catch it breaking?</td><td class="small muted">5</td><td><span class="chip ok">5 of 5</span></td><td><span class="chip warn">1 of 5</span></td></tr><tr><td>Is a reworded requirement noticed when nobody marks it as changed?</td><td class="small muted">1</td><td><span class="chip ok">1 of 1</span></td><td><span class="chip muted">relies on the revision rule</span></td></tr><tr><td>Does the API match its OpenAPI contract?</td><td class="small muted">8</td><td><span class="chip ok">8 of 8</span></td><td><span class="chip muted">not its goal</span> <span class="small muted">0 reported</span></td></tr><tr><td>Does the history follow the conventions?</td><td class="small muted">8</td><td><span class="chip ok">8 of 8</span></td><td><span class="chip muted">not its goal</span> <span class="small muted">0 reported</span></td></tr></tbody></table></div></section>
+<section><h2>How it was run</h2><ol class="steps"><li>The Python demo baseline gets OFT notation the way an agent following OFT's skill would write it: an item per requirement with <code>Needs: impl, utest</code>, ten <code>[impl-&gt;req~…]</code> tags beside the code, and a named <code>utest</code> tag on each test.</li><li>Each scenario script from <code>demo/scenarios/</code> runs unchanged. Whatever it added then gets tagged the same way: new requirement items, new tests, and code for a requirement that had no tag yet. A reworded requirement gets revision 2, as OFT asks of whoever edits it; variant X2 leaves it at 1.</li><li><code>oft trace specs src tests</code> on the result. Exit 1 means OFT reported a defect.</li></ol></section>
+<section><h2>Every scenario</h2><div class="table-wrap"><table><thead><tr><th>Scenario</th><th>This verifier</th><th>OpenFastTrace</th><th>What OFT saw</th></tr></thead><tbody><tr class="group"><td colspan="4">Clean runs</td></tr><tr><td class="scn">baseline<span class="ttl">The clean baseline: six requirements, built the right way</span></td><td><span class="chip ok">passes</span></td><td><span class="chip ok">clean trace</span></td><td class="why">Every requirement has its implementation and test links.</td></tr><tr><td class="scn">00-clean-pr<span class="ttl">Clean PR: a human adds AC-auth-007, the agent implements it properly</span></td><td><span class="chip ok">passes</span></td><td><span class="chip ok">clean trace</span></td><td class="why">The new requirement is linked to its code and tests.</td></tr><tr class="group"><td colspan="4">T · tests prove the spec</td></tr><tr><td class="scn">T1-duplicate-id<span class="ttl">The agent adds a requirement that reuses the ID AC-auth-006</span></td><td><span class="chip ok">caught · T1</span></td><td><span class="chip ok">reported</span></td><td class="why">The reused ID appears as a second item without links. An exact duplicate is reported as a duplicate too (probe below).<br><code>req~auth-006~2 (-impl, -utest)</code></td></tr><tr><td class="scn">T2-not-implemented<span class="ttl">A requirement is added and nothing implements it</span></td><td><span class="chip ok">caught · T2</span></td><td><span class="chip ok">reported</span></td><td class="why">No implementation or test links for the new requirement.<br><code>req~auth-007~1 (-impl, -utest)</code></td></tr><tr><td class="scn">T3-comment-only<span class="ttl">The agent cites AC-auth-007 but its commit only adds a comment</span></td><td><span class="chip ok">caught · T3</span></td><td><span class="chip ok">reported</span></td><td class="why">Reported for the missing test link. The implementation tag sits on a comment, and a tag is a declaration, so that link counts (see X1).<br><code>req~auth-007~1 (impl, -utest)</code></td></tr><tr><td class="scn">T4-no-tests<span class="ttl">The agent implements AC-auth-007 without any tests</span></td><td><span class="chip ok">caught · T4</span></td><td><span class="chip ok">reported</span></td><td class="why">No test link for the new requirement.<br><code>req~auth-007~1 (impl, -utest)</code></td></tr><tr><td class="scn">T5-failing-test<span class="ttl">The agent changes the lockout threshold to 4; the lockout tests now fail</span></td><td><span class="chip ok">caught · T5</span></td><td><span class="chip muted">clean trace</span></td><td class="why">Tracing reads tags; running tests is left to the build.</td></tr><tr><td class="scn">T5-suite-broken<span class="ttl">The agent renames something the tests depend on but doesn&#x27;t update the tests, so the suite can&#x27;t load</span></td><td><span class="chip ok">caught · T5</span></td><td><span class="chip muted">clean trace</span></td><td class="why">Tracing reads tags; running tests is left to the build.</td></tr><tr><td class="scn">T6-assert-true<span class="ttl">The agent adds a test named for AC-auth-007 that only asserts true</span></td><td><span class="chip ok">caught · T6</span></td><td><span class="chip muted">clean trace</span></td><td class="why">The test is tagged, so the link exists. What the test asserts is outside tracing.</td></tr><tr><td class="scn">T7-weak-tests<span class="ttl">The agent &quot;simplifies&quot; the lockout tests so they only check for 401</span></td><td><span class="chip ok">caught · T7</span></td><td><span class="chip muted">clean trace</span></td><td class="why">The rewritten tests still carry their links.</td></tr><tr><td class="scn">T8-spec-changed<span class="ttl">Product changes the lockout rule from 3 to 5 attempts; no code changes</span></td><td><span class="chip ok">caught · T8</span></td><td><span class="chip ok">reported</span></td><td class="why">Revision 2 leaves the code and test links on revision 1 outdated.<br><code>impl tag points to a requirement that doesn&#x27;t exist at that revision</code><br><code>req~auth-002~2 (-impl, -utest)</code></td></tr><tr class="group"><td colspan="4">A · the API matches its contract</td></tr><tr><td class="scn">A1-operation-missing<span class="ttl">A sign-out requirement is implemented without adding it to the contract</span></td><td><span class="chip ok">caught · A1</span></td><td><span class="chip muted">clean trace</span></td><td class="why">The API contract isn&#x27;t part of the trace.</td></tr><tr><td class="scn">A2-unlinked-operation<span class="ttl">The agent adds DELETE /session to the contract without naming a requirement</span></td><td><span class="chip ok">caught · A2</span></td><td><span class="chip muted">clean trace</span></td><td class="why">The API contract isn&#x27;t part of the trace.</td></tr><tr><td class="scn">A3-lint<span class="ttl">The agent loosens the session response schema</span></td><td><span class="chip ok">caught · A3</span></td><td><span class="chip muted">clean trace</span></td><td class="why">The API contract isn&#x27;t part of the trace.</td></tr><tr><td class="scn">A4-breaking-change<span class="ttl">The agent renames token to access_token in contract, code and tests; the spec didn&#x27;t change</span></td><td><span class="chip ok">caught · A4</span></td><td><span class="chip muted">clean trace</span></td><td class="why">The API contract isn&#x27;t part of the trace.</td></tr><tr><td class="scn">A5-shadow-route<span class="ttl">The agent ships GET /debug/users, which isn&#x27;t in the contract</span></td><td><span class="chip ok">caught · A5</span></td><td><span class="chip muted">clean trace</span></td><td class="why">The API contract isn&#x27;t part of the trace.</td></tr><tr><td class="scn">A6-leaked-field<span class="ttl">The login response leaks a debug_password field; tests still pass</span></td><td><span class="chip ok">caught · A6</span></td><td><span class="chip muted">clean trace</span></td><td class="why">The API contract isn&#x27;t part of the trace.</td></tr><tr><td class="scn">A6-undocumented-status<span class="ttl">Lockout switches to HTTP 423 and the test is updated to match; the contract isn&#x27;t</span></td><td><span class="chip ok">caught · A6</span></td><td><span class="chip muted">clean trace</span></td><td class="why">The API contract isn&#x27;t part of the trace.</td></tr><tr><td class="scn">A7-server-error<span class="ttl">Password reset crashes on emails without &quot;@&quot;; the tagged tests only use valid emails</span></td><td><span class="chip ok">caught · A7</span></td><td><span class="chip muted">clean trace</span></td><td class="why">The API contract isn&#x27;t part of the trace.</td></tr><tr class="group"><td colspan="4">H · the history can be trusted</td></tr><tr><td class="scn">H1-wip-commit<span class="ttl">The agent commits with the subject &quot;wip&quot;</span></td><td><span class="chip ok">caught · H1</span></td><td><span class="chip muted">clean trace</span></td><td class="why">Git history isn&#x27;t part of the trace.</td></tr><tr><td class="scn">H2-no-refs<span class="ttl">The agent changes code without saying which requirement it serves</span></td><td><span class="chip ok">caught · H2</span></td><td><span class="chip muted">clean trace</span></td><td class="why">Git history isn&#x27;t part of the trace.</td></tr><tr><td class="scn">H3-two-requirements<span class="ttl">One code commit claims two requirements</span></td><td><span class="chip ok">caught · H3</span></td><td><span class="chip muted">clean trace</span></td><td class="why">Git history isn&#x27;t part of the trace.</td></tr><tr><td class="scn">H4-refactor-changes-behavior<span class="ttl">A &quot;refactor&quot; commit quietly changes the lockout comparison</span></td><td><span class="chip ok">caught · H4</span></td><td><span class="chip muted">clean trace</span></td><td class="why">A behaviour change only shows when tests run.</td></tr><tr><td class="scn">H5-huge-commit<span class="ttl">The agent adds a 600-line file in one commit</span></td><td><span class="chip ok">caught · H5</span></td><td><span class="chip muted">clean trace</span></td><td class="why">Git history isn&#x27;t part of the trace.</td></tr><tr><td class="scn">H6-branch-name<span class="ttl">The agent works on a branch called quick-fix</span></td><td><span class="chip ok">caught · H6</span></td><td><span class="chip muted">clean trace</span></td><td class="why">Git history isn&#x27;t part of the trace.</td></tr><tr><td class="scn">H7-rewrite-main<span class="ttl">The last verified commit on main is amended, rewriting main&#x27;s history</span></td><td><span class="chip ok">caught · H7</span></td><td><span class="chip muted">clean trace</span></td><td class="why">Git history isn&#x27;t part of the trace.</td></tr><tr><td class="scn">H8-no-attribution<span class="ttl">The agent commits without naming itself</span></td><td><span class="chip ok">caught · H8</span></td><td><span class="chip muted">clean trace</span></td><td class="why">Git history isn&#x27;t part of the trace.</td></tr><tr><td class="scn">H9-unsigned<span class="ttl">The agent makes an unsigned commit</span></td><td><span class="chip ok">caught · H9</span></td><td><span class="chip muted">clean trace</span></td><td class="why">Git history isn&#x27;t part of the trace.</td></tr><tr class="group"><td colspan="4">Isolating variants</td></tr><tr><td class="scn">X1-claims-only<span class="ttl">Isolates T3: the implementation is a comment and the tagged test is assert True</span></td><td><span class="chip ok">caught · T3</span></td><td><span class="chip muted">clean trace</span></td><td class="why">Both links are declared, so the trace is complete.</td></tr><tr><td class="scn">X2-spec-changed-no-bump<span class="ttl">Isolates T8: the spec wording changes and nobody bumps the OFT revision</span></td><td><span class="chip ok">caught · T8</span></td><td><span class="chip muted">clean trace</span></td><td class="why">Without a new revision the change isn&#x27;t visible to tracing. OFT&#x27;s model relies on the editor raising it.</td></tr><tr><td class="scn">X3-weak-tests-same-names<span class="ttl">Isolates T7: lockout tests keep their names but stop checking the lockout</span></td><td><span class="chip ok">caught · T7</span></td><td><span class="chip muted">clean trace</span></td><td class="why">Same tests, same links.</td></tr></tbody></table></div></section>
+<section><h2>What OFT does that this verifier doesn't</h2><div class="two quad"><div class="panel"><h3>Traces a hierarchy</h3><p class="small">A feature needs a requirement, the requirement needs a design, the design needs code and a test. With the design's test missing, OFT reports <code>dsn~password-check~1 (impl, -utest)</code>; with it added the trace is clean (5 items). This verifier has one level: requirement → code and tests.</p></div><div class="panel"><h3>Makes revisions explicit</h3><p class="small">Every item carries a revision, and links name the revision they cover, so a reviewed change in meaning is visible in the spec itself. This verifier infers changes from git instead (T8).</p></div><div class="panel"><h3>Reads tags from almost anything</h3><p class="small">One tag syntax across languages, documents and build files.</p><div class="chips"><span class="chip ok">.py</span> <span class="chip ok">.js</span> <span class="chip ok">.ts</span> <span class="chip muted">.tsx</span> <span class="chip ok">.go</span> <span class="chip ok">.rs</span> <span class="chip ok">.kt</span> <span class="chip ok">.kts</span> <span class="chip ok">.java</span> <span class="chip ok">.yaml</span> <span class="chip ok">.json</span> <span class="chip ok">.toml</span> <span class="chip ok">.sh</span> <span class="chip ok">.feature</span></div><p class="small muted">.tsx needs a workaround (IntentBond adds one).</p></div><div class="panel"><h3>Fits documentation-heavy work</h3><p class="small">Mature (version 4.10, Maven and Gradle plugins, an IntelliJ plugin, HTML reports), and it now ships agent skills for writing traced specs. It fits teams that must show coverage of a written specification, such as safety or regulated work.</p></div></div></section>
+<section><h2>What the runs show</h2><ul class="plain"><li><b>On links they agree.</b> Missing implementation, missing tests, a reused ID and a requirement whose revision moved on: OFT reports all four, as does this verifier.</li><li><b>A tag is a declaration; this verifier's links are tested claims.</b> OFT accepts a tag on a comment or on an <code>assert True</code> test (X1), because whether the tagged code works is a question for the build, not for tracing. That question is this verifier's main job: T3, T6 and T7.</li><li><b>Running tests is left to the build.</b> Failing tests, a broken suite and a behaviour change (T5, H4) aren't part of a trace.</li><li><b>Revisions are a process, not a detection.</b> OFT notices a reworded requirement when its revision is raised (T8) and not otherwise (X2). This verifier reads the change from git.</li><li><b>The API contract and git history</b> aren't part of OFT's model.</li></ul></section>
+<section><h2>Using them together</h2><ol class="steps"><li><b>OFT as the specification format.</b> Teams that already write OFT items keep them, including the feature and design levels this verifier doesn't model.</li><li><b>OFT tags as this verifier's claims.</b> An <code>[impl-&gt;req~…]</code> tag says the same thing as a <code>Refs:</code> trailer. Reading OFT tags would let the verifier test those claims with T3–T8 without any re-tagging. Not built yet.</li><li><b>Each where it's strongest.</b> OFT shows the specification is fully covered; this verifier shows the coverage is real.</li></ol><p class="note">When to pick which: OFT when you must demonstrate coverage of a written, multi-level specification. This verifier when you need to judge an agent's output without reading it. Both when you need both.</p></section>
+<section><h2>Limits of this comparison</h2><ul class="plain small"><li>Python only, OFT 4.10.0. The tags were written by a script acting as a careful agent, not by a real agent.</li><li>The scenarios were written to test this verifier, so most of them ask its questions. The probes above ask OFT's.</li><li>OFT's HTML report and IDE plugin weren't evaluated.</li></ul></section>
+<footer>Markdown version: <a href="../../experiments/openfasttrace/README.md">experiments/openfasttrace/README.md</a>. Raw results: <a href="../../experiments/openfasttrace/results/openfasttrace.json"><code>experiments/openfasttrace/results/openfasttrace.json</code></a>, <a href="../../experiments/openfasttrace/results/probes.json"><code>experiments/openfasttrace/results/probes.json</code></a>, <a href="../../experiments/ours-variants.json"><code>experiments/ours-variants.json</code></a>. Rebuild with <code>python experiments/report.py</code>.</footer>
+</main>
+</body>
+</html>

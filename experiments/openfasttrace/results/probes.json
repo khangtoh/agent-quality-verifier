@@ -1,0 +1,36 @@
+{
+  "extensions": {
+    "py": true,
+    "js": true,
+    "ts": true,
+    "tsx": false,
+    "go": true,
+    "rs": true,
+    "kt": true,
+    "kts": true,
+    "java": true,
+    "yaml": true,
+    "json": true,
+    "toml": true,
+    "sh": true,
+    "feature": true
+  },
+  "hierarchy": {
+    "design_without_test": {
+      "exit": 1,
+      "defects": [
+        "dsn~password-check~1 (impl, -utest)"
+      ],
+      "items": 4
+    },
+    "complete_chain": {
+      "exit": 0,
+      "defects": [],
+      "items": 5
+    }
+  },
+  "duplicate": {
+    "exit": 1,
+    "duplicate_reported": true
+  }
+}

@@ -19,7 +19,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 DEMO = ROOT / "demo"
-sys.path.insert(0, str(HERE))
+sys.path.insert(0, str(HERE.parent))
 import oft_layer  # noqa: E402
 
 TEST_CMD = ["python3", "-m", "pytest", "-p", "no:cacheprovider", "-q", "--junitxml=test-results.xml"]
@@ -99,6 +99,28 @@ def reasons(out, summary, log):
     return list(dict.fromkeys(found))
 
 
+def verify_probe(ib, work, env):
+    """`ib verify` against the default baseline's evidence: once on the checked commit, once after a
+    later commit changes code, to show evidence bound to the exact source it checked."""
+    env = {k: v for k, v in env.items() if k != "JAVA_TOOL_OPTIONS"}
+    twin, evidence = work / "twin-default", work / "ev-default-baseline" / "evidence.json"
+    head = sh(["git", "rev-parse", "HEAD"], twin).stdout.strip()
+    same = sh([ib, "verify", "--base", head, "--candidate", head, "--evidence", str(evidence)], twin, env, check=False)
+    probe = work / "verify-probe"
+    if probe.exists():
+        shutil.rmtree(probe)
+    shutil.copytree(twin, probe, symlinks=True)
+    (probe / "src/app/auth.py").write_text((probe / "src/app/auth.py").read_text() + "\n# later edit\n")
+    commit(probe, env, "chore: later edit")
+    changed = sh([ib, "verify", "--base", head, "--candidate", "HEAD", "--evidence", str(evidence)], probe, env, check=False)
+    def tail(r):
+        lines = [l.strip() for l in (r.stdout + r.stderr).splitlines() if l.strip()]
+        keep = [l for l in lines if l.startswith(('"status"', '"review"', "error:"))]
+        return keep or lines[-1:]
+    return {"same_commit": {"exit": same.returncode, "output": tail(same)},
+            "after_code_edit": {"exit": changed.returncode, "output": tail(changed)}}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--work", required=True)
@@ -106,6 +128,7 @@ def main():
     ap.add_argument("--ib", required=True)
     ap.add_argument("--python-bin", required=True, help="bin directory whose python3 has the demo's test dependencies")
     ap.add_argument("--only")
+    ap.add_argument("--probes-only", action="store_true", help="only rerun the ib verify probe (needs a previous run)")
     a = ap.parse_args()
     work = Path(a.work).resolve()
     env = dict(os.environ, GNUPGHOME=a.gnupg, DEMO=str(DEMO), AQV_LANG="python",
@@ -114,6 +137,12 @@ def main():
     base = work / "baseline"
     if not base.exists():
         sh([sys.executable, str(DEMO / "build_baseline.py"), str(base), "--gnupg", a.gnupg, "--lang", "python"], ROOT, env)
+
+    if a.probes_only:
+        probes = {"verify": verify_probe(a.ib, work, env)}
+        (HERE / "results" / "probes.json").write_text(json.dumps(probes, indent=2) + "\n")
+        print(probes)
+        return
 
     results = {}
     for name in ("default", "strict"):
@@ -130,7 +159,7 @@ def main():
         results.setdefault("baseline", {})[name] = {"exit": code, "reasons": reasons(out_dir, summary, log)}
         print(f"[{name}] baseline -> exit {code}", flush=True)
 
-        for script in sorted((DEMO / "scenarios").glob("*.sh")) + sorted((HERE / "variants").glob("*.sh")):
+        for script in sorted((DEMO / "scenarios").glob("*.sh")) + sorted((HERE.parent / "variants").glob("*.sh")):
             sid = script.stem
             if a.only and a.only not in sid:
                 continue
@@ -152,8 +181,10 @@ def main():
             results[sid]["ours"] = re.search(r"^# expect: (.+)$", head, re.M).group(1)
             print(f"[{name}] {sid} -> exit {code}", flush=True)
 
-    (work / "results.json").write_text(json.dumps(results, indent=2))
-    print(work / "results.json")
+    (HERE / "results" / "intentbond.json").write_text(json.dumps(results, indent=2) + "\n")
+    probes = {"verify": verify_probe(a.ib, work, env)}
+    (HERE / "results" / "probes.json").write_text(json.dumps(probes, indent=2) + "\n")
+    print(HERE / "results")
 
 
 if __name__ == "__main__":

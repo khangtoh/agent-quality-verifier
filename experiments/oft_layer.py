@@ -97,7 +97,7 @@ def insert_before(path, anchor, tag):
     raise AssertionError(f"{path}: anchor not found: {anchor!r}")
 
 
-def adopt(repo, scope):
+def adopt(repo, scope=None):
     repo = Path(repo)
     revs = write_spec(repo, {})
     for file, anchor, req in IMPL_ANCHORS:
@@ -107,7 +107,8 @@ def adopt(repo, scope):
     conftest.write_text(conftest.read_text() + CONFTEST_HOOK)
     py = repo / "pyproject.toml"
     py.write_text(py.read_text() + 'junit_family = "xunit1"\nmarkers = ["oft_id: OpenFastTrace test artifact"]\n')
-    (repo / "scope.json").write_text(json.dumps(scope, indent=2) + "\n")
+    if scope is not None:
+        (repo / "scope.json").write_text(json.dumps(scope, indent=2) + "\n")
 
 
 def update(repo, base, bump=True):
