@@ -46,6 +46,7 @@ says nothing against OFT.
 | Is a reworded requirement noticed when nobody marks it as changed? (X2) | 1 | 1 of 1 | relies on the revision rule |
 | Does the API match its OpenAPI contract? (A1–A7) | 8 | 8 of 8 | not its goal |
 | Does the history follow the conventions? (H1–H3, H5–H9) | 8 | 8 of 8 | not its goal |
+| **All scenarios and variants** | **29** | **29 of 29** | **5 of 29** answered by a check; 20 outside its goals |
 
 ## How it was run
 

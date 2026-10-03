@@ -34,7 +34,46 @@ td.scn { font-family: var(--font-mono); font-size: 12.5px; white-space: nowrap; 
 td .ttl { display: block; font-family: var(--font-body); font-size: 13.5px; color: var(--muted); white-space: normal; max-width: 300px; }
 .note { font-size: 14px; color: var(--muted); }
 ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
-.kinds td:nth-child(n+3) { white-space: nowrap; }
+.vs { --ours: var(--accent); --ours-fg: var(--accent); --subj: #8a96a3; --subj-fg: #56626e;
+  background: color-mix(in srgb, var(--accent) 5%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--line)); border-radius: 14px;
+  padding: 22px 24px 18px; display: grid; gap: 4px; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .vs { --subj: #6b7783; --subj-fg: #aeb8c2; } }
+:root[data-theme="dark"] .vs { --subj: #6b7783; --subj-fg: #aeb8c2; }
+.vs-legend { display: flex; flex-wrap: wrap; gap: 6px 20px; font-size: 13.5px; color: var(--muted); padding-bottom: 12px; }
+.vs-legend span { display: inline-flex; align-items: center; gap: 7px; }
+.sw { display: inline-block; width: 22px; height: 10px; border-radius: 99px; }
+.sw.ours { background: var(--ours); }
+.sw.auto { background: var(--subj); }
+.sw.review { background: repeating-linear-gradient(135deg, var(--subj) 0 3px, transparent 3px 6px); border: 1px solid var(--subj); }
+.sw.none { border: 1px dashed var(--subj); }
+.vs-row { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr); gap: 10px 28px;
+  align-items: center; padding: 14px 0; border-top: 1px solid var(--line); }
+.vs-row.head { border-top: 0; padding: 0 0 8px; font-family: var(--font-mono); font-size: 11px; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--muted); }
+.vs-row.head .o { color: var(--ours-fg); font-weight: 600; } .vs-row.head .s { color: var(--subj-fg); font-weight: 600; }
+.vs-q { font-size: 16px; font-weight: 600; line-height: 1.35; }
+.vs-q small { display: block; margin-top: 3px; font-family: var(--font-mono); font-size: 11.5px; font-weight: 400; color: var(--muted); }
+.vs-cell { display: grid; gap: 6px; min-width: 0; align-content: start; }
+.meter { display: flex; height: 12px; border-radius: 99px; background: var(--muted-bg); overflow: hidden; }
+.meter i { display: block; height: 100%; }
+.meter.ours i { background: var(--ours); }
+.meter i.auto { background: var(--subj); }
+.meter i.review { background: repeating-linear-gradient(135deg, var(--subj) 0 3px, transparent 3px 6px); }
+.meter.none { background: transparent; border: 1px dashed var(--subj); }
+.vs-val { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); display: flex; flex-wrap: wrap; gap: 2px 10px; }
+.vs-val b { font-size: 14px; }
+.vs-cell.ours .vs-val b { color: var(--ours-fg); }
+.vs-cell.subj .vs-val b { color: var(--subj-fg); }
+.vs-row.total { align-items: start; border-top: 2px solid color-mix(in srgb, var(--accent) 35%, var(--line)); margin-top: 4px; padding-top: 16px; }
+.vs-row.total .meter { height: 18px; }
+.vs-row.total .vs-val b { font-size: 18px; font-family: var(--font-display); }
+@media (max-width: 720px) {
+  .vs { padding: 18px 16px 14px; }
+  .vs-row { grid-template-columns: 1fr 1fr; align-items: start; }
+  .vs-row .vs-q { grid-column: 1 / -1; }
+  .vs-row.head > :first-child { display: none; }
+}
 .two.quad { grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); }
 """
 
@@ -115,14 +154,57 @@ def two_panels(theirs_title, theirs_q, theirs_items, ours_q, ours_items):
             f'<ul class="plain small">{li(ours_items)}</ul></div></div>')
 
 
-def kinds_table(tool, cell):
-    """cell(kind, ids) -> html for the tool's column."""
-    rows = []
+def meter(cls, parts, total):
+    """parts: [(count, css class)] drawn left to right as shares of total."""
+    segs = "".join(f'<i class="{c}" style="width:{100 * n / total:.1f}%"></i>' for n, c in parts if n)
+    return f'<div class="meter {cls}" role="presentation">{segs}</div>'
+
+
+def versus(tool, cell, review_legend=False):
+    """The scenarios grouped by question: this verifier against `tool`, with paired bars.
+
+    cell(key, ids) -> {"auto": n, "review": n, "goal": bool, "label": html}. "auto" counts scenarios the
+    tool answered with an automated check, "review" ones it handed to a person, and goal=False marks a
+    question it isn't designed to answer."""
+    legend = ['<span><i class="sw ours"></i>This verifier: answered by a check</span>',
+              f'<span><i class="sw auto"></i>{escape(tool)}: answered by a check</span>']
+    if review_legend:
+        legend.append(f'<span><i class="sw review"></i>{escape(tool)}: handed to a person</span>')
+    legend.append('<span><i class="sw none"></i>not what it\'s designed to answer</span>')
+    rows = [f'<div class="vs-legend">{"".join(legend)}</div>',
+            f'<div class="vs-row head"><span>Question the scenarios ask</span><span class="o">This verifier</span>'
+            f'<span class="s">{escape(tool)}</span></div>']
+    tot = {"n": 0, "auto": 0, "review": 0, "off": 0}
     for key, q, ids in KINDS:
-        rows.append(f'<tr><td>{escape(q)}</td><td class="small muted">{len(ids)}</td>'
-                    f'<td>{chip(f"{len(ids)} of {len(ids)}", "ok")}</td><td>{cell(key, ids)}</td></tr>')
-    return ('<div class="table-wrap"><table class="kinds"><thead><tr><th>Question the scenario asks</th><th>Runs</th>'
-            f'<th>This verifier</th><th>{escape(tool)}</th></tr></thead><tbody>{"".join(rows)}</tbody></table></div>')
+        n, c = len(ids), cell(key, ids)
+        tot["n"] += n
+        tot["auto"] += c["auto"]
+        tot["review"] += c["review"]
+        tot["off"] += 0 if c["goal"] else n
+        bar = (meter("subj", [(c["auto"], "auto"), (c["review"], "review")], n) if c["goal"]
+               else '<div class="meter none" role="presentation"></div>')
+        rows.append(
+            f'<div class="vs-row"><div class="vs-q">{escape(q)}<small>{escape(", ".join(short(i) for i in ids))}</small></div>'
+            f'<div class="vs-cell ours">{meter("ours", [(n, "")], n)}<div class="vs-val"><b>{n} of {n}</b></div></div>'
+            f'<div class="vs-cell subj">{bar}<div class="vs-val">{c["label"]}</div></div></div>')
+    n = tot["n"]
+    subj_label = f'<b>{tot["auto"]} of {n}</b><span>answered by a check</span>'
+    if tot["review"]:
+        subj_label += f'<span>{tot["review"]} handed to a person</span>'
+    subj_label += f'<span>{tot["off"]} outside its goals</span>'
+    rows.append(
+        f'<div class="vs-row total"><div class="vs-q">All {n} scenarios and variants</div>'
+        f'<div class="vs-cell ours">{meter("ours", [(n, "")], n)}<div class="vs-val"><b>{n} of {n}</b>'
+        f'<span>answered by a check</span></div></div>'
+        f'<div class="vs-cell subj">{meter("subj", [(tot["auto"], "auto"), (tot["review"], "review")], n)}'
+        f'<div class="vs-val">{subj_label}</div></div></div>')
+    return f'<div class="vs">{"".join(rows)}</div>'
+
+
+def short(sid):
+    """T1-duplicate-id -> T1; T5 and A6 have two scenarios each, so keep their first word."""
+    head, _, rest = sid.partition("-")
+    return f"{head} {rest.split('-')[0]}" if head in ("T5", "A6") else head
 
 
 def footer(md, results):
@@ -172,10 +254,10 @@ def oft_page(res, probes, variants):
     def kind_cell(key, ids):
         n = sum(1 for i in ids if res[i]["exit"] != 0)
         if key in ("api", "git", "run"):
-            return chip("not its goal", "muted") + f' <span class="small muted">{n} reported</span>'
+            return {"auto": 0, "review": 0, "goal": False, "label": "<b>not its goal</b>"}
         if key == "revision":
-            return chip("relies on the revision rule", "muted")
-        return chip(f"{n} of {len(ids)}", "ok" if n == len(ids) else "warn")
+            return {"auto": 0, "review": 0, "goal": False, "label": "<b>relies on the revision rule</b>"}
+        return {"auto": n, "review": 0, "goal": True, "label": f"<b>{n} of {len(ids)}</b>"}
 
     ext = probes["extensions"]
     ext_rows = " ".join(chip("." + e, "ok" if ok else "muted") for e, ok in ext.items())
@@ -210,8 +292,9 @@ def oft_page(res, probes, variants):
         + '</section>',
         f'<section><h2>What this verifier is for</h2>{our_goals()}</section>',
         '<section><h2>The same scenarios, by the question they ask</h2>'
-        '<p class="note">Each scenario attacks one question. "Not its goal" means OFT isn\'t designed to answer it, so a '
-        'clean trace there says nothing against OFT.</p>' + kinds_table("OpenFastTrace", kind_cell) + '</section>',
+        '<p class="note">Each scenario attacks one question. A dashed track means OFT isn\'t designed to answer that '
+        'question, so a clean trace there says nothing against OFT.</p>' + versus("OpenFastTrace", kind_cell)
+        + '</section>',
         '<section><h2>How it was run</h2><ol class="steps">'
         '<li>The Python demo baseline gets OFT notation the way an agent following OFT\'s skill would write it: an item '
         'per requirement with <code>Needs: impl, utest</code>, ten <code>[impl-&gt;req~…]</code> tags beside the code, '
@@ -323,13 +406,14 @@ def ib_page(res, probes, variants):
         d = [res[i]["default"]["exit"] for i in ids]
         s = [res[i]["strict"]["exit"] for i in ids]
         if key in ("api", "git"):
-            return chip("not its goal", "muted") + f' <span class="small muted">{d.count(4)} sent to review</span>'
-        out = chip(f"{d.count(1)} rejected", "ok" if d.count(1) == len(ids) else "warn")
+            extra = f"<span>{d.count(4)} reach review</span>" if d.count(4) else ""
+            return {"auto": 0, "review": 0, "goal": False, "label": f"<b>not its goal</b>{extra}"}
+        label = f"<b>{d.count(1)} of {len(ids)}</b>"
         if d.count(4):
-            out += " " + chip(f"{d.count(4)} to review", "warn")
+            label += f"<span>{d.count(4)} to a person</span>"
         if s.count(1) != d.count(1):
-            out += f' <span class="small muted">strict: {s.count(1)} rejected</span>'
-        return out
+            label += f"<span>strict: {s.count(1)} of {len(ids)}</span>"
+        return {"auto": d.count(1), "review": d.count(4), "goal": True, "label": label}
 
     v = probes["verify"]
     body = [
@@ -369,7 +453,7 @@ def ib_page(res, probes, variants):
         '<section><h2>The same scenarios, by the question they ask</h2>'
         '<p class="note">"Review" is IntentBond\'s deliberate answer for any change to specifications or tests: the clean '
         'pull request gets it too. It hands the question to a person rather than answering it.</p>'
-        + kinds_table("IntentBond (default)", kind_cell) + '</section>',
+        + versus("IntentBond", kind_cell, review_legend=True) + '</section>',
         '<section><h2>How it was run</h2><ol class="steps">'
         '<li>IntentBond <code>5a1200a</code> (2026-09-29) with its pinned OpenFastTrace 4.9.0.</li>'
         '<li>The Python demo baseline gets IntentBond\'s notation the way an agent following its skill would write it: '

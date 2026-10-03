@@ -51,6 +51,7 @@ answering it.
 | Is a reworded requirement noticed when nobody marks it as changed? (X2) | 1 | 1 of 1 | to review | rejected |
 | Does the API match its OpenAPI contract? (A1–A7) | 8 | 8 of 8 | not its goal (3 to review) | same |
 | Does the history follow the conventions? (H1–H3, H5–H9) | 8 | 8 of 8 | not its goal | same |
+| **All scenarios and variants** | **29** | **29 of 29** | **8 of 29** by a check, 5 to a person | **10 of 29** by a check, 3 to a person |
 
 ## How it was run
 
