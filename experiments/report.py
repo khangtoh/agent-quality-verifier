@@ -74,6 +74,11 @@ ol.steps { margin: 0; padding-left: 20px; display: grid; gap: 8px; }
   .vs-row .vs-q { grid-column: 1 / -1; }
   .vs-row.head > :first-child { display: none; }
 }
+.key { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; display: grid; gap: 8px; }
+.key-title { font-family: var(--font-mono); font-size: 11px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.key-row { display: grid; grid-template-columns: 220px 1fr; gap: 4px 14px; align-items: baseline; font-size: 14.5px; }
+.key-row p { color: var(--muted); }
+@media (max-width: 640px) { .key-row { grid-template-columns: 1fr; } }
 .two.quad { grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); }
 """
 
@@ -152,6 +157,12 @@ def two_panels(theirs_title, theirs_q, theirs_items, ours_q, ours_items):
             f'<ul class="plain small">{li(theirs_items)}</ul></div>'
             f'<div class="panel ours"><span class="k">This verifier answers</span><h3>{ours_q}</h3>'
             f'<ul class="plain small">{li(ours_items)}</ul></div></div>')
+
+
+def key(items):
+    """A legend for the result chips: [(chip html, meaning)]."""
+    rows = "".join(f'<div class="key-row"><span>{c}</span><p>{m}</p></div>' for c, m in items)
+    return f'<div class="key"><span class="key-title">How to read the results</span>{rows}</div>'
 
 
 def meter(cls, parts, total):
@@ -240,9 +251,9 @@ def oft_page(res, probes, variants):
         r = res[sid]
         clean = sid in ("baseline", "00-clean-pr")
         if r["exit"] == 0:
-            c = chip("clean trace", "ok" if clean else "muted")
+            c = chip("clean trace", "ok") if clean else chip("clean trace · not flagged", "muted")
         else:
-            c = chip("reported", "ok" if not clean else "bad")
+            c = chip("reported · caught", "ok") if not clean else chip("reported", "bad")
         why = OFT_WHY.get(sid)
         if why is None:
             why = ("The API contract isn't part of the trace." if sid.startswith("A") else
@@ -303,7 +314,14 @@ def oft_page(res, probes, variants):
         'same way: new requirement items, new tests, and code for a requirement that had no tag yet. A reworded '
         'requirement gets revision 2, as OFT asks of whoever edits it; variant X2 leaves it at 1.</li>'
         '<li><code>oft trace specs src tests</code> on the result. Exit 1 means OFT reported a defect.</li></ol></section>',
-        '<section><h2>Every scenario</h2>' + results_table(["This verifier", "OpenFastTrace", "What OFT saw"], tool_cell)
+        '<section><h2>Every scenario</h2>'
+        + key([(chip("caught · T3", "ok"), "This verifier failed the check written for that attack."),
+               (chip("reported · caught", "ok"), "OFT found a trace defect (a missing, duplicate or outdated link), "
+                "so it caught the attack."),
+               (chip("clean trace · not flagged", "muted"), "Every link OFT knows about is in place. On rows about "
+                "running tests, the API or git history that's expected: those questions are outside tracing."),
+               (chip("clean trace", "ok"), "On the two clean runs: the correct result, nothing is wrong.")])
+        + results_table(["This verifier", "OpenFastTrace", "What OFT saw"], tool_cell)
         + '</section>',
         '<section><h2>What OFT does that this verifier doesn\'t</h2><div class="two quad">'
         '<div class="panel"><h3>Traces a hierarchy</h3><p class="small">A feature needs a requirement, the requirement '
@@ -378,13 +396,12 @@ IB_WHY = {
     "X2-spec-changed-no-bump": "Default: the spec edit goes to review. Strict: changed content without a higher revision is rejected.",
     "X3-weak-tests-same-names": "Same pinned names, still passing. The reviewer sees the weaker assertions.",
 }
-IB_LABEL = {0: ("passed", "muted"), 1: ("rejected", "ok"), 4: ("review", "warn")}
+IB_LABEL = {0: ("passed · not flagged", "muted"), 1: ("rejected · caught", "ok"), 4: ("review · to a person", "warn")}
+IB_CLEAN = {0: ("passed", "ok"), 1: ("rejected", "bad"), 4: ("review · to a person", "ok")}
 
 
 def ib_chip(code, clean):
-    label, tone = IB_LABEL.get(code, (f"exit {code}", "bad"))
-    if clean:
-        tone = "ok" if code in (0, 4) else "bad"
+    label, tone = (IB_CLEAN if clean else IB_LABEL).get(code, (f"exit {code}", "bad"))
     return chip(label, tone)
 
 
@@ -469,6 +486,17 @@ def ib_page(res, probes, variants):
         '<li>Exit 1 is <b>rejected</b>, 4 is <b>review</b> (checks passed, a person must review), 0 is <b>passed</b>.</li>'
         '</ol></section>',
         '<section><h2>Every scenario</h2>'
+        + key([(chip("caught · T3", "ok"), "This verifier failed the check written for that attack."),
+               (chip("rejected · caught", "ok"), "<code>ib check</code> exit 1: an automated check failed, so "
+                "IntentBond blocks the change. On an attack, that means it caught it."),
+               (chip("review · to a person", "warn"), "Exit 4: every check passed, but the change touched a "
+                "specification or test, so a person must approve it. The clean pull request gets this too."),
+               (chip("passed · not flagged", "muted"), "Exit 0: every check passed and nothing needs review. On the "
+                "API and git rows that's expected: those questions are outside IntentBond's goals."),
+               (chip("passed", "ok"), "On the baseline: the correct result, nothing is wrong."),
+               ('<span class="small"><b>Default / Strict</b></span>', "The same run with IntentBond's documented "
+                "settings, and with three extra rules: a changed requirement needs a higher revision, no skipped "
+                "tests, and every baseline test must still exist and pass.")])
         + results_table(["This verifier", "IntentBond default", "IntentBond strict", "What IntentBond saw"], tool_cell)
         + '</section>',
         '<section><h2>What IntentBond does that this verifier doesn\'t</h2><div class="two quad">'

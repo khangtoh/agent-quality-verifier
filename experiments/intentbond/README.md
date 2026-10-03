@@ -78,6 +78,20 @@ python3 experiments/report.py
 
 ## Every scenario
 
+How to read the results:
+
+- **This verifier** names the check that caught the attack (for example T3).
+- **rejected** (`ib check` exit 1): an automated check failed, so IntentBond blocks the
+  change. On an attack, that means it caught it.
+- **review** (exit 4): every check passed, but the change touched a specification or test,
+  so a person must approve it. The clean pull request gets this too.
+- **passed** (exit 0): every check passed and nothing needs review. On an attack this means
+  it wasn't flagged, which is expected on the API and git rows; on the baseline it's the
+  correct result.
+- **Default / Strict**: the same run with IntentBond's documented settings, and with three
+  extra rules: a changed requirement needs a higher revision, no skipped tests, and every
+  baseline test must still exist and pass.
+
 | Scenario | This verifier | Default | Strict | What IntentBond saw |
 |---|---|---|---|---|
 | baseline | passes | passed | passed | Coverage complete; 15 linked tests pass |

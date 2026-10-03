@@ -67,6 +67,15 @@ python3 experiments/report.py
 
 ## Every scenario
 
+How to read the results:
+
+- **This verifier** names the check that caught the attack (for example T3).
+- **reported**: OFT found a trace defect (a missing, duplicate or outdated link), so it
+  caught the attack.
+- **clean trace**: every link OFT knows about is in place. On an attack this means it
+  wasn't flagged, which is expected on rows about running tests, the API or git history;
+  on the two clean runs it's the correct result.
+
 | Scenario | This verifier | OpenFastTrace | What OFT saw |
 |---|---|---|---|
 | baseline | passes | clean trace | Every requirement has its implementation and test links |
