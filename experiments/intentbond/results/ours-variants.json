@@ -1,0 +1,26 @@
+{
+  "X1-claims-only": {
+    "failing": [
+      "T3"
+    ],
+    "statuses": {
+      "AC-auth-007": "Gone"
+    }
+  },
+  "X2-spec-changed-no-bump": {
+    "failing": [
+      "T8"
+    ],
+    "statuses": {
+      "AC-auth-002": "Drift"
+    }
+  },
+  "X3-weak-tests-same-names": {
+    "failing": [
+      "T7"
+    ],
+    "statuses": {
+      "AC-auth-002": "Weak"
+    }
+  }
+}

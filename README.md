@@ -184,6 +184,15 @@ the Rust capture helper writes each record in one call so parallel tests don't i
 - **T8 clears** when any later commit for the requirement changes code or tests.
 - **Results aren't stored between runs** (no git notes or service yet).
 
+## Compared with IntentBond
+
+[experiments/intentbond](experiments/intentbond/README.md) runs
+[IntentBond](https://github.com/kbak/intentbond), the closest existing tool (OpenFastTrace
+links plus tests against a git baseline), on the same Python scenarios. It blocks 8 of the
+26 attacks (9 with its strictest options), including 7 of the 9 T attacks. It sends
+claims-only code, `assert True` tests and weakened tests to human review, where this
+verifier's T3, T6 and T7 reject them.
+
 ## Layout
 
 ```
@@ -199,6 +208,7 @@ demo/
   scenarios/            one clean PR and 26 attacks, shared by every language
   run_demo.py           runs everything and writes demo/results/
   results/              index.html, and per language: RESULTS.md, demo.html, runs/*.html
+experiments/intentbond/ IntentBond on the same scenarios
 ```
 
 Based on the evidence-gated verification prototype (`trace.py`) and the design
