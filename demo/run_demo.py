@@ -6,6 +6,7 @@ be caught by the check named in its `# expect:` line.
 
     python demo/run_demo.py [--lang python,go] [--jobs 4] [--only T3,A6]
     python demo/run_demo.py --html-only     # rebuild the HTML pages from the last runs
+    python demo/run_demo.py --impl go --work demo/.work-go --no-pages   # check with the Go binary (bin/aqv)
 """
 import argparse
 import concurrent.futures as cf
@@ -28,6 +29,8 @@ from aqv.engine import CHECKS  # noqa: E402
 from build_baseline import LANGS, load_lang  # noqa: E402
 
 WORK = WORK_ROOT  # set per language in run_language()
+IMPL = "python"   # "go" runs bin/aqv instead of the Python package
+PAGES = True
 
 
 def header(path):
@@ -42,6 +45,9 @@ def header(path):
 
 def verify(repo, out, base=None, env=None):
     cmd = [sys.executable, "-m", "aqv", "check", "--repo", str(repo), "--out", str(out)]
+    if IMPL == "go":
+        cmd = [str(ROOT / "bin" / "aqv"), "check", "--repo", str(repo), "--out", str(out)]
+        env = dict(env or os.environ, AQV_PYTHON=sys.executable, AQV_HOME=str(ROOT))
     if base:
         cmd += ["--base", base]
     t = time.time()
@@ -176,8 +182,9 @@ def run_language(lang, jobs, only):
     results.sort(key=lambda r: (r["name"] != "baseline", r["name"]))
     if not only:
         (WORK / "demo-results.json").write_text(json.dumps(results, indent=2))
-        write_markdown(lang, results)
-        write_html(lang, results)
+        if PAGES:
+            write_markdown(lang, results)
+            write_html(lang, results)
     bad = [r for r in results if not r.get("ok")]
     print(f"[{lang}] {len(results) - len(bad)} of {len(results)} scenarios behaved as expected.", flush=True)
     return results
@@ -189,7 +196,15 @@ def main():
     ap.add_argument("--jobs", type=int, default=4)
     ap.add_argument("--only", default="")
     ap.add_argument("--html-only", action="store_true")
+    ap.add_argument("--impl", choices=["python", "go"], default="python", help="which verifier to run")
+    ap.add_argument("--work", help="work folder (default demo/.work)")
+    ap.add_argument("--no-pages", action="store_true", help="don't rewrite demo/results/")
     a = ap.parse_args()
+    global IMPL, WORK_ROOT, PAGES
+    IMPL = a.impl
+    PAGES = not a.no_pages
+    if a.work:
+        WORK_ROOT = (ROOT / a.work).resolve()
     langs = LANGS if a.lang == "all" else [x for x in a.lang.split(",") if x]
 
     if a.html_only:
@@ -209,7 +224,7 @@ def main():
     for lang in langs:
         results = run_language(lang, a.jobs, only)
         ok = ok and all(r.get("ok") for r in results)
-    if not only:
+    if not only and PAGES:
         write_index()
     return 0 if ok else 1
 

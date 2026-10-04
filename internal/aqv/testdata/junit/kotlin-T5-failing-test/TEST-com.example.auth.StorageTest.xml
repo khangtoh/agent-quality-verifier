@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.auth.StorageTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-04T03:47:26.969Z" hostname="vm" time="0.148">
+  <properties/>
+  <testcase name="AC-auth-006 same password gets different salts()" classname="com.example.auth.StorageTest" time="0.137"/>
+  <testcase name="AC-auth-006 hashed password still signs in()" classname="com.example.auth.StorageTest" time="0.005"/>
+  <testcase name="AC-auth-006 password not stored in plain text()" classname="com.example.auth.StorageTest" time="0.002"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

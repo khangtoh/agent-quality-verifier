@@ -4,3 +4,4 @@ demo/.work/
 .tools/
 __pycache__/
 .schemathesis/
+bin/

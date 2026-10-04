@@ -33,25 +33,58 @@ listed on [index.html](index.html), the site home (also the GitHub Pages root).
 
 ## Quick start
 
+The verifier is a single Go binary, `aqv`. The Python package in `aqv/` is the reference
+implementation it was ported from, and still drives the demo.
+
 ```bash
-scripts/setup.sh                                   # verifier dependencies
-.venv/bin/python demo/run_demo.py --lang python    # one language
-.venv/bin/python demo/run_demo.py --lang all       # all six (about two hours)
+go build -o bin/aqv ./cmd/aqv                       # the verifier (Go 1.24+)
+bin/aqv check --repo path/to/repo                   # all history
+bin/aqv check --repo path/to/repo --base main       # like a pull request
+```
+
+It writes `report.html` (the requirement view), `report.txt` and `results.json` to
+`--out` (default `<repo>/.aqv-out`), and exits non-zero when a check fails. Add a
+`.aqv.yml` to the repo first; each demo language's is in `demo/langs/<language>/stages.py`.
+
+| Variable | Default | Used for |
+|---|---|---|
+| `AQV_HOME` | the folder above `bin/` | `adapters/`, `.tools/` and the pytest capture plugin, `{aqv}` in runner commands |
+| `AQV_PYTHON` | `python3` | `{python}` in runner commands, and the syntax check for Python mutants |
+| `AQV_SPECTRAL`, `AQV_OASDIFF`, `AQV_SCHEMATHESIS` | `.tools/`, `.venv/`, then `PATH` | A3, A4 and A7; a missing tool makes its check report **not covered** |
+
+The demo:
+
+```bash
+scripts/setup.sh                                   # tools for every check, and the Python reference
+go build -o bin/aqv ./cmd/aqv
+.venv/bin/python demo/run_demo.py --lang python    # one language, Python verifier
+.venv/bin/python demo/run_demo.py --lang all --impl go --work demo/.work-go --no-pages   # all six, Go verifier
 .venv/bin/python demo/run_demo.py --html-only      # rebuild the pages from the last runs
 ```
 
-Each language needs its own toolchain; `scripts/setup.sh` lists them.
+Each language needs its own toolchain; `scripts/setup.sh` lists them. All six languages
+take about two hours.
 
-To check your own repo, add a `.aqv.yml` (each language's is in
-`demo/langs/<language>/stages.py`) and run:
+## Go and Python give the same answers
 
-```bash
-.venv/bin/python -m aqv check --repo path/to/repo               # all history
-.venv/bin/python -m aqv check --repo path/to/repo --base main   # like a pull request
-```
+The Go verifier is a line-by-line port of the Python one, and two checks keep them equal:
 
-It writes `report.html` (the requirement view), `report.txt` and `results.json`, and
-exits non-zero when a check fails.
+- **Every demo run, both ways.** `scripts/parity.py` runs `bin/aqv` on the 168 repos the
+  demo left behind (6 languages × the baseline and 27 scenarios), with the same base and
+  environment the Python verifier had, and compares the outputs. Result: **168 of 168 runs
+  give the same results.json**, and Go's `report.txt` and `report.html` match Python's
+  rendering of the same results byte for byte. Read on their own, the Go results also catch
+  every attack with the check written for it: 168 of 168.
+- **The helpers, case by case.** `go test ./internal/...` replays the Python verifier's
+  answers recorded by `scripts/gen_golden.py`: the mutants for all 1,091 code lines in the six
+  demo codebases, how 16 real JUnit reports are read, test-name matching, word diffs, route
+  and glob matching, and Python-style number and string formatting.
+
+The comparison ignores text that changes on every run whichever verifier reads it: object
+addresses and random tokens printed by failing tests, Rust thread IDs, test durations,
+Schemathesis's random test-case IDs, the service's random port, and timestamps in error
+responses. The port also fixed one thing in both versions: tests are now listed in a fixed
+order, because cargo-nextest and Gradle report them in the order they finished.
 
 ## What "quality" means here
 
@@ -204,7 +237,10 @@ different goals, so each page starts with what each tool is for:
 ## Layout
 
 ```
-aqv/                    the verifier
+cmd/aqv/                the aqv command
+internal/aqv/           the Go verifier: engine.go (all checks), runner.go, spec.go, contract.go,
+                        mutate.go, gitx.go, report.go; golden_test.go compares helpers with Python
+aqv/                    the Python reference implementation
   engine.py             all checks, statuses and the requirement view
   runner.py             runs the project's tools through the runner profile
   html.py               report.html, demo pages, cross-language page
@@ -218,6 +254,8 @@ demo/
   results/              index.html, and per language: RESULTS.md, demo.html, runs/*.html
 index.html              site home: goals, start here, and every HTML page
 docs/                   framework.md/.html, compare/ (OpenFastTrace and IntentBond pages)
+scripts/parity.py       runs Go and Python on the same demo repos and compares every output
+scripts/gen_golden.py   records the Python helpers' answers for the Go unit tests
 experiments/            oft_layer.py, variants/, ours.py, report.py (builds docs/compare/)
   openfasttrace/        OpenFastTrace on the same scenarios
   intentbond/           IntentBond on the same scenarios

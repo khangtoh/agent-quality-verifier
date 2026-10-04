@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="jest tests" tests="16" failures="0" errors="0" time="1.054">
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T15:40:33" time="0.543" tests="3">
+    <testcase classname=" AC-auth-001 sign in returns a token" name=" AC-auth-001 sign in returns a token" time="0.035">
+    </testcase>
+    <testcase classname=" AC-auth-001 wrong password is denied" name=" AC-auth-001 wrong password is denied" time="0.006">
+    </testcase>
+    <testcase classname=" AC-auth-001 malformed request is rejected" name=" AC-auth-001 malformed request is rejected" time="0.003">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T15:40:34" time="0.116" tests="4">
+    <testcase classname=" AC-auth-004 link sent for a known email" name=" AC-auth-004 link sent for a known email" time="0.008">
+    </testcase>
+    <testcase classname=" AC-auth-004 no link for an unknown email" name=" AC-auth-004 no link for an unknown email" time="0.003">
+    </testcase>
+    <testcase classname=" AC-auth-005 same response for an unknown email" name=" AC-auth-005 same response for an unknown email" time="0.006">
+    </testcase>
+    <testcase classname=" AC-auth-005 known email still gets its link" name=" AC-auth-005 known email still gets its link" time="0.025">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T15:40:34" time="0.166" tests="3">
+    <testcase classname=" AC-auth-002 locks after three failures" name=" AC-auth-002 locks after three failures" time="0.054">
+    </testcase>
+    <testcase classname=" AC-auth-002 two failures do not lock" name=" AC-auth-002 two failures do not lock" time="0.007">
+    </testcase>
+    <testcase classname=" AC-auth-002 success resets the count" name=" AC-auth-002 success resets the count" time="0.015">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T15:40:34" time="0.096" tests="4">
+    <testcase classname=" AC-auth-003 expired after 30 minutes" name=" AC-auth-003 expired after 30 minutes" time="0.012">
+    </testcase>
+    <testcase classname=" AC-auth-003 active within 30 minutes" name=" AC-auth-003 active within 30 minutes" time="0.003">
+    </testcase>
+    <testcase classname=" AC-auth-003 boundary is exactly 30 minutes" name=" AC-auth-003 boundary is exactly 30 minutes" time="0.001">
+    </testcase>
+    <testcase classname=" AC-auth-003 rejects a bad last_seen and accepts the edges" name=" AC-auth-003 rejects a bad last_seen and accepts the edges" time="0.01">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T15:40:34" time="0.035" tests="2">
+    <testcase classname=" AC-auth-006 password not stored in plain text" name=" AC-auth-006 password not stored in plain text" time="0.001">
+    </testcase>
+    <testcase classname=" AC-auth-006 hashed password still signs in" name=" AC-auth-006 hashed password still signs in" time="0">
+    </testcase>
+  </testsuite>
+</testsuites>

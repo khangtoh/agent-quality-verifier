@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="17" failures="0" errors="0" time="0.208187">
+	<testsuite tests="0" failures="0" time="0.000000" name="example.com/auth/cmd/server" timestamp="2026-10-02T16:09:14Z">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+	</testsuite>
+	<testsuite tests="13" failures="0" time="0.008000" name="example.com/auth/internal/api" timestamp="2026-10-02T16:09:14Z">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_002_LocksAfterThreeFailures" time="0.000000"></testcase>
+		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_002_TwoFailuresDoNotLock" time="0.000000"></testcase>
+		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_002_SuccessResetsTheCount" time="0.000000"></testcase>
+		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_001_SignInReturnsToken" time="0.000000"></testcase>
+		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_001_WrongPasswordIsDenied" time="0.000000"></testcase>
+		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_001_MalformedRequestIsRejected" time="0.000000"></testcase>
+		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_004_LinkSentForKnownEmail" time="0.000000"></testcase>
+		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_004_NoLinkForUnknownEmail" time="0.000000"></testcase>
+		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_005_SameResponseForUnknownEmail" time="0.000000"></testcase>
+		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_005_KnownEmailStillGetsItsLink" time="0.000000"></testcase>
+		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_003_ExpiredAfter30Minutes" time="0.000000"></testcase>
+		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_003_ActiveWithin30Minutes" time="0.000000"></testcase>
+		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_003_RejectsBadLastSeenAndAcceptsEdges" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="4" failures="0" time="0.004000" name="example.com/auth/internal/auth" timestamp="2026-10-02T16:09:14Z">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+		<testcase classname="example.com/auth/internal/auth" name="TestAC_auth_003_BoundaryIsExactly30Minutes" time="0.000000"></testcase>
+		<testcase classname="example.com/auth/internal/auth" name="TestAC_auth_006_PasswordNotStoredInPlainText" time="0.000000"></testcase>
+		<testcase classname="example.com/auth/internal/auth" name="TestAC_auth_006_HashedPasswordStillSignsIn" time="0.000000"></testcase>
+		<testcase classname="example.com/auth/internal/auth" name="TestAC_auth_006_SamePasswordGetsDifferentSalts" time="0.000000"></testcase>
+	</testsuite>
+	<testsuite tests="0" failures="0" time="0.000000" name="example.com/auth/tools/aqvroutes" timestamp="2026-10-02T16:09:14Z">
+		<properties>
+			<property name="go.version" value="go1.24.7 linux/amd64"></property>
+		</properties>
+	</testsuite>
+</testsuites>

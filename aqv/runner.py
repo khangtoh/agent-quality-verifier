@@ -100,6 +100,9 @@ def parse_junit(paths):
                 suite_errors.append(f"{cls or name}: {msg[:200]}")
                 continue
             cases.append(TestCase(name, cls, outcome, msg))
+    # Runners that run tests in parallel (cargo-nextest, Gradle forks) write them in the
+    # order they finished; sort so the same commit always gives the same report.
+    cases.sort(key=lambda c: (c.classname, c.name))
     return cases, suite_errors
 
 

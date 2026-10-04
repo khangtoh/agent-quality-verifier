@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="0.213" timestamp="2026-10-02T15:39:40.323361+00:00" hostname="vm"><testcase classname="" name="tests.test_session" time="0.000"><error message="collection failure">ImportError while importing test module '/home/user/agent-quality-verifier/demo/.work/python/runs/T5-suite-broken/repo/tests/test_session.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/lib/python3.11/importlib/__init__.py:126: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+../../../baseline/tests/test_session.py:3: in &lt;module&gt;
+    from app.auth import is_expired
+E   ImportError: cannot import name 'is_expired' from 'app.auth' (/home/user/agent-quality-verifier/demo/.work/python/runs/T5-suite-broken/repo/src/app/auth.py)</error></testcase></testsuite></testsuites>

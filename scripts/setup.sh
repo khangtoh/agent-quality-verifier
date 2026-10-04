@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# Installs the verifier's own dependencies: Python packages in .venv, Spectral (Node),
-# oasdiff and gotestsum (Go) in .tools. Needs Python 3.11+, Node 18+, Go 1.22+ and gpg.
+# Builds the verifier (bin/aqv) and installs the tools its checks use: Python packages in
+# .venv (Schemathesis, and the Python reference implementation), Spectral (Node), oasdiff and
+# gotestsum (Go) in .tools. Needs Go 1.24+, Python 3.11+, Node 18+ and gpg.
 #
 # Each demo language also needs its own toolchain:
 #   JavaScript, TypeScript  Node 18+ (npm installs the rest)
@@ -9,6 +10,7 @@
 #   Kotlin                  JDK 21 and Gradle 8
 set -euo pipefail
 cd "$(dirname "$0")/.."
+GOTOOLCHAIN=local go build -o bin/aqv ./cmd/aqv
 python3 -m venv .venv
 .venv/bin/pip install -q -r requirements.txt
 mkdir -p .tools
@@ -19,4 +21,5 @@ if [ "${WITH_RUST:-0}" = 1 ]; then
   rustup component add llvm-tools-preview
   cargo install --locked cargo-nextest cargo-llvm-cov
 fi
-echo "Ready. Run: .venv/bin/python demo/run_demo.py --lang all"
+echo "Ready. Check a repo: bin/aqv check --repo PATH --base main"
+echo "Run the demo:  .venv/bin/python demo/run_demo.py --lang all --impl go"
