@@ -1,4 +1,5 @@
-demo/.work/
+demo/.work*/
+demo/.work*.log
 .aqv-out/
 .venv/
 .tools/

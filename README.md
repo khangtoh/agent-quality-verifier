@@ -75,6 +75,9 @@ The Go verifier is a line-by-line port of the Python one, and two checks keep th
   give the same results.json**, and Go's `report.txt` and `report.html` match Python's
   rendering of the same results byte for byte. Read on their own, the Go results also catch
   every attack with the check written for it: 168 of 168.
+- **The whole demo from scratch.** `run_demo.py --lang all --impl go` rebuilt all six
+  languages' repos and checked them with `bin/aqv` only: **168 of 168 scenarios behave as
+  expected**, with the same check verdicts and requirement statuses as the Python run.
 - **The helpers, case by case.** `go test ./internal/...` replays the Python verifier's
   answers recorded by `scripts/gen_golden.py`: the mutants for all 1,091 code lines in the six
   demo codebases, how 16 real JUnit reports are read, test-name matching, word diffs, route
