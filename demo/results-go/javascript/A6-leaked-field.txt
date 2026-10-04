@@ -1,0 +1,44 @@
+Agent Quality Verifier: repo (feat/AC-auth-001-debug-info, ed20485..9cf6b8d)
+
+REQUIREMENT  STATUS       FAILING CHECKS
+AC-auth-001  Contract     A6
+AC-auth-002  Contract     A6
+AC-auth-003  Sync         -
+AC-auth-004  Sync         -
+AC-auth-005  Sync         -
+AC-auth-006  Sync         -
+
+Tests prove the spec
+  T1  pass         Requirement IDs are valid and never reused
+  T2  pass         A code commit references the requirement
+  T3  pass         The code from those commits still exists
+  T4  pass         Tests are tagged to the requirement
+  T5  pass         The tagged tests pass
+  T6  pass         The tagged tests run the requirement's code
+  T7  pass         The tagged tests fail when the code is broken
+  T8  pass         Results reset when the requirement changes
+
+The API matches its OpenAPI contract
+  A1  pass         Every API requirement has an operation
+  A2  pass         Every operation references a requirement
+  A3  pass         The contract passes the lint rules
+  A4  pass         No breaking change unless the spec changed
+  A5  pass         The service serves exactly the documented routes
+  A6  FAIL         Responses in the tagged tests match the contract
+        AC-auth-001: AC-auth-001 sign in returns a token: POST /login 200 body breaks the schema: Additional properties are not allowed ('debug_password' was unexpected)
+        AC-auth-002: AC-auth-002 success resets the count: POST /login 200 body breaks the schema: Additional properties are not allowed ('debug_password' was unexpected); AC-auth-002 two failures do not lock: POST /login 200 body breaks the schema: Additional properties are not allowed ('debug_password' was unexpected)
+  A7  pass         The running service conforms to the contract
+
+Git follows the conventions
+  H1  pass         Subjects follow Conventional Commits
+  H2  pass         Code commits carry a Refs: trailer
+  H3  pass         One requirement per code commit
+  H4  pass         refactor and chore commits change no status
+  H5  pass         Commit size under the limit
+  H6  pass         Branch names follow the pattern
+  H7  pass         Main is never rewritten
+  H8  pass         The agent is named on its commits
+  H9  pass         Commits are signed
+
+Agent scorecard (this range)
+  Claude <noreply@anthropic.com>: 1 commit(s), git rule pass rate 100%, requirements AC-auth-001

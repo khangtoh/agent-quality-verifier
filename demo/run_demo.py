@@ -6,7 +6,8 @@ be caught by the check named in its `# expect:` line.
 
     python demo/run_demo.py [--lang python,go] [--jobs 4] [--only T3,A6]
     python demo/run_demo.py --html-only     # rebuild the HTML pages from the last runs
-    python demo/run_demo.py --impl go --work demo/.work-go --no-pages   # check with the Go binary (bin/aqv)
+    python demo/run_demo.py --lang all --impl go --work demo/.work-go   # check with the Go binary; pages go to demo/results-go
+    python demo/run_demo.py --impl go --work demo/.work-go --html-only  # rewrite demo/results-go from the last Go run
 """
 import argparse
 import concurrent.futures as cf
@@ -82,10 +83,10 @@ def run_scenario(path, env):
 EXAMPLES = ["baseline", "T7-weak-tests", "A6-leaked-field"]
 
 
-def write_html(lang, results):
+def write_html(lang, results, results_dir=None, variant=None, command="python demo/run_demo.py"):
     """demo/results/<lang>/demo.html for the whole run, plus single-run reports for a few samples."""
     L = load_lang(lang)
-    out_dir = RESULTS / lang
+    out_dir = (results_dir or RESULTS) / lang
     out_dir.mkdir(parents=True, exist_ok=True)
     scenarios = []
     for r in results:
@@ -98,7 +99,8 @@ def write_html(lang, results):
         if r["name"] in EXAMPLES:
             (out_dir / f"{r['name']}.html").write_text(html.run_report(rep, nav="../../../"))
             (out_dir / f"{r['name']}.txt").write_text(scrub_text((Path(r["out"]) / "report.txt").read_text()))
-    (out_dir / "demo.html").write_text(html.demo_report(scenarios, language=f"{L.NAME} ({L.STACK})", nav="../../../"))
+    (out_dir / "demo.html").write_text(html.demo_report(scenarios, language=f"{L.NAME} ({L.STACK})", nav="../../../",
+                                                         variant=variant, command=command))
 
 
 # Comparison pages built by experiments/report.py: (html, markdown, title, description).
@@ -110,18 +112,48 @@ COMPARE = [
 ]
 
 
-def write_index():
+GO_RESULTS = DEMO / "results-go"
+GO_WORK = DEMO / ".work-go"
+
+
+def write_go_pages(work):
+    """The Go verifier's pages: demo/results-go, written by `aqv pages` from a demo run made with --impl go."""
+    subprocess.run([sys.executable, str(ROOT / "scripts" / "export_langs.py")], check=True, capture_output=True)
+    subprocess.run([str(ROOT / "bin" / "aqv"), "pages", "--work", str(work), "--meta", str(DEMO / "langs.json"),
+                    "--out", str(GO_RESULTS)], check=True, cwd=ROOT)
+
+
+def load_langs(work):
     langs = []
     for lang in LANGS:
-        f = WORK_ROOT / lang / "demo-results.json"
+        f = work / lang / "demo-results.json"
         if f.exists():
             L = load_lang(lang)
             langs.append({"lang": lang, "name": L.NAME, "stack": L.STACK, "mechanisms": getattr(L, "MECHANISMS", {}),
                           "results": json.loads(f.read_text())})
+    return langs
+
+
+PY_WORK = DEMO / ".work"
+
+
+def write_languages_index(work):
+    """demo/results/index.html: every language, from the Python verifier's demo run."""
     RESULTS.mkdir(exist_ok=True)
-    (RESULTS / "index.html").write_text(html.languages_report(langs, nav="../../"))
+    (RESULTS / "index.html").write_text(html.languages_report(load_langs(work), nav="../../"))
+
+
+def write_site_home():
+    """index.html at the repository root, listing every page. The Python demo run is read from
+    demo/.work and the Go one from demo/.work-go, whichever of them have been made."""
     compare = [c for c in COMPARE if (ROOT / c[0]).exists()]
-    (ROOT / "index.html").write_text(html.site_index(langs, compare))
+    go_langs = load_langs(GO_WORK) if (GO_RESULTS / "index.html").exists() else None
+    (ROOT / "index.html").write_text(html.site_index(load_langs(PY_WORK), compare, go_langs=go_langs))
+
+
+def write_index():
+    write_languages_index(WORK_ROOT)
+    write_site_home()
 
 
 def scrub_text(text):
@@ -182,7 +214,7 @@ def run_language(lang, jobs, only):
     results.sort(key=lambda r: (r["name"] != "baseline", r["name"]))
     if not only:
         (WORK / "demo-results.json").write_text(json.dumps(results, indent=2))
-        if PAGES:
+        if PAGES and IMPL != "go":
             write_markdown(lang, results)
             write_html(lang, results)
     bad = [r for r in results if not r.get("ok")]
@@ -207,6 +239,11 @@ def main():
         WORK_ROOT = (ROOT / a.work).resolve()
     langs = LANGS if a.lang == "all" else [x for x in a.lang.split(",") if x]
 
+    if a.html_only and IMPL == "go":
+        write_go_pages(WORK_ROOT)
+        write_site_home()
+        print(f"Wrote {GO_RESULTS}")
+        return 0
     if a.html_only:
         global WORK
         for lang in langs:
@@ -225,15 +262,19 @@ def main():
         results = run_language(lang, a.jobs, only)
         ok = ok and all(r.get("ok") for r in results)
     if not only and PAGES:
-        write_index()
+        if IMPL == "go":
+            write_go_pages(WORK_ROOT)
+            write_site_home()
+        else:
+            write_index()
     return 0 if ok else 1
 
 
-def write_markdown(lang, results):
+def write_markdown(lang, results, results_dir=None, command="python demo/run_demo.py"):
     clean = [r for r in results if not r["expect"] and "error" not in r]
     L = load_lang(lang)
     lines = [f"# Demo results: {L.NAME}", "", f"Stack: {L.STACK}.", "",
-             "Generated by `python demo/run_demo.py`. Each attack runs in its own copy of the baseline repo and "
+             f"Generated by `{command}`. Each attack runs in its own copy of the baseline repo and "
              "is checked like a pull request against `main`.", "",
              "## Every check, clean and attacked", "",
              "| Check | What it checks | Clean runs | Caught by |", "|---|---|---|---|"]
@@ -254,8 +295,9 @@ def write_markdown(lang, results):
         changed = ", ".join(f"{k}: {v}" for k, v in r["statuses"].items() if v != "Sync") or "all Sync"
         lines.append(f"| `{r['name']}` | {r['title']} | {', '.join(r['expect']) or 'all pass'} | "
                      f"{', '.join(r['failing']) or 'none'} | {changed} | {'✅' if r['ok'] else '❌'} |")
-    (RESULTS / lang).mkdir(parents=True, exist_ok=True)
-    (RESULTS / lang / "RESULTS.md").write_text("\n".join(lines) + "\n")
+    out = (results_dir or RESULTS) / lang
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "RESULTS.md").write_text("\n".join(lines) + "\n")
 
 
 if __name__ == "__main__":

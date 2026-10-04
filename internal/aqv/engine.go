@@ -95,38 +95,38 @@ type Options struct {
 
 type Engine struct {
 	Repo, Head, BaseRef, Base, MergeBase string
-	light                                 bool
-	wanted                                map[string]bool
-	Workdir, HeadBranch                   string
-	Cfg                                   *OMap
-	Results                               []*Result
+	light                                bool
+	wanted                               map[string]bool
+	Workdir, HeadBranch                  string
+	Cfg                                  *OMap
+	Results                              []*Result
 
-	reqs         []*Requirement
-	activeIDs    []string
-	active       map[string]*Requirement
-	contract     any
-	ops          []*Operation
-	history      []*Commit
-	rng          []*Commit
-	codePaths    []string
-	testPaths    []string
-	codeExclude  []string
-	linkedCode   map[string][]*Commit
-	linkedAny    map[string][]*Commit
-	suite        *SuiteRun
-	importOnly   LineSet
-	capturePath  string
-	lines        map[string][]pathLines
-	surviving    map[string]map[string]int
-	ownersCache  map[string]map[string][]int
-	tagged       map[string][]*TestCase
-	hist         []SpecVersion
-	histLoaded   bool
-	svcState     int // 0 not started, 1 running, -1 failed or none
-	svcCmd       *exec.Cmd
-	svcPort      int
-	svcLog       *os.File
-	svcExited    chan struct{}
+	reqs        []*Requirement
+	activeIDs   []string
+	active      map[string]*Requirement
+	contract    any
+	ops         []*Operation
+	history     []*Commit
+	rng         []*Commit
+	codePaths   []string
+	testPaths   []string
+	codeExclude []string
+	linkedCode  map[string][]*Commit
+	linkedAny   map[string][]*Commit
+	suite       *SuiteRun
+	importOnly  LineSet
+	capturePath string
+	lines       map[string][]pathLines
+	surviving   map[string]map[string]int
+	ownersCache map[string]map[string][]int
+	tagged      map[string][]*TestCase
+	hist        []SpecVersion
+	histLoaded  bool
+	svcState    int // 0 not started, 1 running, -1 failed or none
+	svcCmd      *exec.Cmd
+	svcPort     int
+	svcLog      *os.File
+	svcExited   chan struct{}
 }
 
 func NewEngine(repo string, o Options) (*Engine, error) {
@@ -1813,7 +1813,7 @@ func (e *Engine) vitals(rid string, req *Requirement) *OMap {
 }
 
 type event struct {
-	order              int
+	order             int
 	sha, label, state string
 }
 

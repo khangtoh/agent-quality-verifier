@@ -177,7 +177,7 @@ func TestPythonFormatting(t *testing.T) {
 	cases := map[string]string{pyFloat(1): "1.0", pyFloat(0.67): "0.67", pyFloat(1e16): "1e+16", pyFloat(1e-5): "1e-05",
 		pyFloat(a + b): "0.30000000000000004", percent(4.0 / 9): "44%", percent(0.6): "60%",
 		reprString("it's"): `"it's"`, reprString(`a"b'c`): `'a"b\'c'`, reprString("x\ny"): `'x\ny'`,
-		escapeHTML(`<a href="x">'&'</a>`): "&lt;a href=&quot;x&quot;&gt;&#x27;&amp;&#x27;&lt;/a&gt;",
+		escapeHTML(`<a href="x">'&'</a>`):                              "&lt;a href=&quot;x&quot;&gt;&#x27;&amp;&#x27;&lt;/a&gt;",
 		dumpJSON(om("a", []any{}, "b", NewOMap(), "c", "→", "d", nil)): "{\n  \"a\": [],\n  \"b\": {},\n  \"c\": \"\\u2192\",\n  \"d\": null\n}",
 	}
 	for got, want := range cases {

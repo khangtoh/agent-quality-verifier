@@ -89,6 +89,11 @@ Schemathesis's random test-case IDs, the service's random port, and timestamps i
 responses. The port also fixed one thing in both versions: tests are now listed in a fixed
 order, because cargo-nextest and Gradle report them in the order they finished.
 
+The Go verifier has its own demo pages, written by `bin/aqv pages` from a demo run made with
+`--impl go`: open [demo/results-go/index.html](demo/results-go/index.html). They match the Python
+pages page for page; [docs/go-demo-parity.md](docs/go-demo-parity.md) says what is checked, the
+current numbers, and the plan for keeping the two in step (`scripts/parity_all.sh` runs the checks).
+
 ## What "quality" means here
 
 1. **Tests prove the spec.** Every requirement has tests tagged to it, the tests run
@@ -257,7 +262,12 @@ demo/
   results/              index.html, and per language: RESULTS.md, demo.html, runs/*.html
 index.html              site home: goals, start here, and every HTML page
 docs/                   framework.md/.html, compare/ (OpenFastTrace and IntentBond pages)
+demo/results-go/        the demo pages written by the Go verifier (aqv pages), same layout as demo/results
+demo/langs.json         language names, stacks and mechanisms for the Go page writer (scripts/export_langs.py)
 scripts/parity.py       runs Go and Python on the same demo repos and compares every output
+scripts/pages_parity.py Go and Python page writers render the same data: every page byte-identical
+scripts/demo_parity.py  demo/results against demo/results-go after removing what always differs
+scripts/parity_all.sh   runs the parity checks
 scripts/gen_golden.py   records the Python helpers' answers for the Go unit tests
 experiments/            oft_layer.py, variants/, ours.py, report.py (builds docs/compare/)
   openfasttrace/        OpenFastTrace on the same scenarios

@@ -70,10 +70,10 @@ func (r *Requirement) Body() string {
 	return r.Text
 }
 
-func (r *Requirement) Hash() string   { return textHash(r.Body()) }
-func (r *Requirement) Retired() bool  { return strings.HasPrefix(strings.ToLower(r.Text), "(retired)") }
-func (r *Requirement) HasAPI() bool   { return len(r.APIOps) > 0 }
-func opKey(op [2]string) string       { return op[0] + " " + op[1] }
+func (r *Requirement) Hash() string  { return textHash(r.Body()) }
+func (r *Requirement) Retired() bool { return strings.HasPrefix(strings.ToLower(r.Text), "(retired)") }
+func (r *Requirement) HasAPI() bool  { return len(r.APIOps) > 0 }
+func opKey(op [2]string) string      { return op[0] + " " + op[1] }
 
 func parseSpec(path, content string) []*Requirement {
 	var reqs []*Requirement
