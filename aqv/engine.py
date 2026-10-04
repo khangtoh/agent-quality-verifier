@@ -455,6 +455,9 @@ class Engine:
         if self.want("A7"):
             self.check_a7(api_reqs)
 
+    def scrub(self, text):
+        return runner.scrub_paths(text, runner.path_pairs(self.repo, self.workdir))
+
     def tool(self, name, rel):
         env = os.environ.get(f"AQV_{name.upper()}")
         if env:
@@ -475,7 +478,7 @@ class Engine:
         try:
             found = json.loads(r.stdout or "[]")
         except json.JSONDecodeError:
-            self.add("A3", "project", "contract", "error", f"Spectral failed: {(r.stderr or r.stdout)[:300]}")
+            self.add("A3", "project", "contract", "error", f"Spectral failed: {self.scrub(r.stderr or r.stdout)[:300]}")
             return
         errors = [f"{'.'.join(map(str, f.get('path', [])))}: {f.get('message')} ({f.get('code')})"
                   for f in found if f.get("severity") == 0]
@@ -667,7 +670,7 @@ class Engine:
             return
         svc = self.start_service()
         if not svc:
-            tail = open(os.path.join(self.workdir, "service.log")).read()[-300:]
+            tail = self.scrub(open(os.path.join(self.workdir, "service.log")).read())[-300:]
             self.add("A7", "project", "service", "error", f"The service didn't start: {tail}")
             return
         port = svc[1]
@@ -685,9 +688,9 @@ class Engine:
                 if f is None:
                     f = tc.find("error")
                 if f is not None:
-                    failed_ops[tc.get("name", "")] = ((f.get("message") or "") + " " + (f.text or "")).strip()[:400]
+                    failed_ops[tc.get("name", "")] = self.scrub(((f.get("message") or "") + " " + (f.text or "")).strip())[:400]
         elif r.returncode:
-            self.add("A7", "project", "service", "error", f"Schemathesis didn't run: {(r.stdout + r.stderr)[-300:]}")
+            self.add("A7", "project", "service", "error", f"Schemathesis didn't run: {self.scrub(r.stdout + r.stderr)[-300:]}")
             return
         bad = {op.key: msg for op in self.ops for name, msg in failed_ops.items()
                if name.startswith(op.key) or name == op.key}

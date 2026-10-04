@@ -866,6 +866,10 @@ func (e *Engine) checkContract() {
 	}
 }
 
+func (e *Engine) scrub(text string) string {
+	return scrubPaths(text, pathPairs(e.Repo, e.Workdir))
+}
+
 func tool(name, rel string) string {
 	if env := os.Getenv("AQV_" + strings.ToUpper(name)); env != "" {
 		return env
@@ -930,7 +934,7 @@ func (e *Engine) checkA3() {
 		if msg == "" {
 			msg = stdout
 		}
-		e.add("A3", "project", "contract", "error", "Spectral failed: "+head(msg, 300), nil)
+		e.add("A3", "project", "contract", "error", "Spectral failed: "+head(e.scrub(msg), 300), nil)
 		return
 	}
 	var errs []string
@@ -1315,7 +1319,7 @@ func (e *Engine) checkA7(apiReqs []string) {
 	}
 	if !e.startService() {
 		logText, _ := os.ReadFile(filepath.Join(e.Workdir, "service.log"))
-		e.add("A7", "project", "service", "error", "The service didn't start: "+tail(string(logText), 300), nil)
+		e.add("A7", "project", "service", "error", "The service didn't start: "+tail(e.scrub(string(logText)), 300), nil)
 		return
 	}
 	junit := filepath.Join(e.Workdir, "schemathesis.xml")
@@ -1336,11 +1340,11 @@ func (e *Engine) checkA7(apiReqs []string) {
 				f = tc.find("error")
 			}
 			if f != nil {
-				failed.Set(tc.Attr["name"], head(strip(f.Attr["message"]+" "+f.Text), 400))
+				failed.Set(tc.Attr["name"], head(e.scrub(strip(f.Attr["message"]+" "+f.Text)), 400))
 			}
 		})
 	} else if code != 0 {
-		e.add("A7", "project", "service", "error", "Schemathesis didn't run: "+tail(stdout+stderr, 300), nil)
+		e.add("A7", "project", "service", "error", "Schemathesis didn't run: "+tail(e.scrub(stdout+stderr), 300), nil)
 		return
 	}
 	bad := NewOMap()

@@ -121,8 +121,49 @@ func fillMap(tmpl string, values map[string]string) string {
 	return pyFormat(tmpl, v)
 }
 
-// runShell runs cmd with /bin/sh in its own session; output is stdout then stderr.
+type pathPair struct{ folder, label string }
+
+// pathPairs lists this checkout and work folder with their resolved paths (runner.path_pairs).
+func pathPairs(repo, workdir string) []pathPair {
+	var pairs []pathPair
+	for _, p := range []pathPair{{repo, "<repo>"}, {workdir, "<work>"}} {
+		if p.folder == "" {
+			continue
+		}
+		folder := absPath(p.folder)
+		pairs = append(pairs, pathPair{folder, p.label})
+		if real, err := filepath.EvalSymlinks(folder); err == nil && real != folder {
+			pairs = append(pairs, pathPair{real, p.label})
+		}
+	}
+	return pairs
+}
+
+// scrubPaths replaces machine-specific folders with placeholders, longest first. Messages are cut at
+// a fixed length, so the same commit must give the same text wherever it is checked out: scrub before cutting.
+func scrubPaths(text string, pairs []pathPair) string {
+	seen := map[pathPair]bool{}
+	var uniq []pathPair
+	for _, p := range pairs {
+		if !seen[p] {
+			seen[p] = true
+			uniq = append(uniq, p)
+		}
+	}
+	sort.SliceStable(uniq, func(i, j int) bool { return len(uniq[i].folder) > len(uniq[j].folder) })
+	for _, p := range uniq {
+		text = strings.ReplaceAll(text, p.folder, p.label)
+	}
+	return text
+}
+
+// runShell runs cmd with /bin/sh in its own session; output is stdout then stderr, with the
+// working folder scrubbed.
 func runShell(cmd, cwd string, env map[string]string, timeout time.Duration) (int, string) {
+	return runShellP(cmd, cwd, env, timeout, pathPairs(cwd, ""))
+}
+
+func runShellP(cmd, cwd string, env map[string]string, timeout time.Duration, pairs []pathPair) (int, string) {
 	e := os.Environ()
 	set := map[string]string{"PYTHONPATH": Home() + string(os.PathListSeparator) + os.Getenv("PYTHONPATH")}
 	for k, v := range env {
@@ -143,7 +184,7 @@ func runShell(cmd, cwd string, env map[string]string, timeout time.Duration) (in
 	go func() { done <- c.Wait() }()
 	select {
 	case err := <-done:
-		text := univNL(out.String() + errb.String())
+		text := scrubPaths(univNL(out.String()+errb.String()), pairs)
 		if err == nil {
 			return 0, text
 		}
@@ -346,7 +387,7 @@ func joinNonEmpty(xs ...string) string {
 }
 
 // parseJUnit reads test cases from JUnit XML files; cases is nil when no report exists.
-func parseJUnit(paths []string) ([]*TestCase, []string) {
+func parseJUnit(paths []string, pairs []pathPair) ([]*TestCase, []string) {
 	var existing []string
 	for _, p := range paths {
 		if exists(p) {
@@ -376,6 +417,7 @@ func parseJUnit(paths []string) ([]*TestCase, []string) {
 			}
 			// Collection and build failures show up as cases that aren't real tests:
 			// pytest "collection" errors, gotestsum's "TestMain ... [build failed]".
+			msg = scrubPaths(msg, pairs)
 			low := strings.ToLower(msg)
 			if (outcome == "error" || outcome == "fail") && (name == "" || strings.Contains(low, "collection") ||
 				strings.Contains(low, "[build failed]") || strings.Contains(low, "[setup failed]")) {
@@ -426,8 +468,9 @@ func fullSuite(cfg *OMap, repo, workdir, extra string, env map[string]string) *S
 	for k, v := range env {
 		e[k] = v
 	}
-	code, out := runShell(fill(r.Str("test"), "junit", junit, "extra", extra), repo, e, defaultTimeout)
-	cases, suiteErrors := parseJUnit(junitPaths(cfg, repo, junit))
+	pairs := pathPairs(repo, workdir)
+	code, out := runShellP(fill(r.Str("test"), "junit", junit, "extra", extra), repo, e, defaultTimeout, pairs)
+	cases, suiteErrors := parseJUnit(junitPaths(cfg, repo, junit), pairs)
 	// A non-zero exit that no failing test explains means part of the suite didn't run
 	// (for example a Go package that failed to compile, which JUnit lists as 0 tests).
 	explained := false

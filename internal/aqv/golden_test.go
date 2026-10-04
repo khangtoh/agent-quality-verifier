@@ -141,7 +141,7 @@ func TestJUnitMatchesPython(t *testing.T) {
 		t.Fatal("no JUnit reports in testdata")
 	}
 	for _, c := range g.JUnit {
-		cases, errs := parseJUnit(c.Files)
+		cases, errs := parseJUnit(c.Files, nil)
 		var got [][]string
 		for _, tc := range cases {
 			got = append(got, []string{tc.Name, tc.Classname, tc.Outcome, tc.Message})

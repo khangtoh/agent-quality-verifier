@@ -32,14 +32,36 @@ def fill(template, **values):
     return template.format(**v)
 
 
-def run(cmd, cwd, env=None, timeout=900):
+def path_pairs(repo, workdir=None):
+    """[(folder, placeholder)] for this checkout and work folder, including their resolved paths."""
+    pairs = []
+    for folder, label in ((repo, "<repo>"), (workdir, "<work>")):
+        if folder:
+            folder = os.path.abspath(str(folder))
+            pairs.append((folder, label))
+            real = os.path.realpath(folder)
+            if real != folder:
+                pairs.append((real, label))
+    return pairs
+
+
+def scrub_paths(text, pairs):
+    """Replaces machine-specific folders with placeholders. Messages are cut at a fixed length, so the same
+    commit must give the same text wherever it is checked out: scrub before cutting."""
+    for folder, label in sorted(set(pairs), key=lambda x: -len(x[0])):
+        text = text.replace(folder, label)
+    return text
+
+
+def run(cmd, cwd, env=None, timeout=900, scrub=None):
+    pairs = path_pairs(cwd) if scrub is None else scrub
     e = dict(os.environ)
     e["PYTHONPATH"] = AQV_DIR + os.pathsep + e.get("PYTHONPATH", "")
     e.update(env or {})
     try:
         r = subprocess.run(cmd, shell=True, cwd=cwd, env=e, capture_output=True, text=True, timeout=timeout,
                            start_new_session=True)
-        return r.returncode, r.stdout + r.stderr
+        return r.returncode, scrub_paths(r.stdout + r.stderr, pairs)
     except subprocess.TimeoutExpired as ex:
         return 124, f"timed out after {timeout}s: {ex}"
 
@@ -69,8 +91,8 @@ class SuiteRun:
     broken_reason: str = ""
 
 
-def parse_junit(paths):
-    """Test cases from one or more JUnit XML files. None when no report exists."""
+def parse_junit(paths, pairs=()):
+    """Test cases from one or more JUnit XML files. None when no report exists. `pairs` as for scrub_paths."""
     paths = [p for p in paths if os.path.exists(p)]
     if not paths:
         return None, ["no JUnit report was written"]
@@ -94,6 +116,7 @@ def parse_junit(paths):
                 outcome, msg = "pass", ""
             # Collection and build failures show up as cases that aren't real tests:
             # pytest "collection" errors, gotestsum's "TestMain ... [build failed]".
+            msg = scrub_paths(msg, pairs)
             low = msg.lower()
             if outcome in ("error", "fail") and (not name or "collection" in low or "[build failed]" in low
                                                   or "[setup failed]" in low):
@@ -128,8 +151,9 @@ def full_suite(cfg, repo, workdir, extra="", env=None):
     clear_junit(cfg, repo)
     e = profile_env(cfg, repo)
     e.update(env or {})
-    code, out = run(fill(r["test"], junit=junit, extra=extra), repo, env=e)
-    cases, suite_errors = parse_junit(junit_paths(cfg, repo, junit))
+    pairs = path_pairs(repo, workdir)
+    code, out = run(fill(r["test"], junit=junit, extra=extra), repo, env=e, scrub=pairs)
+    cases, suite_errors = parse_junit(junit_paths(cfg, repo, junit), pairs)
     # A non-zero exit that no failing test explains means part of the suite didn't run
     # (for example a Go package that failed to compile, which JUnit lists as 0 tests).
     unexplained = code != 0 and not any(c.outcome in ("fail", "error") for c in (cases or []))
