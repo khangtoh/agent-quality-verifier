@@ -93,6 +93,8 @@ The Go verifier has its own demo pages, written by `bin/aqv pages` from a demo r
 `--impl go`: open [demo/results-go/index.html](demo/results-go/index.html). They match the Python
 pages page for page; [docs/go-demo-parity.md](docs/go-demo-parity.md) says what is checked, the
 current numbers, and the plan for keeping the two in step (`scripts/parity_all.sh` runs the checks).
+`bin/aqv site` also writes the site home and the two comparison pages; they match Python's byte for byte.
+The Python verifier stays the reference and is not retired: the plan lists the criteria, none met yet.
 
 ## What "quality" means here
 
@@ -267,7 +269,11 @@ demo/langs.json         language names, stacks and mechanisms for the Go page wr
 scripts/parity.py       runs Go and Python on the same demo repos and compares every output
 scripts/pages_parity.py Go and Python page writers render the same data: every page byte-identical
 scripts/demo_parity.py  demo/results against demo/results-go after removing what always differs
-scripts/parity_all.sh   runs the parity checks
+scripts/site_parity.py  site home and comparison pages: aqv site against the Python writers
+scripts/check_links.py  every link in the published pages resolves
+scripts/gen_go_css.py   regenerates internal/aqv/css_gen.go from the Python page styles
+scripts/parity_all.sh   runs the parity checks (--engine adds the 168-repo comparison)
+.github/workflows/parity.yml  CI: go checks, published pages and links, weekly full parity
 scripts/gen_golden.py   records the Python helpers' answers for the Go unit tests
 experiments/            oft_layer.py, variants/, ours.py, report.py (builds docs/compare/)
   openfasttrace/        OpenFastTrace on the same scenarios

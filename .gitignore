@@ -6,3 +6,4 @@ demo/.work*.log
 __pycache__/
 .schemathesis/
 bin/
+demo/.*.log

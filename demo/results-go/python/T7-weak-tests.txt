@@ -1,4 +1,4 @@
-Agent Quality Verifier: repo (test/AC-auth-002-simplify, 546f05a..1bd7143)
+Agent Quality Verifier: repo (test/AC-auth-002-simplify, 21995c0..a945457)
 
 REQUIREMENT  STATUS       FAILING CHECKS
 AC-auth-001  Sync         -

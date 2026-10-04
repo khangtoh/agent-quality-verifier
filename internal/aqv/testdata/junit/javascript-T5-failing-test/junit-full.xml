@@ -1,33 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="16" failures="1" errors="0" time="2.766">
-  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T15:50:35" time="1.512" tests="4">
-    <testcase classname=" AC-auth-003 expired after 30 minutes" name=" AC-auth-003 expired after 30 minutes" time="0.092">
-    </testcase>
-    <testcase classname=" AC-auth-003 active within 30 minutes" name=" AC-auth-003 active within 30 minutes" time="0.014">
-    </testcase>
-    <testcase classname=" AC-auth-003 boundary is exactly 30 minutes" name=" AC-auth-003 boundary is exactly 30 minutes" time="0.001">
-    </testcase>
-    <testcase classname=" AC-auth-003 rejects a bad last_seen and accepts the edges" name=" AC-auth-003 rejects a bad last_seen and accepts the edges" time="0.048">
-    </testcase>
-  </testsuite>
-  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T15:50:35" time="1.745" tests="4">
-    <testcase classname=" AC-auth-004 link sent for a known email" name=" AC-auth-004 link sent for a known email" time="0.159">
-    </testcase>
-    <testcase classname=" AC-auth-004 no link for an unknown email" name=" AC-auth-004 no link for an unknown email" time="0.009">
-    </testcase>
-    <testcase classname=" AC-auth-005 same response for an unknown email" name=" AC-auth-005 same response for an unknown email" time="0.027">
-    </testcase>
-    <testcase classname=" AC-auth-005 known email still gets its link" name=" AC-auth-005 known email still gets its link" time="0.035">
-    </testcase>
-  </testsuite>
-  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T15:50:37" time="0.07" tests="2">
-    <testcase classname=" AC-auth-006 password not stored in plain text" name=" AC-auth-006 password not stored in plain text" time="0.001">
-    </testcase>
-    <testcase classname=" AC-auth-006 hashed password still signs in" name=" AC-auth-006 hashed password still signs in" time="0.001">
-    </testcase>
-  </testsuite>
-  <testsuite name="undefined" errors="0" failures="1" skipped="0" timestamp="2026-10-02T15:50:35" time="2.016" tests="3">
-    <testcase classname=" AC-auth-002 locks after three failures" name=" AC-auth-002 locks after three failures" time="0.118">
+<testsuites name="jest tests" tests="16" failures="1" errors="0" time="0.989">
+  <testsuite name="undefined" errors="0" failures="1" skipped="0" timestamp="2026-10-04T13:30:18" time="0.507" tests="3">
+    <testcase classname=" AC-auth-002 locks after three failures" name=" AC-auth-002 locks after three failures" time="0.047">
       <failure>Error: expect(received).toBe(expected) // Object.is equality
 
 Expected: 401
@@ -35,17 +9,43 @@ Received: 200
     at Object.toBe (/home/user/agent-quality-verifier/demo/.work/javascript/runs/T5-failing-test/repo/tests/lockout.test.js:17:20)
     at processTicksAndRejections (node:internal/process/task_queues:105:5)</failure>
     </testcase>
-    <testcase classname=" AC-auth-002 two failures do not lock" name=" AC-auth-002 two failures do not lock" time="0.01">
+    <testcase classname=" AC-auth-002 two failures do not lock" name=" AC-auth-002 two failures do not lock" time="0.009">
     </testcase>
-    <testcase classname=" AC-auth-002 success resets the count" name=" AC-auth-002 success resets the count" time="0.025">
+    <testcase classname=" AC-auth-002 success resets the count" name=" AC-auth-002 success resets the count" time="0.015">
     </testcase>
   </testsuite>
-  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-02T15:50:36" time="0.501" tests="3">
-    <testcase classname=" AC-auth-001 sign in returns a token" name=" AC-auth-001 sign in returns a token" time="0.08">
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-04T13:30:18" time="0.107" tests="4">
+    <testcase classname=" AC-auth-003 expired after 30 minutes" name=" AC-auth-003 expired after 30 minutes" time="0.019">
     </testcase>
-    <testcase classname=" AC-auth-001 wrong password is denied" name=" AC-auth-001 wrong password is denied" time="0.033">
+    <testcase classname=" AC-auth-003 active within 30 minutes" name=" AC-auth-003 active within 30 minutes" time="0.004">
     </testcase>
-    <testcase classname=" AC-auth-001 malformed request is rejected" name=" AC-auth-001 malformed request is rejected" time="0.009">
+    <testcase classname=" AC-auth-003 boundary is exactly 30 minutes" name=" AC-auth-003 boundary is exactly 30 minutes" time="0">
+    </testcase>
+    <testcase classname=" AC-auth-003 rejects a bad last_seen and accepts the edges" name=" AC-auth-003 rejects a bad last_seen and accepts the edges" time="0.011">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-04T13:30:18" time="0.149" tests="3">
+    <testcase classname=" AC-auth-001 sign in returns a token" name=" AC-auth-001 sign in returns a token" time="0.037">
+    </testcase>
+    <testcase classname=" AC-auth-001 wrong password is denied" name=" AC-auth-001 wrong password is denied" time="0.016">
+    </testcase>
+    <testcase classname=" AC-auth-001 malformed request is rejected" name=" AC-auth-001 malformed request is rejected" time="0.026">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-04T13:30:19" time="0.086" tests="4">
+    <testcase classname=" AC-auth-004 link sent for a known email" name=" AC-auth-004 link sent for a known email" time="0.02">
+    </testcase>
+    <testcase classname=" AC-auth-004 no link for an unknown email" name=" AC-auth-004 no link for an unknown email" time="0.003">
+    </testcase>
+    <testcase classname=" AC-auth-005 same response for an unknown email" name=" AC-auth-005 same response for an unknown email" time="0.005">
+    </testcase>
+    <testcase classname=" AC-auth-005 known email still gets its link" name=" AC-auth-005 known email still gets its link" time="0.005">
+    </testcase>
+  </testsuite>
+  <testsuite name="undefined" errors="0" failures="0" skipped="0" timestamp="2026-10-04T13:30:19" time="0.041" tests="2">
+    <testcase classname=" AC-auth-006 password not stored in plain text" name=" AC-auth-006 password not stored in plain text" time="0.001">
+    </testcase>
+    <testcase classname=" AC-auth-006 hashed password still signs in" name=" AC-auth-006 hashed password still signs in" time="0.001">
     </testcase>
   </testsuite>
 </testsuites>

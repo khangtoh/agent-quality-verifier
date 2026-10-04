@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="17" failures="1" errors="0" time="0.254826">
-	<testsuite tests="0" failures="0" time="0.000000" name="example.com/auth/cmd/server" timestamp="2026-10-02T16:12:22Z">
+<testsuites tests="17" failures="1" errors="0" time="0.446820">
+	<testsuite tests="0" failures="0" time="0.000000" name="example.com/auth/cmd/server" timestamp="2026-10-04T13:48:38Z">
 		<properties>
 			<property name="go.version" value="go1.24.7 linux/amd64"></property>
 		</properties>
 	</testsuite>
-	<testsuite tests="13" failures="1" time="0.010000" name="example.com/auth/internal/api" timestamp="2026-10-02T16:12:22Z">
+	<testsuite tests="13" failures="1" time="0.011000" name="example.com/auth/internal/api" timestamp="2026-10-04T13:48:39Z">
 		<properties>
 			<property name="go.version" value="go1.24.7 linux/amd64"></property>
 		</properties>
 		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_002_LocksAfterThreeFailures" time="0.000000">
-			<failure message="Failed" type="">=== RUN   TestAC_auth_002_LocksAfterThreeFailures&#xA;    lockout_test.go:19: got 200 map[token:62c594ce42e8b2ac2ab03477cd786232]&#xA;--- FAIL: TestAC_auth_002_LocksAfterThreeFailures (0.00s)&#xA;</failure>
+			<failure message="Failed" type="">=== RUN   TestAC_auth_002_LocksAfterThreeFailures&#xA;    lockout_test.go:19: got 200 map[token:946eeda7222840f22a8960db607e6ef1]&#xA;--- FAIL: TestAC_auth_002_LocksAfterThreeFailures (0.00s)&#xA;</failure>
 		</testcase>
 		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_002_TwoFailuresDoNotLock" time="0.000000"></testcase>
 		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_002_SuccessResetsTheCount" time="0.000000"></testcase>
@@ -25,7 +25,7 @@
 		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_003_ActiveWithin30Minutes" time="0.000000"></testcase>
 		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_003_RejectsBadLastSeenAndAcceptsEdges" time="0.000000"></testcase>
 	</testsuite>
-	<testsuite tests="4" failures="0" time="0.004000" name="example.com/auth/internal/auth" timestamp="2026-10-02T16:12:22Z">
+	<testsuite tests="4" failures="0" time="0.006000" name="example.com/auth/internal/auth" timestamp="2026-10-04T13:48:39Z">
 		<properties>
 			<property name="go.version" value="go1.24.7 linux/amd64"></property>
 		</properties>
@@ -34,7 +34,7 @@
 		<testcase classname="example.com/auth/internal/auth" name="TestAC_auth_006_HashedPasswordStillSignsIn" time="0.000000"></testcase>
 		<testcase classname="example.com/auth/internal/auth" name="TestAC_auth_006_SamePasswordGetsDifferentSalts" time="0.000000"></testcase>
 	</testsuite>
-	<testsuite tests="0" failures="0" time="0.000000" name="example.com/auth/tools/aqvroutes" timestamp="2026-10-02T16:12:22Z">
+	<testsuite tests="0" failures="0" time="0.000000" name="example.com/auth/tools/aqvroutes" timestamp="2026-10-04T13:48:39Z">
 		<properties>
 			<property name="go.version" value="go1.24.7 linux/amd64"></property>
 		</properties>

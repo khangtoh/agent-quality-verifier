@@ -1,47 +1,47 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<testsuites name="vitest tests" tests="15" failures="1" errors="0" time="1.424307113">
-    <testsuite name="tests/lockout.test.ts" timestamp="2026-10-02T16:07:23.455Z" hostname="vm" tests="3" failures="0" errors="0" skipped="0" time="0.427019209">
-        <testcase classname="tests/lockout.test.ts" name="AC-auth-002 locks after three failures" time="0.320694115">
+<testsuites name="vitest tests" tests="15" failures="1" errors="0" time="2.050262943">
+    <testsuite name="tests/lockout.test.ts" timestamp="2026-10-04T13:43:24.970Z" hostname="vm" tests="3" failures="0" errors="0" skipped="0" time="0.782164846">
+        <testcase classname="tests/lockout.test.ts" name="AC-auth-002 locks after three failures" time="0.514613675">
         </testcase>
-        <testcase classname="tests/lockout.test.ts" name="AC-auth-002 two failures do not lock" time="0.065938595">
+        <testcase classname="tests/lockout.test.ts" name="AC-auth-002 two failures do not lock" time="0.18614747">
         </testcase>
-        <testcase classname="tests/lockout.test.ts" name="AC-auth-002 success resets the count" time="0.038988764">
-        </testcase>
-    </testsuite>
-    <testsuite name="tests/login.test.ts" timestamp="2026-10-02T16:07:23.458Z" hostname="vm" tests="3" failures="0" errors="0" skipped="0" time="0.444717548">
-        <testcase classname="tests/login.test.ts" name="AC-auth-001 sign in returns a token" time="0.323432109">
-        </testcase>
-        <testcase classname="tests/login.test.ts" name="AC-auth-001 wrong password is denied" time="0.063717843">
-        </testcase>
-        <testcase classname="tests/login.test.ts" name="AC-auth-001 malformed request is rejected" time="0.051526046">
+        <testcase classname="tests/lockout.test.ts" name="AC-auth-002 success resets the count" time="0.079683339">
         </testcase>
     </testsuite>
-    <testsuite name="tests/reset.test.ts" timestamp="2026-10-02T16:07:23.460Z" hostname="vm" tests="4" failures="0" errors="0" skipped="0" time="0.360973701">
-        <testcase classname="tests/reset.test.ts" name="AC-auth-004 link sent for a known email" time="0.275307731">
+    <testsuite name="tests/login.test.ts" timestamp="2026-10-04T13:43:24.981Z" hostname="vm" tests="3" failures="0" errors="0" skipped="0" time="0.450252953">
+        <testcase classname="tests/login.test.ts" name="AC-auth-001 sign in returns a token" time="0.328656012">
         </testcase>
-        <testcase classname="tests/reset.test.ts" name="AC-auth-004 no link for an unknown email" time="0.032060742">
+        <testcase classname="tests/login.test.ts" name="AC-auth-001 wrong password is denied" time="0.077068788">
         </testcase>
-        <testcase classname="tests/reset.test.ts" name="AC-auth-005 same response for an unknown email" time="0.031005921">
-        </testcase>
-        <testcase classname="tests/reset.test.ts" name="AC-auth-005 known email still gets its link" time="0.020393891">
+        <testcase classname="tests/login.test.ts" name="AC-auth-001 malformed request is rejected" time="0.038367883">
         </testcase>
     </testsuite>
-    <testsuite name="tests/session.test.ts" timestamp="2026-10-02T16:07:23.462Z" hostname="vm" tests="3" failures="1" errors="0" skipped="0" time="0.186454967">
-        <testcase classname="tests/session.test.ts" name="AC-auth-003 expired after 30 minutes" time="0.157010492">
+    <testsuite name="tests/reset.test.ts" timestamp="2026-10-04T13:43:24.981Z" hostname="vm" tests="4" failures="0" errors="0" skipped="0" time="0.569985611">
+        <testcase classname="tests/reset.test.ts" name="AC-auth-004 link sent for a known email" time="0.428751746">
         </testcase>
-        <testcase classname="tests/session.test.ts" name="AC-auth-003 active within 30 minutes" time="0.024320774">
+        <testcase classname="tests/reset.test.ts" name="AC-auth-004 no link for an unknown email" time="0.044358904">
         </testcase>
-        <testcase classname="tests/session.test.ts" name="AC-auth-003 boundary is exactly 30 minutes" time="0.003771471">
+        <testcase classname="tests/reset.test.ts" name="AC-auth-005 same response for an unknown email" time="0.075490933">
+        </testcase>
+        <testcase classname="tests/reset.test.ts" name="AC-auth-005 known email still gets its link" time="0.019659628">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/session.test.ts" timestamp="2026-10-04T13:43:24.988Z" hostname="vm" tests="3" failures="1" errors="0" skipped="0" time="0.229004159">
+        <testcase classname="tests/session.test.ts" name="AC-auth-003 expired after 30 minutes" time="0.18804188">
+        </testcase>
+        <testcase classname="tests/session.test.ts" name="AC-auth-003 active within 30 minutes" time="0.035125313">
+        </testcase>
+        <testcase classname="tests/session.test.ts" name="AC-auth-003 boundary is exactly 30 minutes" time="0.004349915">
             <failure message="(0 , isExpired) is not a function" type="TypeError">
 TypeError: (0 , isExpired) is not a function
  ❯ tests/session.test.ts:21:10
             </failure>
         </testcase>
     </testsuite>
-    <testsuite name="tests/storage.test.ts" timestamp="2026-10-02T16:07:23.465Z" hostname="vm" tests="2" failures="0" errors="0" skipped="0" time="0.005141688">
-        <testcase classname="tests/storage.test.ts" name="AC-auth-006 password not stored in plain text" time="0.002417334">
+    <testsuite name="tests/storage.test.ts" timestamp="2026-10-04T13:43:24.993Z" hostname="vm" tests="2" failures="0" errors="0" skipped="0" time="0.018855374">
+        <testcase classname="tests/storage.test.ts" name="AC-auth-006 password not stored in plain text" time="0.002682695">
         </testcase>
-        <testcase classname="tests/storage.test.ts" name="AC-auth-006 hashed password still signs in" time="0.000440726">
+        <testcase classname="tests/storage.test.ts" name="AC-auth-006 hashed password still signs in" time="0.014953004">
         </testcase>
     </testsuite>
 </testsuites>

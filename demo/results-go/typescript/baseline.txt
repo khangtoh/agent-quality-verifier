@@ -1,4 +1,4 @@
-Agent Quality Verifier: baseline (main, all history to 2e2e197)
+Agent Quality Verifier: baseline (main, all history to dfb5caa)
 
 REQUIREMENT  STATUS       FAILING CHECKS
 AC-auth-001  Sync         -

@@ -1,4 +1,4 @@
-Agent Quality Verifier: repo (feat/AC-auth-001-debug-info, 0b1fee2..61c5d19)
+Agent Quality Verifier: repo (feat/AC-auth-001-debug-info, 203cbeb..00576c0)
 
 REQUIREMENT  STATUS       FAILING CHECKS
 AC-auth-001  Contract     A6

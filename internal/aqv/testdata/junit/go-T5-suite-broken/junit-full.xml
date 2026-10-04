@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites tests="13" failures="1" errors="1" time="0.236319">
+<testsuites tests="13" failures="1" errors="1" time="0.300488">
 	<testsuite tests="0" failures="0" time="0.000000" name="" timestamp="0001-01-01T00:00:00Z">
 		<properties>
 			<property name="go.version" value="go1.24.7 linux/amd64"></property>
 		</properties>
 	</testsuite>
-	<testsuite tests="0" failures="0" time="0.000000" name="example.com/auth/cmd/server" timestamp="2026-10-02T16:12:29Z">
+	<testsuite tests="0" failures="0" time="0.000000" name="example.com/auth/cmd/server" timestamp="2026-10-04T13:48:43Z">
 		<properties>
 			<property name="go.version" value="go1.24.7 linux/amd64"></property>
 		</properties>
 	</testsuite>
-	<testsuite tests="13" failures="0" time="0.006000" name="example.com/auth/internal/api" timestamp="2026-10-02T16:12:29Z">
+	<testsuite tests="13" failures="0" time="0.008000" name="example.com/auth/internal/api" timestamp="2026-10-04T13:48:43Z">
 		<properties>
 			<property name="go.version" value="go1.24.7 linux/amd64"></property>
 		</properties>
@@ -28,7 +28,7 @@
 		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_003_ActiveWithin30Minutes" time="0.000000"></testcase>
 		<testcase classname="example.com/auth/internal/api" name="TestAC_auth_003_RejectsBadLastSeenAndAcceptsEdges" time="0.000000"></testcase>
 	</testsuite>
-	<testsuite tests="0" failures="0" time="0.000000" name="example.com/auth/internal/auth" timestamp="2026-10-02T16:12:29Z">
+	<testsuite tests="0" failures="0" time="0.000000" name="example.com/auth/internal/auth" timestamp="2026-10-04T13:48:43Z">
 		<properties>
 			<property name="go.version" value="go1.24.7 linux/amd64"></property>
 		</properties>
@@ -36,7 +36,7 @@
 			<failure message="Failed" type="">FAIL&#x9;example.com/auth/internal/auth [build failed]&#xA;</failure>
 		</testcase>
 	</testsuite>
-	<testsuite tests="0" failures="0" time="0.000000" name="example.com/auth/tools/aqvroutes" timestamp="2026-10-02T16:12:29Z">
+	<testsuite tests="0" failures="0" time="0.000000" name="example.com/auth/tools/aqvroutes" timestamp="2026-10-04T13:48:43Z">
 		<properties>
 			<property name="go.version" value="go1.24.7 linux/amd64"></property>
 		</properties>
