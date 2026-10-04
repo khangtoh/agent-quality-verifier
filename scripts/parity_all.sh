@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Runs every Go/Python parity check, cheapest first. See docs/go-demo-parity.md.
+# (Needs the demo runs in demo/.work and demo/.work-go; CI runs the checks that work from git alone.)
 #
 #   scripts/parity_all.sh             helpers, page writers, published page sets (a minute or two)
 #   scripts/parity_all.sh --engine    also reruns the Go verifier on all 168 demo repos (about an hour)
@@ -18,8 +19,11 @@ step "2. Page writers: Go and Python render the Go demo run to identical pages"
 step "3. Published pages: demo/results (Python run) against demo/results-go (Go run)"
 .venv/bin/python scripts/demo_parity.py
 
+step "4. Site: the home page and comparison pages, Go against Python"
+.venv/bin/python scripts/site_parity.py
+
 if [ "${1:-}" = "--engine" ]; then
-  step "4. Engine: the Go verifier on the 168 demo repos against the Python results"
+  step "5. Engine: the Go verifier on the 168 demo repos against the Python results"
   .venv/bin/python scripts/parity.py --lang all
 fi
 printf '\nAll parity checks passed.\n'

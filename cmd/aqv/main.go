@@ -2,6 +2,7 @@
 //
 //	aqv check [--repo .] [--base main] [--out out/] [--skip T7,A7] [--only H1,H2] [--record]
 //	aqv pages --work demo/.work-go --meta demo/langs.json --out demo/results-go
+//	aqv site  --root . --meta demo/langs.json --py-work demo/.work --go-work demo/.work-go
 package main
 
 import (
@@ -39,14 +40,33 @@ func pages(args []string) {
 	fmt.Println("Wrote", *out)
 }
 
+func site(args []string) {
+	fs := flag.NewFlagSet("site", flag.ExitOnError)
+	root := fs.String("root", ".", "repository root: index.html and docs/compare/*.html are written here")
+	meta := fs.String("meta", "demo/langs.json", "language metadata written by scripts/export_langs.py")
+	pyWork := fs.String("py-work", "demo/.work", "the Python demo run")
+	goWork := fs.String("go-work", "demo/.work-go", "the Go demo run")
+	fs.Parse(args)
+	if err := aqv.WriteSite(aqv.SiteOptions{Root: *root, Meta: *meta, PyWork: *pyWork, GoWork: *goWork}); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	fmt.Println("Wrote", filepath.Join(*root, "index.html"), "and docs/compare/")
+}
+
 func main() {
 	if len(os.Args) >= 2 && os.Args[1] == "pages" {
 		pages(os.Args[2:])
 		return
 	}
+	if len(os.Args) >= 2 && os.Args[1] == "site" {
+		site(os.Args[2:])
+		return
+	}
 	if len(os.Args) < 2 || os.Args[1] != "check" {
 		fmt.Fprintln(os.Stderr, "usage: aqv check [--repo .] [--base REF] [--out DIR] [--skip T7,A7] [--only H1,H2] [--record]\n"+
-			"       aqv pages [--work DIR] [--meta FILE] [--out DIR]")
+			"       aqv pages [--work DIR] [--meta FILE] [--out DIR]\n"+
+			"       aqv site  [--root DIR] [--meta FILE] [--py-work DIR] [--go-work DIR]")
 		os.Exit(2)
 	}
 	fs := flag.NewFlagSet("check", flag.ExitOnError)

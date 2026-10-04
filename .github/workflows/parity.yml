@@ -1,0 +1,67 @@
+# Keeps the Go and Python verifiers, and their demo pages, in step. See docs/go-demo-parity.md.
+#
+#   go     every push and pull request: formatting, vet, unit tests (which replay the Python verifier's
+#          recorded answers) and the build
+#   pages  every push and pull request: the two committed page sets agree, and every link resolves
+#   full   manual (Actions > parity > Run workflow) and weekly: builds the Python demo with both
+#          verifiers and compares the engines and the page writers
+name: parity
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 4 * * 1"
+
+jobs:
+  go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - name: gofmt
+        run: test -z "$(gofmt -l cmd internal)" || { gofmt -l cmd internal; exit 1; }
+      - run: go vet ./...
+      - run: go test ./...
+      - run: go build -o bin/aqv ./cmd/aqv
+
+  pages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Published pages (Python run against Go run)
+        run: python scripts/demo_parity.py
+      - name: Links
+        run: python scripts/check_links.py
+
+  full:
+    if: github.event_name != 'push' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Verifier, tools and the Python reference
+        run: scripts/setup.sh
+      - name: Python demo, Python verifier
+        run: .venv/bin/python demo/run_demo.py --lang python --no-pages
+      - name: Python demo, Go verifier
+        run: .venv/bin/python demo/run_demo.py --lang python --impl go --work demo/.work-go --no-pages
+      - name: Engines agree on every demo repo
+        run: .venv/bin/python scripts/parity.py --lang python
+      - name: Page writers agree
+        run: .venv/bin/python scripts/pages_parity.py
