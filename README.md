@@ -44,7 +44,21 @@ bin/aqv check --repo path/to/repo --base main       # like a pull request
 
 It writes `report.html` (the requirement view), `report.txt` and `results.json` to
 `--out` (default `<repo>/.aqv-out`), and exits non-zero when a check fails. Add a
-`.aqv.yml` to the repo first; each demo language's is in `demo/langs/<language>/stages.py`.
+`.aqv.yml` to the repo first: `aqv init` writes one for a Go project, and each demo
+language's is in `demo/langs/<language>/stages.py`.
+
+To start a new Go project with Claude Code:
+
+```bash
+bin/aqv init --repo path/to/project                 # needs GOAL.md and PLAN.md there
+```
+
+`init` stops if the project has no goal or plan. Otherwise it writes `.aqv.yml`, the contract lint
+rules, an empty ID registry, a test helper that records HTTP responses (`tools/aqvcapture`), a
+section in `CLAUDE.md` with the conventions, and two Claude Code workflows: `aqv-specs` drafts the
+requirements from the goal and plan, and `aqv-build` builds them one at a time, each gated by
+`aqv check`. It never overwrites a file unless `--force` is given. See
+[adapters/claude/README.md](adapters/claude/README.md). `init` is in the Go binary only.
 
 | Variable | Default | Used for |
 |---|---|---|
@@ -249,13 +263,16 @@ different goals, so each page starts with what each tool is for:
 ```
 cmd/aqv/                the aqv command
 internal/aqv/           the Go verifier: engine.go (all checks), runner.go, spec.go, contract.go,
-                        mutate.go, gitx.go, report.go; golden_test.go compares helpers with Python
+                        mutate.go, gitx.go, report.go, init.go; golden_test.go compares helpers with Python
 aqv/                    the Python reference implementation
   engine.py             all checks, statuses and the requirement view
   runner.py             runs the project's tools through the runner profile
   html.py               report.html, demo pages, cross-language page
   gitx.py spec.py contract.py mutate.py pytest_capture.py
 adapters/node/          A5 route listers and the A6 capture setup file for Node
+adapters/claude/        Claude Code workflows: aqv-specs (goal and plan to spec), aqv-build (spec to verified code)
+adapters/init/          what aqv init writes: the Go .aqv.yml, the lint rules, the CLAUDE.md section
+adapters/go/aqvcapture/ the A6 test helper aqv init copies into a Go project
 demo/
   build_baseline.py     builds a clean demo repo for one language
   langs/<language>/     stages.py (code, tests, runner profile) and edits.sh (attack edits)

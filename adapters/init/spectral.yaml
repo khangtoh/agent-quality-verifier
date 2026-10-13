@@ -1,0 +1,23 @@
+extends: ["spectral:oas"]
+rules:
+  aqv-response-has-schema:
+    description: Every response except 204 documents a JSON body schema.
+    severity: error
+    given: "$.paths[*][*].responses[?(@property != '204')]"
+    then:
+      field: "content.application/json.schema"
+      function: truthy
+  aqv-closed-objects:
+    description: Object schemas set additionalProperties to false so extra fields are caught.
+    severity: error
+    given: "$.components.schemas[?(@.type == 'object')]"
+    then:
+      field: additionalProperties
+      function: falsy
+  aqv-objects-declare-additional-properties:
+    description: Object schemas must declare additionalProperties explicitly.
+    severity: error
+    given: "$.components.schemas[?(@.type == 'object')]"
+    then:
+      field: additionalProperties
+      function: defined

@@ -1,5 +1,6 @@
 // Command aqv checks an agent's work against the spec.
 //
+//	aqv init  [--repo .] [--goal GOAL.md] [--plan PLAN.md] [--lang go] [--human EMAIL] [--force]
 //	aqv check [--repo .] [--base main] [--out out/] [--skip T7,A7] [--only H1,H2] [--record]
 //	aqv pages --work demo/.work-go --meta demo/langs.json --out demo/results-go
 //	aqv site  --root . --meta demo/langs.json --py-work demo/.work --go-work demo/.work-go
@@ -54,7 +55,40 @@ func site(args []string) {
 	fmt.Println("Wrote", filepath.Join(*root, "index.html"), "and docs/compare/")
 }
 
+func initProject(args []string) {
+	fs := flag.NewFlagSet("init", flag.ExitOnError)
+	repo := fs.String("repo", ".", "project to set up")
+	goal := fs.String("goal", "GOAL.md", "the project's goal, relative to the project")
+	plan := fs.String("plan", "PLAN.md", "the plan for reaching it, relative to the project")
+	lang := fs.String("lang", "", "stack to set up (go); picked from the project's files when empty")
+	human := fs.String("human", "", "address for git.humans; git's user.email when empty, \"none\" for nobody")
+	force := fs.Bool("force", false, "overwrite files init wrote before, and replace its CLAUDE.md section")
+	fs.Parse(args)
+	res, err := aqv.Init(aqv.InitOptions{Repo: *repo, Goal: *goal, Plan: *plan, Lang: *lang, Human: *human, Force: *force})
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Not ready for aqv:\n  "+strings.ReplaceAll(err.Error(), "\n", "\n  "))
+		os.Exit(1)
+	}
+	for _, f := range res.Wrote {
+		fmt.Println("wrote ", f)
+	}
+	for _, f := range res.Kept {
+		fmt.Println("kept  ", f)
+	}
+	for _, w := range res.Warnings {
+		fmt.Println("note:  " + w)
+	}
+	fmt.Println("\nNext:\n" +
+		"  1. Read .aqv.yml, then commit what init wrote (subject: \"chore: add verifier config\").\n" +
+		"  2. In Claude Code, run the aqv-specs workflow: it drafts the requirements from the goal and plan.\n" +
+		"  3. Read the spec, commit it yourself, then run the aqv-build workflow.")
+}
+
 func main() {
+	if len(os.Args) >= 2 && os.Args[1] == "init" {
+		initProject(os.Args[2:])
+		return
+	}
 	if len(os.Args) >= 2 && os.Args[1] == "pages" {
 		pages(os.Args[2:])
 		return
@@ -65,6 +99,7 @@ func main() {
 	}
 	if len(os.Args) < 2 || os.Args[1] != "check" {
 		fmt.Fprintln(os.Stderr, "usage: aqv check [--repo .] [--base REF] [--out DIR] [--skip T7,A7] [--only H1,H2] [--record]\n"+
+			"       aqv init  [--repo .] [--goal FILE] [--plan FILE] [--lang go] [--human EMAIL] [--force]\n"+
 			"       aqv pages [--work DIR] [--meta FILE] [--out DIR]\n"+
 			"       aqv site  [--root DIR] [--meta FILE] [--py-work DIR] [--go-work DIR]")
 		os.Exit(2)

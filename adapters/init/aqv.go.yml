@@ -1,0 +1,45 @@
+# Agent Quality Verifier config, written by `aqv init`. Owned by people: agents must not change it.
+specs: ["specs/*.md"]
+ids_registry: specs/.ids
+contract: contracts/openapi.yaml
+code_paths: ["internal/", "cmd/"]
+test_paths: ["*_test.go"]
+code_exclude: ["*_test.go"]
+protected_paths: ["specs/", ".aqv.yml", ".spectral.yaml"]
+
+# Runner profile: how to run the tests and where the reports go.
+runner:
+  test: "{aqv}/.tools/bin/gotestsum --junitfile {junit} --format standard-quiet -- -count=1 {extra} {filter} ./..."
+  coverage: "go test -count=1 -coverpkg=./internal/... -coverprofile={lcov} {filter} ./..."
+  coverage_format: gocover
+  filter: "-run '(?i){id_underscore}'"
+  select_nothing: "-run '^$'"
+  comment_prefix: ["//", "/*", "*"]
+
+api:
+  # A7 starts the service with this: a main package at cmd/server that listens on $PORT.
+  serve: "PORT={port} go run ./cmd/server"
+  serve_timeout: 120
+  # A6 reads the responses tests record through tools/aqvcapture.
+  capture: true
+  # A5 (the service serves exactly the documented routes) needs a command that prints the routes the
+  # router really serves, as {"routes": ["POST /login", "GET /session"]}. net/http cannot list its
+  # routes; with chi, a short program around chi.Walk can. Write and review that program yourself,
+  # then uncomment this. Until then A5 reports "not covered".
+  # routes_from_code: "go run ./tools/aqvroutes"
+
+mutation:
+  family: c
+  build: "go test -count=1 -run '^$' ./... > /dev/null"
+  min_kill_ratio: 0.6
+  max_mutants: 20
+
+git:
+  # Commits by these authors need no agent trailer (H8) and are left out of the agent scorecard.
+  # If an agent commits under one of these addresses, H8 cannot tell its commits from yours.
+  humans: [__HUMANS__]
+  agent_trailer: "Co-Authored-By"
+  branch_pattern: "^(feat|fix|refactor|test|docs|chore)/AC-[a-z0-9]+-[0-9]{3}(-[a-z0-9-]+)?$"
+  max_commit_lines: 400
+  size_exclude: ["go.sum"]
+  verified_ref: refs/aqv/verified
