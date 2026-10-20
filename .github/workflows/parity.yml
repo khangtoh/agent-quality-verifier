@@ -1,7 +1,7 @@
 # Keeps the Go and Python verifiers, and their demo pages, in step. See docs/go-demo-parity.md.
 #
-#   go     every push and pull request: formatting, vet, unit tests (which replay the Python verifier's
-#          recorded answers) and the build
+#   go     every push and pull request: formatting, vet, Go unit tests (which replay the Python
+#          verifier's recorded answers), the Python path-scrubbing checks, and the build
 #   pages  every push and pull request: the two committed page sets agree, and every link resolves
 #   full   manual (Actions > parity > Run workflow) and weekly: builds the Python demo with both
 #          verifiers and compares the engines and the page writers
@@ -26,6 +26,8 @@ jobs:
         run: test -z "$(gofmt -l cmd internal)" || { gofmt -l cmd internal; exit 1; }
       - run: go vet ./...
       - run: go test ./...
+      - name: Python path scrubbing
+        run: python3 -m unittest aqv.runner_test
       - run: go build -o bin/aqv ./cmd/aqv
 
   pages:
