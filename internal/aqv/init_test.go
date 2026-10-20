@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/khangtoh/agent-quality-verifier/adapters"
 )
 
 func initRepo(t *testing.T, files map[string]string) string {
@@ -126,5 +128,133 @@ func TestInitWritesAGoProject(t *testing.T) {
 	}
 	if got := readFile(t, dir, "CLAUDE.md"); got != claude+"\nAfter.\n" {
 		t.Fatalf("--force CLAUDE.md: %q", got)
+	}
+}
+
+func TestInitRefusesAnUnknownLanguage(t *testing.T) {
+	dir := initRepo(t, map[string]string{"GOAL.md": "goal", "PLAN.md": "plan", "Cargo.toml": "[package]\n"})
+	_, err := Init(InitOptions{Repo: dir, Goal: "GOAL.md", Plan: "PLAN.md"})
+	if err == nil || !strings.Contains(err.Error(), "found Cargo.toml") || !strings.Contains(err.Error(), "demo/langs/rust/stages.py") {
+		t.Fatalf("got %v", err)
+	}
+	if _, err := Init(InitOptions{Repo: dir, Goal: "GOAL.md", Plan: "PLAN.md", Lang: "python"}); err == nil || !strings.Contains(err.Error(), "--lang python") {
+		t.Fatalf("got %v", err)
+	}
+	if exists(filepath.Join(dir, ".aqv.yml")) || exists(filepath.Join(dir, "CLAUDE.md")) {
+		t.Fatal("init wrote files for a stack it cannot set up")
+	}
+}
+
+func TestInitPrefersGoModOverOtherMarkers(t *testing.T) {
+	dir := initRepo(t, map[string]string{
+		"GOAL.md": "goal", "PLAN.md": "plan", "package.json": "{}",
+		"go.mod": "module example.com/todo\n\ngo 1.24\n",
+	})
+	res, err := Init(InitOptions{Repo: dir, Goal: "GOAL.md", Plan: "PLAN.md"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Lang != "go" {
+		t.Fatalf("lang %s, want go (go.mod is ahead of package.json)", res.Lang)
+	}
+}
+
+func TestInitGitignore(t *testing.T) {
+	dir := initRepo(t, map[string]string{
+		"GOAL.md": "goal", "PLAN.md": "plan", "go.mod": "module example.com/todo\n\ngo 1.24\n",
+		".gitignore": "bin/\n  .aqv-out\n",
+	})
+	res, err := Init(InitOptions{Repo: dir, Goal: "GOAL.md", Plan: "PLAN.md", Force: true})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if contains(res.Wrote, ".gitignore") || !contains(res.Kept, ".gitignore") {
+		t.Fatalf("wrote %v kept %v", res.Wrote, res.Kept)
+	}
+	if got := readFile(t, dir, ".gitignore"); got != "bin/\n  .aqv-out\n" {
+		t.Fatalf(".gitignore: %q", got)
+	}
+
+	dir = initRepo(t, map[string]string{
+		"GOAL.md": "goal", "PLAN.md": "plan", "go.mod": "module example.com/todo\n\ngo 1.24\n",
+		".gitignore": "bin/",
+	})
+	if _, err := Init(InitOptions{Repo: dir, Goal: "GOAL.md", Plan: "PLAN.md"}); err != nil {
+		t.Fatal(err)
+	}
+	if got := readFile(t, dir, ".gitignore"); got != "bin/\n.aqv-out/\n" {
+		t.Fatalf(".gitignore: %q", got)
+	}
+}
+
+func TestInitClaudeSection(t *testing.T) {
+	section, err := adapters.Files.ReadFile("init/claude.go.md")
+	if err != nil {
+		t.Fatal(err)
+	}
+	dir := initRepo(t, map[string]string{
+		"GOAL.md": "goal", "PLAN.md": "plan", "go.mod": "module example.com/todo\n\ngo 1.24\n",
+	})
+	if _, err := Init(InitOptions{Repo: dir, Goal: "GOAL.md", Plan: "PLAN.md"}); err != nil {
+		t.Fatal(err)
+	}
+	if got := readFile(t, dir, "CLAUDE.md"); got != string(section) {
+		t.Fatalf("missing CLAUDE.md became %q", got)
+	}
+
+	// An end marker before the start, or no end marker at all, cannot be replaced safely.
+	for _, broken := range []string{
+		"pre\n<!-- aqv:end -->\n<!-- aqv:start -->\nno matching end\n",
+		"<!-- aqv:start -->\nno end marker\nkeep this\n",
+	} {
+		dir = initRepo(t, map[string]string{
+			"GOAL.md": "goal", "PLAN.md": "plan", "go.mod": "module example.com/todo\n\ngo 1.24\n",
+			"CLAUDE.md": broken,
+		})
+		res, err := Init(InitOptions{Repo: dir, Goal: "GOAL.md", Plan: "PLAN.md", Force: true})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got := readFile(t, dir, "CLAUDE.md"); got != broken || !contains(res.Kept, "CLAUDE.md") {
+			t.Fatalf("force rewrote a section it cannot bound: %q kept %v", got, res.Kept)
+		}
+	}
+}
+
+func TestInitWarnsWhenEmailAndModuleAreMissing(t *testing.T) {
+	dir := initRepo(t, map[string]string{"GOAL.md": "goal", "PLAN.md": "plan"})
+	// An empty local value hides a global user.email, so the warning does not depend on this machine.
+	if out, err := exec.Command("git", "-C", dir, "config", "user.email", "").CombinedOutput(); err != nil {
+		t.Fatalf("clear email: %v %s", err, out)
+	}
+	res, err := Init(InitOptions{Repo: dir, Goal: "GOAL.md", Plan: "PLAN.md", Lang: "go"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	warns := strings.Join(res.Warnings, "\n")
+	if !strings.Contains(warns, "git has no user.email") || !strings.Contains(warns, "no go.mod yet") {
+		t.Fatalf("warnings: %q", warns)
+	}
+	cfg, err := LoadConfig(readFile(t, dir, ".aqv.yml"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := strList(cfg.Map("git").Get("humans")); len(got) != 0 {
+		t.Fatalf("humans: %v", got)
+	}
+}
+
+func TestInitRejectsUnreadableConfig(t *testing.T) {
+	const broken = "humans: [\n"
+	dir := initRepo(t, map[string]string{
+		"GOAL.md": "goal", "PLAN.md": "plan", "go.mod": "module example.com/todo\n\ngo 1.24\n",
+		".aqv.yml": broken,
+	})
+	_, err := Init(InitOptions{Repo: dir, Goal: "GOAL.md", Plan: "PLAN.md"})
+	if err == nil || !strings.Contains(err.Error(), ".aqv.yml already here can't be read") {
+		t.Fatalf("got %v", err)
+	}
+	if readFile(t, dir, ".aqv.yml") != broken {
+		t.Fatal("init rewrote a config it could not read")
 	}
 }
