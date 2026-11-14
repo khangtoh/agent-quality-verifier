@@ -37,6 +37,12 @@ class ScrubPathsTest(unittest.TestCase):
             self.assertEqual(got, "<repo>/a <repo>/b")
             self.assertNotIn("<work>", [label for _, label in path_pairs(real)])
 
+    def test_scrub_paths_keeps_the_checkout_label_when_work_is_the_same_folder(self):
+        with tempfile.TemporaryDirectory() as root:
+            d = os.path.abspath(root)
+            got = scrub_paths(d + "/main.go", path_pairs(d, d))
+            self.assertEqual(got, "<repo>/main.go")
+
     def test_parse_junit_scrubs_paths_before_cutting(self):
         repo = "/var/checkout/" + "p" * 180
         work = repo + "/.aqv-out"

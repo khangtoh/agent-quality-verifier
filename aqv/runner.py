@@ -47,8 +47,19 @@ def path_pairs(repo, workdir=None):
 
 def scrub_paths(text, pairs):
     """Replaces machine-specific folders with placeholders. Messages are cut at a fixed length, so the same
-    commit must give the same text wherever it is checked out: scrub before cutting."""
-    for folder, label in sorted(set(pairs), key=lambda x: -len(x[0])):
+    commit must give the same text wherever it is checked out: scrub before cutting.
+
+    Longest folder first. Equal lengths keep insertion order (path_pairs puts <repo> before <work>), matching
+    Go's stable sort so the same path is always <repo> when checkout and work are the same folder.
+    """
+    seen, uniq = set(), []
+    for folder, label in pairs:
+        key = (folder, label)
+        if key not in seen:
+            seen.add(key)
+            uniq.append(key)
+    uniq.sort(key=lambda x: -len(x[0]))
+    for folder, label in uniq:
         text = text.replace(folder, label)
     return text
 

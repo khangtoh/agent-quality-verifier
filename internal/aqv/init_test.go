@@ -257,4 +257,13 @@ func TestInitRejectsUnreadableConfig(t *testing.T) {
 	if readFile(t, dir, ".aqv.yml") != broken {
 		t.Fatal("init rewrote a config it could not read")
 	}
+	for _, rel := range []string{
+		".spectral.yaml", "tools/aqvcapture/capture.go",
+		".claude/workflows/aqv-specs.js", ".claude/workflows/aqv-build.js",
+		"CLAUDE.md", ".gitignore",
+	} {
+		if exists(filepath.Join(dir, rel)) {
+			t.Fatalf("init wrote %s after refusing a broken .aqv.yml", rel)
+		}
+	}
 }
