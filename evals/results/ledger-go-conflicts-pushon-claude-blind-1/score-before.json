@@ -1,0 +1,207 @@
+{
+  "meta": {
+    "problem": "ledger",
+    "stack": "go",
+    "variant": "conflicts-pushon",
+    "seed": "0d9ef369faa4c2c594f977981d4fc8a8c8df5570",
+    "agent": "claude",
+    "arm": "blind",
+    "model": "default",
+    "exit": 0,
+    "minutes": 10.0,
+    "stop_blocks": 0
+  },
+  "requirements": [
+    {
+      "id": "AC-led-001",
+      "verifier": "Contract",
+      "failing_checks": [
+        "A6"
+      ],
+      "oracle_tests": 3,
+      "oracle_failed": [],
+      "oracle_messages": [],
+      "cell": "unproven_but_working"
+    },
+    {
+      "id": "AC-led-002",
+      "verifier": "Contract",
+      "failing_checks": [
+        "A6"
+      ],
+      "oracle_tests": 3,
+      "oracle_failed": [
+        "test_AC_led_002_creates_an_open_order_with_the_right_total"
+      ],
+      "oracle_messages": [
+        "AssertionError: assert ('pending' == 'open'"
+      ],
+      "cell": "caught"
+    },
+    {
+      "id": "AC-led-003",
+      "verifier": "Contract",
+      "failing_checks": [
+        "A6"
+      ],
+      "oracle_tests": 2,
+      "oracle_failed": [
+        "test_AC_led_003_returns_the_order_with_lines_total_paid_and_status"
+      ],
+      "oracle_messages": [
+        "AssertionError: assert {'id': 1, 'cu...s': 1000, ...} == {'id': 1, 'cu...s': 1000, ...}"
+      ],
+      "cell": "caught"
+    },
+    {
+      "id": "AC-led-004",
+      "verifier": "Contract",
+      "failing_checks": [
+        "A6"
+      ],
+      "oracle_tests": 3,
+      "oracle_failed": [
+        "test_AC_led_004_records_part_payments_and_marks_the_order_paid"
+      ],
+      "oracle_messages": [
+        "AssertionError: assert 'pending' == 'open'"
+      ],
+      "cell": "caught"
+    },
+    {
+      "id": "AC-led-005",
+      "verifier": "Sync",
+      "failing_checks": [],
+      "oracle_tests": 3,
+      "oracle_failed": [],
+      "oracle_messages": [],
+      "cell": "confirmed"
+    },
+    {
+      "id": "AC-led-006",
+      "verifier": "Contract",
+      "failing_checks": [
+        "A6"
+      ],
+      "oracle_tests": 3,
+      "oracle_failed": [
+        "test_AC_led_006_a_refund_reopens_a_paid_order"
+      ],
+      "oracle_messages": [
+        "AssertionError: assert ('pending' == 'open'"
+      ],
+      "cell": "caught"
+    },
+    {
+      "id": "AC-led-007",
+      "verifier": "Sync",
+      "failing_checks": [],
+      "oracle_tests": 2,
+      "oracle_failed": [],
+      "oracle_messages": [],
+      "cell": "confirmed"
+    },
+    {
+      "id": "AC-led-008",
+      "verifier": "Contract",
+      "failing_checks": [
+        "A6"
+      ],
+      "oracle_tests": 2,
+      "oracle_failed": [],
+      "oracle_messages": [],
+      "cell": "unproven_but_working"
+    },
+    {
+      "id": "AC-led-009",
+      "verifier": "Contract",
+      "failing_checks": [
+        "A6"
+      ],
+      "oracle_tests": 3,
+      "oracle_failed": [],
+      "oracle_messages": [],
+      "cell": "unproven_but_working"
+    }
+  ],
+  "cells": {
+    "confirmed": 2,
+    "false_assurance": 0,
+    "caught": 4,
+    "unproven_but_working": 3
+  },
+  "oracle_error": "",
+  "checks": {
+    "C1": "not_run",
+    "C2": "not_run",
+    "C3": "not_run",
+    "C4": "not_run",
+    "C5": "not_run",
+    "C6": "not_run",
+    "C7": "not_run",
+    "T1": "pass",
+    "T2": "pass",
+    "T3": "pass",
+    "T4": "pass",
+    "T5": "pass",
+    "T6": "pass",
+    "T7": "not_run",
+    "T8": "pass",
+    "A1": "pass",
+    "A2": "pass",
+    "A3": "pass",
+    "A4": "skip",
+    "A5": "pass",
+    "A6": "fail",
+    "A7": "not_run",
+    "A8": "not_run",
+    "D1": "pass",
+    "D2": "pass",
+    "D3": "pass",
+    "D4": "skip",
+    "D5": "pass",
+    "D6": "pass",
+    "D7": "pass",
+    "H1": "pass",
+    "H2": "pass",
+    "H3": "pass",
+    "H4": "pass",
+    "H5": "pass",
+    "H6": "pass",
+    "H7": "not_covered",
+    "H8": "pass",
+    "H9": "pass",
+    "H10": "pass"
+  },
+  "project_level_failures": [],
+  "protected_files_changed": [],
+  "timeline": {
+    "commits_checked": 19,
+    "on_main": 9,
+    "checks_with_failing_health": 19,
+    "checks_with_regressions": 0,
+    "first_check_with_everything_proven": null,
+    "proven_over_time": [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      2,
+      2,
+      2,
+      2,
+      2
+    ]
+  },
+  "checks_skipped": "T7,A7,C1,C2,C3,C4,C5,C6,C7,A8"
+}

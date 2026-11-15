@@ -1,0 +1,56 @@
+Agent Quality Verifier: final-tree (HEAD, all history to 8ac8f9e)
+
+REQUIREMENT  STATUS       FAILING CHECKS
+AC-led-001   Sync         -
+AC-led-002   Sync         -
+AC-led-003   Sync         -
+AC-led-004   Sync         -
+AC-led-005   Sync         -
+AC-led-006   Sync         -
+AC-led-007   Sync         -
+AC-led-008   Sync         -
+AC-led-009   Sync         -
+
+Tests prove the spec
+  T1  pass         Requirement IDs are valid and never reused
+  T2  pass         A code commit references the requirement
+  T3  pass         The code from those commits still exists
+  T4  pass         Tests are tagged to the requirement
+  T5  pass         The tagged tests pass
+  T6  pass         The tagged tests run the requirement's code
+  T7  pass         The tagged tests fail when the code is broken
+  T8  pass         Results reset when the requirement changes
+
+The API matches its OpenAPI contract
+  A1  pass         Every API requirement has an operation
+  A2  pass         Every operation references a requirement
+  A3  pass         The contract passes the lint rules
+  A4  skip         No breaking change unless the spec changed
+  A5  pass         The service serves exactly the documented routes
+  A6  pass         Responses in the tagged tests match the contract
+  A7  pass         The running service conforms to the contract
+
+The database matches its data contract
+  D1  pass         Every data requirement has a dataset
+  D2  pass         Every dataset references a requirement
+  D3  pass         The data contract is complete and consistent
+  D4  skip         No breaking data change unless the spec changed
+  D5  pass         The database has exactly the declared schema
+  D6  pass         Derived data reads only its declared sources
+  D7  pass         Merged migrations are never edited
+
+Git follows the conventions
+  H1  pass         Subjects follow Conventional Commits
+  H2  pass         Code commits carry a Refs: trailer
+  H3  pass         One requirement per code commit
+  H4  pass         refactor and chore commits change no status
+  H5  pass         Commit size under the limit
+  H6  pass         Branch names follow the pattern
+  H7  not covered  Main is never rewritten
+        No refs/aqv/verified recorded yet
+  H8  pass         The agent is named on its commits
+  H9  pass         Commits are signed
+  H10 pass         Protected files are changed only by people
+
+Agent scorecard (this range)
+  Claude <noreply@anthropic.com>: 23 commit(s), git rule pass rate 100%, requirements AC-led-001, AC-led-002, AC-led-003, AC-led-004, AC-led-005, AC-led-006, AC-led-007, AC-led-008, AC-led-009, none

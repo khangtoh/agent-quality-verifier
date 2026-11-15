@@ -1,0 +1,127 @@
+{
+  "seq": 1,
+  "time": "2026-11-15T07:25:45Z",
+  "sha": "c72d3775a9c97884ccbe41deb50977297440b716",
+  "branch": "main",
+  "subject": "docs: revise the requirements, the contracts and the plan",
+  "requirements": 9,
+  "proven": 0,
+  "built": 0,
+  "health": "failing",
+  "statuses": {
+    "AC-led-001": "Missing",
+    "AC-led-002": "Conflict",
+    "AC-led-003": "Missing",
+    "AC-led-004": "Missing",
+    "AC-led-005": "Missing",
+    "AC-led-006": "Conflict",
+    "AC-led-007": "Missing",
+    "AC-led-008": "Missing",
+    "AC-led-009": "Missing"
+  },
+  "counts": {
+    "Missing": 7,
+    "Conflict": 2
+  },
+  "checks": {
+    "C1": "fail",
+    "C2": "fail",
+    "C3": "fail",
+    "C4": "pass",
+    "C5": "skip",
+    "C6": "pass",
+    "T1": "pass",
+    "T2": "fail",
+    "T3": "skip",
+    "T4": "fail",
+    "T5": "skip",
+    "T6": "skip",
+    "T7": "not_run",
+    "T8": "skip",
+    "A1": "pass",
+    "A2": "pass",
+    "A3": "pass",
+    "A4": "skip",
+    "A5": "error",
+    "A6": "fail",
+    "A7": "not_run",
+    "A8": "skip",
+    "D1": "pass",
+    "D2": "pass",
+    "D3": "pass",
+    "D4": "skip",
+    "D5": "error",
+    "D6": "error",
+    "D7": "pass",
+    "H1": "pass",
+    "H2": "pass",
+    "H3": "pass",
+    "H4": "pass",
+    "H5": "pass",
+    "H6": "pass",
+    "H7": "not_covered",
+    "H8": "pass",
+    "H9": "pass",
+    "H10": "pass"
+  },
+  "families": {
+    "C": {
+      "pass": 2,
+      "fail": 3,
+      "other": 1
+    },
+    "T": {
+      "pass": 1,
+      "fail": 2,
+      "other": 5
+    },
+    "A": {
+      "pass": 3,
+      "fail": 2,
+      "other": 3
+    },
+    "D": {
+      "pass": 4,
+      "fail": 2,
+      "other": 1
+    },
+    "H": {
+      "pass": 9,
+      "fail": 0,
+      "other": 1
+    }
+  },
+  "attention": [
+    {
+      "check": "C2",
+      "subject": "AC-led-002",
+      "verdict": "fail",
+      "summary": "The requirement says \"open\"; POST /orders, orders, order_lines allows status: pending | paid",
+      "who": "person"
+    },
+    {
+      "check": "C1",
+      "subject": "AC-led-006",
+      "verdict": "fail",
+      "summary": "The requirement says 400; POST /payments/{payment_id}/refunds documents 201, 404, 409, 422",
+      "who": "person"
+    },
+    {
+      "check": "C2",
+      "subject": "AC-led-006",
+      "verdict": "fail",
+      "summary": "The requirement says \"open\"; the contracts allows account: cash | revenue; status: pending | paid",
+      "who": "person"
+    },
+    {
+      "check": "C3",
+      "subject": "AC-led-006",
+      "verdict": "fail",
+      "summary": "amount_cents is integer in the API contract and real in refunds",
+      "who": "person"
+    }
+  ],
+  "pending": 29,
+  "regressed": [],
+  "on_main": true
+}

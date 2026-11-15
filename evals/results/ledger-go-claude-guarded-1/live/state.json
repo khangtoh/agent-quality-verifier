@@ -1,0 +1,85 @@
+{
+  "seq": 33,
+  "time": "2026-11-15T04:13:47Z",
+  "sha": "8ac8f9e298864a5eee07c19f46eccb341fd82533",
+  "branch": "main",
+  "subject": "test(store): merge AC-led-001, single connection",
+  "requirements": 9,
+  "proven": 9,
+  "built": 9,
+  "health": "healthy",
+  "statuses": {
+    "AC-led-001": "Sync",
+    "AC-led-002": "Sync",
+    "AC-led-003": "Sync",
+    "AC-led-004": "Sync",
+    "AC-led-005": "Sync",
+    "AC-led-006": "Sync",
+    "AC-led-007": "Sync",
+    "AC-led-008": "Sync",
+    "AC-led-009": "Sync"
+  },
+  "counts": {
+    "Sync": 9
+  },
+  "checks": {
+    "T1": "pass",
+    "T2": "pass",
+    "T3": "pass",
+    "T4": "pass",
+    "T5": "pass",
+    "T6": "pass",
+    "T7": "not_run",
+    "T8": "pass",
+    "A1": "pass",
+    "A2": "pass",
+    "A3": "pass",
+    "A4": "skip",
+    "A5": "pass",
+    "A6": "pass",
+    "A7": "not_run",
+    "D1": "pass",
+    "D2": "pass",
+    "D3": "pass",
+    "D4": "skip",
+    "D5": "pass",
+    "D6": "pass",
+    "D7": "pass",
+    "H1": "pass",
+    "H2": "pass",
+    "H3": "pass",
+    "H4": "pass",
+    "H5": "pass",
+    "H6": "pass",
+    "H7": "not_covered",
+    "H8": "pass",
+    "H9": "pass",
+    "H10": "pass"
+  },
+  "families": {
+    "T": {
+      "pass": 7,
+      "fail": 0,
+      "other": 1
+    },
+    "A": {
+      "pass": 5,
+      "fail": 0,
+      "other": 2
+    },
+    "D": {
+      "pass": 6,
+      "fail": 0,
+      "other": 1
+    },
+    "H": {
+      "pass": 9,
+      "fail": 0,
+      "other": 1
+    }
+  },
+  "attention": [],
+  "pending": 0,
+  "regressed": [],
+  "on_main": true
+}

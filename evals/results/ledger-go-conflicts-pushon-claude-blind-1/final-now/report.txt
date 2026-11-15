@@ -1,0 +1,80 @@
+Agent Quality Verifier: final-tree (HEAD, all history to d523613)
+
+REQUIREMENT  STATUS       FAILING CHECKS
+AC-led-001   Contract     A6
+AC-led-002   Conflict     A6, C2
+AC-led-003   Conflict     A6, C7
+AC-led-004   Conflict     A6, C7
+AC-led-005   Sync         -
+AC-led-006   Conflict     A6, A8, C1, C2, C3
+AC-led-007   Sync         -
+AC-led-008   Contract     A6
+AC-led-009   Contract     A6
+
+The spec, the contracts and the design agree
+  C1  FAIL         Status codes a requirement names are in the API contract
+        AC-led-006: The requirement says 400; POST /payments/{payment_id}/refunds documents 201, 404, 409, 422
+  C2  FAIL         Values a requirement quotes are allowed by the contracts
+        AC-led-002: The requirement says "open"; POST /orders, orders, order_lines allows status: pending | paid
+        AC-led-006: The requirement says "open"; the contracts allow status: pending | paid
+  C3  FAIL         The API and data contracts agree on shared fields
+        AC-led-006: amount_cents is integer in the API contract and real in refunds
+  C4  pass         The design names only what the contracts have
+  C5  pass         Results reset when the requirement's contract changes
+  C6  pass         The spec followed the last design change
+  C7  FAIL         The requirement relies on nothing the documents disagree about
+        AC-led-003: Carries status, which is in dispute (see C2 on AC-led-002, AC-led-006)
+        AC-led-004: Quotes "paid", a value of status, which is in dispute (see C2 on AC-led-002, AC-led-006)
+
+Tests prove the spec
+  T1  pass         Requirement IDs are valid and never reused
+  T2  pass         A code commit references the requirement
+  T3  pass         The code from those commits still exists
+  T4  pass         Tests are tagged to the requirement
+  T5  pass         The tagged tests pass
+  T6  pass         The tagged tests run the requirement's code
+  T7  not run      The tagged tests fail when the code is broken
+  T8  pass         Results reset when the requirement changes
+
+The API matches its OpenAPI contract
+  A1  pass         Every API requirement has an operation
+  A2  pass         Every operation references a requirement
+  A3  pass         The contract passes the lint rules
+  A4  skip         No breaking change unless the spec changed
+  A5  pass         The service serves exactly the documented routes
+  A6  FAIL         Responses in the tagged tests match the contract
+        AC-led-001: TestAC_led_001_DatabaseFailureReturns500: POST /customers returned 500, which the contract doesn't document; TestAC_led_001_UnknownRouteAndMethodReturnJSONErrors called DELETE /customers, which the contract doesn't have; TestAC_led_001_UnknownRouteAndMethodReturnJSONErrors called GET /nothing-here, which the contract doesn't have
+        AC-led-002: TestAC_led_002_DatabaseFailureReturns500: POST /orders returned 500, which the contract doesn't document
+        AC-led-003: TestAC_led_003_DatabaseFailureReturns500: GET /orders/{order_id} returned 500, which the contract doesn't document
+        AC-led-004: TestAC_led_004_DatabaseFailureReturns500: POST /orders/{order_id}/payments returned 500, which the contract doesn't document
+        AC-led-006: TestAC_led_006_DatabaseFailureReturns500: POST /payments/{payment_id}/refunds returned 500, which the contract doesn't document
+        AC-led-008: TestAC_led_008_DatabaseFailureReturns500: GET /accounts/{account}/balance returned 500, which the contract doesn't document
+        AC-led-009: TestAC_led_009_DatabaseFailureReturns500: GET /reports/daily-revenue returned 500, which the contract doesn't document
+  A7  not run      The running service conforms to the contract
+  A8  FAIL         The tagged tests saw every status the requirement names
+        AC-led-006: The requirement says 400; its tagged tests saw only 201, 404, 409, 422, 500 from POST /payments/{payment_id}/refunds
+
+The database matches its data contract
+  D1  pass         Every data requirement has a dataset
+  D2  pass         Every dataset references a requirement
+  D3  pass         The data contract is complete and consistent
+  D4  skip         No breaking data change unless the spec changed
+  D5  pass         The database has exactly the declared schema
+  D6  pass         Derived data reads only its declared sources
+  D7  pass         Merged migrations are never edited
+
+Git follows the conventions
+  H1  pass         Subjects follow Conventional Commits
+  H2  pass         Code commits carry a Refs: trailer
+  H3  pass         One requirement per code commit
+  H4  pass         refactor and chore commits change no status
+  H5  pass         Commit size under the limit
+  H6  pass         Branch names follow the pattern
+  H7  not covered  Main is never rewritten
+        No refs/aqv/verified recorded yet
+  H8  pass         The agent is named on its commits
+  H9  pass         Commits are signed
+  H10 pass         Protected files are changed only by people
+
+Agent scorecard (this range)
+  Claude <noreply@anthropic.com>: 19 commit(s), git rule pass rate 100%, requirements AC-led-001, AC-led-002, AC-led-003, AC-led-004, AC-led-005, AC-led-006, AC-led-007, AC-led-008, AC-led-009

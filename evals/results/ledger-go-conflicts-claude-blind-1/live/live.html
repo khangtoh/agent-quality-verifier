@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agent work: state and health</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap">
+<style>
+:root {
+  --bg: #f6f7f6; --surface: #ffffff; --fg: #1b2226; --muted: #5a666b; --line: #dde2e1;
+  --accent: #1d5c63; --code-bg: #eef1f0;
+  --ok-fg: #1f6b4a; --ok-bg: #e1f1e8; --warn-fg: #8a5a00; --warn-bg: #fbefd6;
+  --bad-fg: #a5332a; --bad-bg: #fbe3e0; --muted-fg: #5a666b; --muted-bg: #eceeed;
+  --font-display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Source Sans 3", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101517; --surface: #171f22; --fg: #e3e9ea; --muted: #99a6aa; --line: #2a3437;
+    --accent: #7cc4c9; --code-bg: #1f292c;
+    --ok-fg: #8fd9b2; --ok-bg: #183528; --warn-fg: #f0c46a; --warn-bg: #3a2d12;
+    --bad-fg: #f3a198; --bad-bg: #41201d; --muted-fg: #99a6aa; --muted-bg: #222b2e;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101517; --surface: #171f22; --fg: #e3e9ea; --muted: #99a6aa; --line: #2a3437;
+  --accent: #7cc4c9; --code-bg: #1f292c;
+  --ok-fg: #8fd9b2; --ok-bg: #183528; --warn-fg: #f0c46a; --warn-bg: #3a2d12;
+  --bad-fg: #f3a198; --bad-bg: #41201d; --muted-fg: #99a6aa; --muted-bg: #222b2e;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+.page { max-width: 1160px; margin: 0 auto; padding-inline: 20px; padding-block: 36px 64px; display: grid; gap: 44px; }
+section { display: grid; gap: 16px; min-width: 0; }
+h1, h2, h3 { font-family: var(--font-display); margin: 0; line-height: 1.15; text-wrap: balance; }
+h1 { font-size: clamp(28px, 5vw, 40px); }
+h2 { font-size: 24px; }
+h3 { font-size: 17px; }
+p { margin: 0; }
+a { color: var(--accent); }
+code { font-family: var(--font-mono); font-size: 0.85em; background: var(--code-bg); padding: 0.08em 0.35em; border-radius: 4px; overflow-wrap: anywhere; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 19px; max-width: 70ch; }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+header.top { display: grid; gap: 12px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 4px; min-width: 0; }
+.stat b { font-family: var(--font-display); font-size: 28px; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 14px; color: var(--muted); }
+.chip { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 5px; font-family: var(--font-mono); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.chip.ok { color: var(--ok-fg); background: var(--ok-bg); }
+.chip.warn { color: var(--warn-fg); background: var(--warn-bg); }
+.chip.bad { color: var(--bad-fg); background: var(--bad-bg); }
+.chip.muted { color: var(--muted-fg); background: var(--muted-bg); }
+.chip.id { color: var(--fg); background: var(--code-bg); }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+thead th { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
+tbody tr:last-child td { border-bottom: 0; }
+tr.group td { font-family: var(--font-display); font-weight: 700; color: var(--accent); background: var(--bg); padding-block: 8px; }
+td.id { font-family: var(--font-mono); font-weight: 600; white-space: nowrap; }
+td.name { font-weight: 600; }
+.matrix th, .matrix td { padding: 6px 4px; text-align: center; border-bottom: 1px solid var(--line); }
+.matrix th.check { font-family: var(--font-mono); font-size: 11px; color: var(--muted); writing-mode: vertical-rl; transform: rotate(180deg); height: 44px; padding: 6px 2px; }
+.matrix th.scn, .matrix td.scn { text-align: left; position: sticky; left: 0; background: var(--surface); white-space: nowrap; padding-inline: 12px; font-family: var(--font-mono); font-size: 12.5px; z-index: 1; }
+.matrix thead th.scn { background: var(--bg); }
+.matrix td.gap, .matrix th.gap { border-left: 2px solid var(--line); }
+.cell { display: inline-block; width: 16px; height: 16px; border-radius: 4px; vertical-align: middle; }
+.cell.hit { background: var(--bad-fg); }
+.cell.good { background: var(--ok-fg); }
+.cell.also { border: 2px solid var(--bad-fg); }
+.cell.pass { width: 6px; height: 6px; border-radius: 50%; background: var(--ok-fg); opacity: 0.55; }
+.cell.skip { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); opacity: 0.4; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 14px; color: var(--muted); align-items: center; }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+details.scenario { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+details.scenario > summary { cursor: pointer; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; list-style: none; }
+details.scenario > summary::-webkit-details-marker { display: none; }
+details.scenario > summary .nm { font-family: var(--font-mono); font-weight: 600; font-size: 14px; }
+details.scenario > summary .tt { flex: 1 1 280px; min-width: 0; }
+details.scenario[open] > summary { border-bottom: 1px solid var(--line); }
+details.scenario .inner { padding: 14px 16px 16px; display: grid; gap: 12px; }
+summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 10px; }
+ul.findings { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 6px; font-size: 14.5px; }
+ul.findings li { display: grid; grid-template-columns: 44px 1fr; gap: 8px; }
+ul.findings li .ck { font-family: var(--font-mono); font-weight: 600; color: var(--bad-fg); }
+.reqs { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.req { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.req .top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.req .id { font-family: var(--font-mono); font-weight: 600; font-size: 13px; }
+.req p { font-size: 14.5px; }
+.req .why { font-size: 13px; color: var(--muted); }
+.req.ok { border-top: 3px solid var(--ok-fg); } .req.warn { border-top: 3px solid var(--warn-fg); }
+.req.bad { border-top: 3px solid var(--bad-fg); } .req.muted { border-top: 3px solid var(--muted); }
+.goal-list { display: grid; gap: 4px; }
+.goal-list .row { display: grid; grid-template-columns: 40px 100px 1fr; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--line); align-items: start; }
+.goal-list .row:last-child { border-bottom: 0; }
+.goal-list .row .ck { font-family: var(--font-mono); font-weight: 600; }
+.goal-list .msg { display: block; font-size: 13.5px; color: var(--muted); margin-top: 2px; overflow-wrap: anywhere; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.panel h3 { padding: 12px 12px 4px; }
+footer { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+@media (max-width: 640px) { .goal-list .row { grid-template-columns: 36px 1fr; } .goal-list .row > :nth-child(3) { grid-column: 1 / -1; } }
+.site-nav { position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
+.site-nav .in { max-width: 1160px; margin: 0 auto; padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: baseline; }
+.site-nav .brand { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--fg); text-decoration: none; margin-right: auto; }
+.site-nav a.lk { color: var(--muted); text-decoration: none; font-size: 14px; }
+.site-nav a.lk:hover { color: var(--accent); text-decoration: underline; }
+.site-nav a.lk[aria-current="page"] { color: var(--accent); font-weight: 600; }
+@media (max-width: 640px) { .site-nav { position: static; } }
+
+.live-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: baseline; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 16px 0; }
+.stats .stat { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+.stats .stat b { display: block; font-family: var(--font-display); font-size: 26px; line-height: 1.1; }
+.stats .stat span { color: var(--muted-fg); font-size: 13px; }
+.bar { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--muted-bg); margin: 6px 0 2px; }
+.bar i { display: block; height: 100%; }
+.grid-wrap { overflow-x: auto; }
+table.grid { border-collapse: collapse; font-size: 12px; }
+table.grid th, table.grid td { padding: 2px 3px; text-align: left; white-space: nowrap; }
+table.grid td.cell { width: 16px; min-width: 16px; height: 16px; padding: 0; border: 2px solid var(--bg); border-radius: 4px; }
+table.grid th.sha { font-family: var(--font-mono); font-weight: 400; color: var(--muted-fg); writing-mode: vertical-rl; height: 64px; }
+table.grid th.onmain { color: var(--fg); font-weight: 600; }
+table.grid td.rid { font-family: var(--font-mono); padding-right: 10px; }
+.att { display: grid; grid-template-columns: max-content max-content 1fr; gap: 4px 12px; font-size: 14px; align-items: baseline; }
+.att code { font-size: 12px; }
+.legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: var(--muted-fg); margin-top: 8px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; }
+</style>
+</head>
+<body>
+<main class="page">
+<header class="top"><span class="eyebrow">repo · main · 0ea730d · check 3</span><div class="live-head"><h1>1 of 9 requirements proven.</h1><span class="chip ok">healthy</span></div><p class="lede muted">Merge branch &#x27;feat/AC-led-001-customers&#x27;</p></header>
+<section><h2>State</h2><div class="bar"><i style="width:11.11%;background:var(--ok-fg)" title="Sync: 1"></i><i style="width:88.89%;background:var(--muted-bg)" title="Missing: 8"></i></div><div class="legend"><span><i style="background:var(--ok-fg)"></i>1 Sync</span><span><i style="background:var(--muted-bg)"></i>8 Missing</span></div></section>
+<section><h2>Health</h2><div class="stats"><div class="stat"><b>5 pass · 2 fail</b><span><span class="chip bad">T</span> Tests prove the spec</span></div><div class="stat"><b>3 pass · 2 fail</b><span><span class="chip bad">A</span> API matches its contract</span></div><div class="stat"><b>4 pass · 1 fail</b><span><span class="chip bad">D</span> Database matches its contract</span></div><div class="stat"><b>9 pass · 0 fail</b><span><span class="chip ok">H</span> Git history can be trusted</span></div></div>
+<p class="muted small">Nothing built so far breaks a check. 35 failure(s) only say that work hasn't started.</p></section>
+<section><h2>Commit by commit</h2><div class="grid-wrap"><table class="grid"><thead><tr><th></th><th class="sha onmain" title="main: docs: revise the requirements, the contracts and the plan">78b95ce</th><th class="sha" title="feat/AC-led-001-customers: docs: revise the requirements, the contracts and the plan">78b95ce</th><th class="sha onmain" title="main: Merge branch &#x27;feat/AC-led-001-customers&#x27;">0ea730d</th><th>now</th></tr></thead><tbody><tr><td class="rid">AC-led-001</td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td class="cell" style="background:var(--ok-fg)" title="Sync"></td><td>Sync</td></tr><tr><td class="rid">AC-led-002</td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td>Missing</td></tr><tr><td class="rid">AC-led-003</td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td>Missing</td></tr><tr><td class="rid">AC-led-004</td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td>Missing</td></tr><tr><td class="rid">AC-led-005</td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td>Missing</td></tr><tr><td class="rid">AC-led-006</td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td>Missing</td></tr><tr><td class="rid">AC-led-007</td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td>Missing</td></tr><tr><td class="rid">AC-led-008</td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td>Missing</td></tr><tr><td class="rid">AC-led-009</td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td class="cell" style="background:var(--muted-bg)" title="Missing"></td><td>Missing</td></tr></tbody></table></div><p class="muted small">One column per checked commit, oldest first; commits on main are in bold. Each commit's full report is in <code>snap/</code>.</p></section>
+<footer>Written by <code>aqv watch</code>. This page reloads every 5 seconds.<script>setTimeout(function () { location.reload(); }, 5000);</script></footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "problem": "ledger",
+  "stack": "go",
+  "seed": "6f9ea9ef3bcf36664f29c02c6e018ecfa99a0d31",
+  "agent": "claude",
+  "arm": "guarded",
+  "model": "default",
+  "exit": 0,
+  "minutes": 38.7,
+  "stop_blocks": 0
+}

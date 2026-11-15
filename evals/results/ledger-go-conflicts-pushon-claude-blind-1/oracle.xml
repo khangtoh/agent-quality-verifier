@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="4" skipped="0" tests="24" time="2.045" timestamp="2026-11-15T17:47:50.002762+08:00" hostname="Mac"><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_001_creates_a_customer_with_a_new_id" time="0.231" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_001_rejects_a_duplicate_email_and_stores_nothing" time="0.071" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_001_rejects_a_malformed_body" time="0.069" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_002_creates_an_open_order_with_the_right_total" time="0.073"><failure message="AssertionError: assert ('pending' == 'open'&#10;  &#10;  - open&#10;  + pending)">svc = &lt;conftest.Service object at 0x10d67c770&gt;
+
+    def test_AC_led_002_creates_an_open_order_with_the_right_total(svc):
+        c = svc.customer()
+        lines = [{"sku": "A", "quantity": 3, "unit_price_cents": 250}, {"sku": "B", "quantity": 1, "unit_price_cents": 999},
+                 {"sku": "FREE", "quantity": 5, "unit_price_cents": 0}]
+        o = svc.order(c["id"], lines)
+&gt;       assert o["status"] == "open" and o["total_cents"] == 1749 and o["paid_cents"] == 0
+E       AssertionError: assert ('pending' == 'open'
+E         
+E         - open
+E         + pending)
+
+evals/problems/ledger/oracle/test_ledger.py:43: AssertionError</failure></testcase><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_002_rejects_an_unknown_customer" time="0.068" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_002_rejects_bad_lines" time="0.073" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_003_returns_the_order_with_lines_total_paid_and_status" time="0.076"><failure message="AssertionError: assert {'id': 1, 'cu...s': 1000, ...} == {'id': 1, 'cu...s': 1000, ...}&#10;  &#10;  Omitting 5 identical items, use -vv to show&#10;  Differing items:&#10;  {'status': 'pending'} != {'status': 'open'}&#10;  Use -v to get more diff">svc = &lt;conftest.Service object at 0x10d6508d0&gt;
+
+    def test_AC_led_003_returns_the_order_with_lines_total_paid_and_status(svc):
+        c = svc.customer()
+        lines = [{"sku": "Z", "quantity": 1, "unit_price_cents": 700}, {"sku": "A", "quantity": 2, "unit_price_cents": 150}]
+        o = svc.order(c["id"], lines)
+        p = svc.pay(o["id"], 400).json()
+        svc.refund(p["id"], 100)
+        got = svc.http.get(f"/orders/{o['id']}")
+        assert got.status_code == 200
+&gt;       assert got.json() == {"id": o["id"], "customer_id": c["id"], "status": "open", "total_cents": 1000,
+                              "paid_cents": 300, "lines": lines}
+E       AssertionError: assert {'id': 1, 'cu...s': 1000, ...} == {'id': 1, 'cu...s': 1000, ...}
+E         
+E         Omitting 5 identical items, use -vv to show
+E         Differing items:
+E         {'status': 'pending'} != {'status': 'open'}
+E         Use -v to get more diff
+
+evals/problems/ledger/oracle/test_ledger.py:78: AssertionError</failure></testcase><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_003_unknown_order_is_404" time="0.072" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_004_records_part_payments_and_marks_the_order_paid" time="0.077"><failure message="AssertionError: assert 'pending' == 'open'&#10;  &#10;  - open&#10;  + pending">svc = &lt;conftest.Service object at 0x10d641f50&gt;
+
+    def test_AC_led_004_records_part_payments_and_marks_the_order_paid(svc):
+        o = svc.order(svc.customer()["id"])  # total 3000
+        r1 = svc.pay(o["id"], 1000, "2026-03-01")
+        assert r1.status_code == 201
+        p1 = r1.json()
+        assert p1 == {"id": p1["id"], "order_id": o["id"], "amount_cents": 1000, "paid_on": "2026-03-01", "refunded_cents": 0}
+&gt;       assert svc.http.get(f"/orders/{o['id']}").json()["status"] == "open"
+E       AssertionError: assert 'pending' == 'open'
+E         
+E         - open
+E         + pending
+
+evals/problems/ledger/oracle/test_ledger.py:97: AssertionError</failure></testcase><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_004_rejects_a_payment_above_the_unpaid_balance" time="0.075" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_004_unknown_order_and_bad_bodies" time="0.075" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_005_a_repeated_key_returns_the_original_and_records_nothing" time="0.080" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_005_keys_are_scoped_to_the_order_and_optional" time="0.082" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_005_a_repeat_is_recognised_even_when_the_order_is_fully_paid" time="0.078" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_006_records_refunds_up_to_what_is_left_of_the_payment" time="0.082" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_006_a_refund_reopens_a_paid_order" time="0.075"><failure message="AssertionError: assert ('pending' == 'open'&#10;  &#10;  - open&#10;  + pending)">svc = &lt;conftest.Service object at 0x10d694f50&gt;
+
+    def test_AC_led_006_a_refund_reopens_a_paid_order(svc):
+        o = svc.order(svc.customer()["id"])  # total 3000
+        p = svc.pay(o["id"], 3000).json()
+        assert svc.http.get(f"/orders/{o['id']}").json()["status"] == "paid"
+        assert svc.refund(p["id"], 1).status_code == 201
+        after = svc.http.get(f"/orders/{o['id']}").json()
+&gt;       assert after["status"] == "open" and after["paid_cents"] == 2999
+E       AssertionError: assert ('pending' == 'open'
+E         
+E         - open
+E         + pending)
+
+evals/problems/ledger/oracle/test_ledger.py:182: AssertionError</failure></testcase><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_006_unknown_payment_and_bad_bodies" time="0.071" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_007_payments_and_refunds_write_balanced_entry_pairs" time="0.071" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_007_rejected_requests_write_no_entries" time="0.069" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_008_balances_start_at_zero_and_follow_the_ledger" time="0.082" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_008_unknown_account_is_404" time="0.081" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_009_report_is_empty_before_anything_is_recorded" time="0.079" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_009_report_lists_gross_refunds_and_net_per_day_in_date_order" time="0.086" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_009_the_daily_revenue_dataset_agrees_with_the_report" time="0.079" /></testsuite></testsuites>

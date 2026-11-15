@@ -1,0 +1,3648 @@
+{
+  "repo": "evals/runs/ledger-go-conflicts-pushon-claude-blind-1/final-tree",
+  "head": "d523613c2e56fbfa9c9e5444ca78c3c78278c2c6",
+  "base": null,
+  "head_branch": "HEAD",
+  "checks": {
+    "C1": "not_run",
+    "C2": "not_run",
+    "C3": "not_run",
+    "C4": "not_run",
+    "C5": "not_run",
+    "C6": "not_run",
+    "C7": "not_run",
+    "T1": "pass",
+    "T2": "pass",
+    "T3": "pass",
+    "T4": "pass",
+    "T5": "pass",
+    "T6": "pass",
+    "T7": "not_run",
+    "T8": "pass",
+    "A1": "pass",
+    "A2": "pass",
+    "A3": "pass",
+    "A4": "skip",
+    "A5": "pass",
+    "A6": "not_run",
+    "A7": "not_run",
+    "A8": "not_run",
+    "D1": "pass",
+    "D2": "pass",
+    "D3": "pass",
+    "D4": "skip",
+    "D5": "pass",
+    "D6": "pass",
+    "D7": "pass",
+    "H1": "pass",
+    "H2": "pass",
+    "H3": "pass",
+    "H4": "pass",
+    "H5": "pass",
+    "H6": "pass",
+    "H7": "not_covered",
+    "H8": "pass",
+    "H9": "pass",
+    "H10": "pass"
+  },
+  "requirements": [
+    {
+      "id": "AC-led-001",
+      "text": "A customer is created with a name and an email address and gets a new ID; a second customer with an email address already in use is rejected with 409 and is not stored.",
+      "api": [
+        "POST /customers"
+      ],
+      "status": "Sync",
+      "not_covered": [
+        "H7"
+      ],
+      "failing_checks": [],
+      "data": [
+        "customers"
+      ],
+      "vitals": {
+        "spec": "ok",
+        "code": "ok",
+        "api": "ok",
+        "data": "ok",
+        "tests": "ok"
+      },
+      "note": "Implemented, tested, and matching the contract.",
+      "segments": [
+        {
+          "t": "A customer is created with a name and an email address and gets a new ID; a second customer with an email address already in use is rejected with 409 and is not stored.",
+          "m": false
+        }
+      ],
+      "timeline": [
+        {
+          "sha": "7d1aac9",
+          "label": "Spec added",
+          "state": "neutral"
+        },
+        {
+          "sha": "0f46410",
+          "label": "feat(store): open the database and apply migrations (71 lines still in the code)",
+          "state": "ok"
+        },
+        {
+          "sha": "4d21edf",
+          "label": "feat(customers): create customers with unique email addresses (155 lines still in the code)",
+          "state": "ok"
+        },
+        {
+          "sha": "78d583a",
+          "label": "test(customers): cover customer creation, duplicates and limits (tests)",
+          "state": "ok"
+        }
+      ],
+      "now": [
+        {
+          "label": "TestAC_led_001_AcceptsBoundaryLengths: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_AcceptsBoundaryLengths/longest_email: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_AcceptsBoundaryLengths/longest_name: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_AcceptsBoundaryLengths/shortest_name_and_email: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_CreatesCustomerWithNewID: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_DatabaseFailureReturns500: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsEmailAlreadyInUse: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/email_not_string: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/email_too_long: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/email_too_short: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/email_two_ats: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/email_with_space: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/email_without_at: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/empty_body: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/empty_name: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/missing_email: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/missing_name: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/name_not_string: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/name_too_long: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/not_an_object: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/not_json: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/null: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/trailing_data: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/unknown_field: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_UnknownRouteAndMethodReturnJSONErrors: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_OpenAppliesEachMigrationOnce: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_OpenCreatesCustomersTable: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_OpenFailsOnUnusablePath: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_OpenTurnsForeignKeysOn: pass",
+          "state": "ok"
+        },
+        {
+          "label": "Its tests run 89 of its 226 code line(s)",
+          "state": "ok"
+        }
+      ]
+    },
+    {
+      "id": "AC-led-002",
+      "text": "An order is created for an existing customer with one or more lines, starts with status \"open\", and its total is the sum of quantity times unit price over its lines; an order for a customer that does not exist is rejected with 404.",
+      "api": [
+        "POST /orders"
+      ],
+      "status": "Sync",
+      "not_covered": [
+        "H7"
+      ],
+      "failing_checks": [],
+      "data": [
+        "orders",
+        "order_lines"
+      ],
+      "vitals": {
+        "spec": "ok",
+        "code": "ok",
+        "api": "ok",
+        "data": "ok",
+        "tests": "ok"
+      },
+      "note": "Implemented, tested, and matching the contract.",
+      "segments": [
+        {
+          "t": "An order is created for an existing customer with one or more lines, starts with status \"open\", and its total is the sum of quantity times unit price over its lines; an order for a customer that does not exist is rejected with 404.",
+          "m": false
+        }
+      ],
+      "timeline": [
+        {
+          "sha": "7d1aac9",
+          "label": "Spec added",
+          "state": "neutral"
+        },
+        {
+          "sha": "1157ac0",
+          "label": "feat(orders): create orders with lines and a total (157 lines still in the code)",
+          "state": "ok"
+        },
+        {
+          "sha": "d7f4694",
+          "label": "test(orders): cover order creation, totals and limits (tests)",
+          "state": "ok"
+        }
+      ],
+      "now": [
+        {
+          "label": "TestAC_led_002_AcceptsBoundaryValues: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_CreatesOpenOrderWithTotal: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_DatabaseFailureReturns500: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/bad_second_line: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/customer_not_integer: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/customer_too_large: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/customer_zero: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/empty_body: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/empty_sku: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/missing_customer: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/missing_lines: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/missing_price: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/missing_quantity: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/missing_sku: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/no_lines: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/not_json: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/null_lines: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/price_negative: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/price_too_large: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/quantity_fractional: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/quantity_too_large: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/quantity_zero: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/sku_too_long: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/too_many_lines: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/unknown_field: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsInvalidBody/unknown_line_field: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_RejectsUnknownCustomer: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_SecondOrderGetsNewID: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_002_OrdersRequireAnExistingCustomer: pass",
+          "state": "ok"
+        },
+        {
+          "label": "Its tests run 56 of its 157 code line(s)",
+          "state": "ok"
+        }
+      ]
+    },
+    {
+      "id": "AC-led-003",
+      "text": "An order is returned with its lines in the order they were given, its total, the amount paid so far (its payments, ignoring refunds) and its status; an order that does not exist returns 404.",
+      "api": [
+        "GET /orders/{order_id}"
+      ],
+      "status": "Sync",
+      "not_covered": [
+        "H7"
+      ],
+      "failing_checks": [],
+      "vitals": {
+        "spec": "ok",
+        "code": "ok",
+        "api": "ok",
+        "tests": "ok"
+      },
+      "note": "Implemented, tested, and matching the contract.",
+      "segments": [
+        {
+          "t": "An order is returned with its lines in the order they were given, its total, the amount paid so far (its payments, ignoring refunds) and its status; an order that does not exist returns 404.",
+          "m": false
+        }
+      ],
+      "timeline": [
+        {
+          "sha": "7d1aac9",
+          "label": "Spec added",
+          "state": "neutral"
+        },
+        {
+          "sha": "0d9ef36",
+          "label": "Spec changed: (payments minus \u2192 (its payments, ignoring",
+          "state": "neutral"
+        },
+        {
+          "sha": "7ecebf6",
+          "label": "feat(orders): return an order with its lines, total and status (36 lines still in the code)",
+          "state": "ok"
+        },
+        {
+          "sha": "82d6734",
+          "label": "test(orders): cover reading an order and missing orders (tests)",
+          "state": "ok"
+        }
+      ],
+      "now": [
+        {
+          "label": "TestAC_led_003_DatabaseFailureReturns500: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_003_LinesFollowPositionNotInsertionID: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_003_MissingOrderReturns404: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_003_MissingOrderReturns404/+1: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_003_MissingOrderReturns404/-1: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_003_MissingOrderReturns404/0: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_003_MissingOrderReturns404/1.0: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_003_MissingOrderReturns404/1x: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_003_MissingOrderReturns404/2: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_003_MissingOrderReturns404/2147483648: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_003_MissingOrderReturns404/99999999999999999999: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_003_MissingOrderReturns404/abc: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_003_ReturnsOrderWithLinesInGivenOrder: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_003_ReturnsStoredStatus: pass",
+          "state": "ok"
+        },
+        {
+          "label": "Its tests run 18 of its 36 code line(s)",
+          "state": "ok"
+        }
+      ]
+    },
+    {
+      "id": "AC-led-004",
+      "text": "A payment records an amount and a payment date against an order and returns 201; a payment larger than the order's unpaid balance is rejected with 409 and not recorded; when the amount paid reaches the order's total, its status becomes \"paid\".",
+      "api": [
+        "POST /orders/{order_id}/payments"
+      ],
+      "status": "Sync",
+      "not_covered": [
+        "H7"
+      ],
+      "failing_checks": [],
+      "data": [
+        "payments"
+      ],
+      "vitals": {
+        "spec": "ok",
+        "code": "ok",
+        "api": "ok",
+        "data": "ok",
+        "tests": "ok"
+      },
+      "note": "Implemented, tested, and matching the contract.",
+      "segments": [
+        {
+          "t": "A payment records an amount and a payment date against an order and returns 201; a payment larger than the order's unpaid balance is rejected with 409 and not recorded; when the amount paid reaches the order's total, its status becomes \"paid\".",
+          "m": false
+        }
+      ],
+      "timeline": [
+        {
+          "sha": "7d1aac9",
+          "label": "Spec added",
+          "state": "neutral"
+        },
+        {
+          "sha": "8f31a59",
+          "label": "feat(payments): record payments and reject overpayment (104 lines still in the code)",
+          "state": "ok"
+        },
+        {
+          "sha": "4a013de",
+          "label": "test(payments): cover part-payments, overpayment and limits (tests)",
+          "state": "ok"
+        }
+      ],
+      "now": [
+        {
+          "label": "TestAC_led_004_AcceptsLargestAmount: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_DatabaseFailureReturns500: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_MissingOrderReturns404: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_MissingOrderReturns404/-1: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_MissingOrderReturns404/0: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_MissingOrderReturns404/2: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_MissingOrderReturns404/2147483648: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_MissingOrderReturns404/abc: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_PartPaymentsAddUpAndFinalOneMarksPaid: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_PaymentsCountOnlyTowardsTheirOwnOrder: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_RecordsPayment: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_RejectsInvalidBody: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_RejectsInvalidBody/amount_fractional: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_RejectsInvalidBody/amount_negative: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_RejectsInvalidBody/amount_string: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_RejectsInvalidBody/amount_too_large: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_RejectsInvalidBody/amount_zero: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_RejectsInvalidBody/date_not_string: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_RejectsInvalidBody/date_prefixed: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_RejectsInvalidBody/date_short: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_RejectsInvalidBody/date_with_time: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_RejectsInvalidBody/empty_body: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_RejectsInvalidBody/missing_amount: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_RejectsInvalidBody/missing_date: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_RejectsInvalidBody/not_json: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_RejectsInvalidBody/unknown_field: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_RejectsOverpayment: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_004_SinglePaymentOfTheTotalMarksPaid: pass",
+          "state": "ok"
+        },
+        {
+          "label": "Its tests run 38 of its 104 code line(s)",
+          "state": "ok"
+        }
+      ]
+    },
+    {
+      "id": "AC-led-005",
+      "text": "A payment request that repeats an Idempotency-Key already used on the same order returns the original payment with 200 and records nothing new; requests without the header are never treated as repeats.",
+      "api": [
+        "POST /orders/{order_id}/payments"
+      ],
+      "status": "Sync",
+      "not_covered": [
+        "H7"
+      ],
+      "failing_checks": [],
+      "vitals": {
+        "spec": "ok",
+        "code": "ok",
+        "api": "ok",
+        "tests": "ok"
+      },
+      "note": "Implemented, tested, and matching the contract.",
+      "segments": [
+        {
+          "t": "A payment request that repeats an Idempotency-Key already used on the same order returns the original payment with 200 and records nothing new; requests without the header are never treated as repeats.",
+          "m": false
+        }
+      ],
+      "timeline": [
+        {
+          "sha": "7d1aac9",
+          "label": "Spec added",
+          "state": "neutral"
+        },
+        {
+          "sha": "4755ad6",
+          "label": "feat(payments): return the original payment for a repeated Idempotency-Key (43 lines still in the code)",
+          "state": "ok"
+        },
+        {
+          "sha": "b9bfab5",
+          "label": "test(payments): cover repeated, distinct and missing idempotency keys (tests)",
+          "state": "ok"
+        }
+      ],
+      "now": [
+        {
+          "label": "TestAC_led_005_DifferentKeysRecordSeparatePayments: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_005_KeyDoesNotBypassChecks: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_005_KeyIsScopedToTheOrder: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_005_RejectsUnusableKey: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_005_RejectsUnusableKey/empty: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_005_RejectsUnusableKey/space: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_005_RejectsUnusableKey/symbol: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_005_RejectsUnusableKey/too_long: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_005_RepeatOfTheFinalPaymentIsNotAnOverpayment: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_005_RepeatReturnsOriginalEvenWithADifferentBody: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_005_RepeatedKeyReturnsOriginalPayment: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_005_RequestsWithoutKeyAreNeverRepeats: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_005_IdempotencyKeyIsUniquePerOrder: pass",
+          "state": "ok"
+        },
+        {
+          "label": "Its tests run 28 of its 43 code line(s)",
+          "state": "ok"
+        }
+      ]
+    },
+    {
+      "id": "AC-led-006",
+      "text": "A refund records an amount and a refund date against a payment and returns 201; a refund larger than what is left of the payment after its earlier refunds is rejected with 400 and not recorded; a refund puts the order's status back to \"open\" when the amount paid falls below its total.",
+      "api": [
+        "POST /payments/{payment_id}/refunds"
+      ],
+      "status": "Sync",
+      "not_covered": [
+        "H7"
+      ],
+      "failing_checks": [],
+      "data": [
+        "refunds"
+      ],
+      "vitals": {
+        "spec": "ok",
+        "code": "ok",
+        "api": "ok",
+        "data": "ok",
+        "tests": "ok"
+      },
+      "note": "Implemented, tested, and matching the contract.",
+      "segments": [
+        {
+          "t": "A refund records an amount and a refund date against a payment and returns 201; a refund larger than what is left of the payment after its earlier refunds is rejected with 400 and not recorded; a refund puts the order's status back to \"open\" when the amount paid falls below its total.",
+          "m": false
+        }
+      ],
+      "timeline": [
+        {
+          "sha": "7d1aac9",
+          "label": "Spec added",
+          "state": "neutral"
+        },
+        {
+          "sha": "0d9ef36",
+          "label": "Spec changed: 409 \u2192 400",
+          "state": "neutral"
+        },
+        {
+          "sha": "12bc183",
+          "label": "feat(refunds): record refunds and reopen the order (101 lines still in the code)",
+          "state": "ok"
+        },
+        {
+          "sha": "4a27e1d",
+          "label": "test(refunds): cover partial refunds, limits and reopening (tests)",
+          "state": "ok"
+        }
+      ],
+      "now": [
+        {
+          "label": "TestAC_led_006_DatabaseFailureReturns500: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_MissingPaymentReturns404: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_MissingPaymentReturns404/-1: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_MissingPaymentReturns404/0: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_MissingPaymentReturns404/2: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_MissingPaymentReturns404/2147483648: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_MissingPaymentReturns404/abc: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_OrderStaysPaidWhileAmountPaidCoversTotal: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RecordsRefund: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RefundReopensOrderAndLowersAmountPaid: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RefundsCountOnlyAgainstTheirOwnPayment: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RefundsTheLargestAmountExactly: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RejectsInvalidBody: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RejectsInvalidBody/amount_fractional: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RejectsInvalidBody/amount_negative: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RejectsInvalidBody/amount_too_large: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RejectsInvalidBody/amount_zero: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RejectsInvalidBody/date_malformed: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RejectsInvalidBody/date_not_string: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RejectsInvalidBody/date_suffixed: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RejectsInvalidBody/empty_body: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RejectsInvalidBody/missing_amount: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RejectsInvalidBody/missing_date: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RejectsInvalidBody/not_json: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RejectsInvalidBody/unknown_field: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RejectsRefundAboveWhatIsLeft: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_006_RepeatedPaymentReportsItsRefunds: pass",
+          "state": "ok"
+        },
+        {
+          "label": "Its tests run 55 of its 101 code line(s)",
+          "state": "ok"
+        }
+      ]
+    },
+    {
+      "id": "AC-led-007",
+      "text": "Every payment writes two ledger entries for its amount, a debit to \"cash\" and a credit to \"revenue\", and every refund writes two for its amount, a debit to \"revenue\" and a credit to \"cash\", so total debits always equal total credits.",
+      "api": [],
+      "status": "Sync",
+      "not_covered": [
+        "H7"
+      ],
+      "failing_checks": [],
+      "data": [
+        "ledger_entries"
+      ],
+      "vitals": {
+        "spec": "ok",
+        "code": "ok",
+        "api": "none",
+        "data": "ok",
+        "tests": "ok"
+      },
+      "note": "Implemented, tested, and matching the contract.",
+      "segments": [
+        {
+          "t": "Every payment writes two ledger entries for its amount, a debit to \"cash\" and a credit to \"revenue\", and every refund writes two for its amount, a debit to \"revenue\" and a credit to \"cash\", so total debits always equal total credits.",
+          "m": false
+        }
+      ],
+      "timeline": [
+        {
+          "sha": "7d1aac9",
+          "label": "Spec added",
+          "state": "neutral"
+        },
+        {
+          "sha": "9995149",
+          "label": "feat(ledger): write a balanced pair of entries for every payment and refund (37 lines still in the code)",
+          "state": "ok"
+        },
+        {
+          "sha": "c9b929c",
+          "label": "test(ledger): cover entry pairs, rollback and the balance of the ledger (tests)",
+          "state": "ok"
+        }
+      ],
+      "now": [
+        {
+          "label": "TestAC_led_007_DebitsEqualCreditsAfterMixedActivity: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_007_PaymentIsNotRecordedWithoutItsEntries: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_007_PaymentWritesDebitCashAndCreditRevenue: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_007_RefundIsNotRecordedWithoutItsEntries: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_007_RefundWritesDebitRevenueAndCreditCash: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_007_RejectedAndRepeatedRequestsWriteNothing: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_007_LedgerEntriesReferenceRealPaymentsAndRefunds: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_007_MigrationWritesEntriesForEarlierPaymentsAndRefunds: pass",
+          "state": "ok"
+        },
+        {
+          "label": "Its tests run 10 of its 37 code line(s)",
+          "state": "ok"
+        }
+      ]
+    },
+    {
+      "id": "AC-led-008",
+      "text": "The balance of the \"cash\" or \"revenue\" account is the sum of its debits minus the sum of its credits, and is 0 before anything is recorded; any other account name returns 404.",
+      "api": [
+        "GET /accounts/{account}/balance"
+      ],
+      "status": "Sync",
+      "not_covered": [
+        "H7"
+      ],
+      "failing_checks": [],
+      "vitals": {
+        "spec": "ok",
+        "code": "ok",
+        "api": "ok",
+        "tests": "ok"
+      },
+      "note": "Implemented, tested, and matching the contract.",
+      "segments": [
+        {
+          "t": "The balance of the \"cash\" or \"revenue\" account is the sum of its debits minus the sum of its credits, and is 0 before anything is recorded; any other account name returns 404.",
+          "m": false
+        }
+      ],
+      "timeline": [
+        {
+          "sha": "7d1aac9",
+          "label": "Spec added",
+          "state": "neutral"
+        },
+        {
+          "sha": "eb3454a",
+          "label": "feat(accounts): report the balance of the cash and revenue accounts (25 lines still in the code)",
+          "state": "ok"
+        },
+        {
+          "sha": "5499355",
+          "label": "test(accounts): cover balances after payments and refunds (tests)",
+          "state": "ok"
+        }
+      ],
+      "now": [
+        {
+          "label": "TestAC_led_008_BalanceCountsOnlyTheAccountsOwnEntries: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_008_BalanceIsDebitsMinusCredits: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_008_BalancesAreZeroBeforeAnythingIsRecorded: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_008_DatabaseFailureReturns500: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_008_UnknownAccountReturns404: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_008_UnknownAccountReturns404/1: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_008_UnknownAccountReturns404/Cash: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_008_UnknownAccountReturns404/REVENUE: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_008_UnknownAccountReturns404/bank: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_008_UnknownAccountReturns404/cash2: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_008_UnknownAccountReturns404/suspense: pass",
+          "state": "ok"
+        },
+        {
+          "label": "Its tests run 14 of its 25 code line(s)",
+          "state": "ok"
+        }
+      ]
+    },
+    {
+      "id": "AC-led-009",
+      "text": "The daily revenue report lists, for every date that has a payment or a refund, the payments dated that day (gross), the refunds dated that day, and gross minus refunds (net), in date order; it is computed from the payments and refunds datasets only.",
+      "api": [
+        "GET /reports/daily-revenue"
+      ],
+      "status": "Sync",
+      "not_covered": [
+        "H7"
+      ],
+      "failing_checks": [],
+      "data": [
+        "daily_revenue"
+      ],
+      "vitals": {
+        "spec": "ok",
+        "code": "ok",
+        "api": "ok",
+        "data": "ok",
+        "tests": "ok"
+      },
+      "note": "Implemented, tested, and matching the contract.",
+      "segments": [
+        {
+          "t": "The daily revenue report lists, for every date that has a payment or a refund, the payments dated that day (gross), the refunds dated that day, and gross minus refunds (net), in date order; it is computed from the payments and refunds datasets only.",
+          "m": false
+        }
+      ],
+      "timeline": [
+        {
+          "sha": "7d1aac9",
+          "label": "Spec added",
+          "state": "neutral"
+        },
+        {
+          "sha": "091ab0f",
+          "label": "feat(reports): add the daily revenue view and report (47 lines still in the code)",
+          "state": "ok"
+        },
+        {
+          "sha": "97c4d05",
+          "label": "test(reports): cover the daily revenue view and report (tests)",
+          "state": "ok"
+        }
+      ],
+      "now": [
+        {
+          "label": "TestAC_led_009_DatabaseFailureReturns500: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_009_RejectedAndRepeatedRequestsDoNotCount: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_009_ReportHandlesTheLargestAmounts: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_009_ReportIsComputedFromPaymentsAndRefundsOnly: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_009_ReportIsEmptyBeforeAnythingIsRecorded: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_009_ReportsGrossRefundsAndNetPerDayInDateOrder: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_009_DailyRevenueViewSumsPaymentsAndRefundsPerDay: pass",
+          "state": "ok"
+        },
+        {
+          "label": "Its tests run 14 of its 47 code line(s)",
+          "state": "ok"
+        }
+      ]
+    }
+  ],
+  "outside": [],
+  "results": [
+    {
+      "check": "T1",
+      "scope": "project",
+      "subject": "spec",
+      "verdict": "pass",
+      "summary": "9 requirement IDs valid and registered",
+      "details": {}
+    },
+    {
+      "check": "T2",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "2 commit(s) reference it: 0f46410, 4d21edf",
+      "details": {}
+    },
+    {
+      "check": "T3",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "226 line(s) from its commits still exist",
+      "details": {
+        "lines": {
+          "cmd/server/main.go": [
+            2,
+            4,
+            5,
+            6,
+            7,
+            9,
+            10,
+            11,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29
+          ],
+          "internal/api/customers.go": [
+            1,
+            3,
+            4,
+            5,
+            6,
+            7,
+            9,
+            10,
+            11,
+            13,
+            15,
+            16,
+            17,
+            18,
+            20,
+            21,
+            22,
+            23,
+            24,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            42,
+            43,
+            44,
+            45,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72
+          ],
+          "internal/api/httpx.go": [
+            1,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            10,
+            11,
+            13,
+            15,
+            16,
+            17,
+            18,
+            19,
+            21,
+            22,
+            23,
+            25,
+            26,
+            27,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55
+          ],
+          "internal/api/router.go": [
+            2,
+            4,
+            5,
+            6,
+            8,
+            9,
+            11,
+            12,
+            13,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            32,
+            33
+          ],
+          "internal/store/migrations/0001_customers.sql": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            7
+          ],
+          "internal/store/store.go": [
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            13,
+            16,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77
+          ]
+        }
+      }
+    },
+    {
+      "check": "T4",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "30 tagged test(s)",
+      "details": {
+        "tests": [
+          "example.com/ledger/internal/api::TestAC_led_001_AcceptsBoundaryLengths",
+          "example.com/ledger/internal/api::TestAC_led_001_AcceptsBoundaryLengths/longest_email",
+          "example.com/ledger/internal/api::TestAC_led_001_AcceptsBoundaryLengths/longest_name",
+          "example.com/ledger/internal/api::TestAC_led_001_AcceptsBoundaryLengths/shortest_name_and_email",
+          "example.com/ledger/internal/api::TestAC_led_001_CreatesCustomerWithNewID",
+          "example.com/ledger/internal/api::TestAC_led_001_DatabaseFailureReturns500",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsEmailAlreadyInUse",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/email_not_string",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/email_too_long",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/email_too_short",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/email_two_ats",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/email_with_space",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/email_without_at",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/empty_body",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/empty_name",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/missing_email",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/missing_name",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/name_not_string",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/name_too_long",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/not_an_object",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/not_json",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/null",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/trailing_data",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/unknown_field",
+          "example.com/ledger/internal/api::TestAC_led_001_UnknownRouteAndMethodReturnJSONErrors",
+          "example.com/ledger/internal/store::TestAC_led_001_OpenAppliesEachMigrationOnce",
+          "example.com/ledger/internal/store::TestAC_led_001_OpenCreatesCustomersTable",
+          "example.com/ledger/internal/store::TestAC_led_001_OpenFailsOnUnusablePath",
+          "example.com/ledger/internal/store::TestAC_led_001_OpenTurnsForeignKeysOn"
+        ]
+      }
+    },
+    {
+      "check": "T5",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "All 30 tagged test(s) pass",
+      "details": {}
+    },
+    {
+      "check": "T6",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "Its tests run 89 of its 226 code line(s)",
+      "details": {
+        "executed": {
+          "internal/api/customers.go": [
+            27,
+            29,
+            31,
+            33,
+            35,
+            37,
+            39,
+            43,
+            44,
+            45,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            71
+          ],
+          "internal/api/httpx.go": [
+            16,
+            17,
+            18,
+            19,
+            22,
+            23,
+            26,
+            27,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39
+          ],
+          "internal/api/router.go": [
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            32
+          ],
+          "internal/store/store.go": [
+            21,
+            22,
+            23,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            37,
+            38,
+            39,
+            40,
+            41,
+            44,
+            45,
+            46,
+            50,
+            54,
+            55,
+            58,
+            59,
+            60,
+            63,
+            64,
+            65,
+            66,
+            67,
+            70,
+            73,
+            76
+          ]
+        }
+      }
+    },
+    {
+      "check": "T2",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "pass",
+      "summary": "1 commit(s) reference it: 1157ac0",
+      "details": {}
+    },
+    {
+      "check": "T3",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "pass",
+      "summary": "157 line(s) from its commits still exist",
+      "details": {
+        "lines": {
+          "internal/api/orders.go": [
+            1,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            12,
+            13,
+            14,
+            15,
+            17,
+            18,
+            19,
+            20,
+            21,
+            23,
+            24,
+            25,
+            26,
+            28,
+            29,
+            30,
+            31,
+            32,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            69,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127,
+            128,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            173,
+            175,
+            176,
+            177,
+            178,
+            179,
+            180
+          ],
+          "internal/api/payments.go": [
+            134,
+            135,
+            136,
+            137,
+            138,
+            139
+          ],
+          "internal/api/refunds.go": [
+            99,
+            100,
+            101,
+            102,
+            103,
+            104
+          ],
+          "internal/api/router.go": [
+            26
+          ],
+          "internal/store/migrations/0002_orders.sql": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            17
+          ]
+        }
+      }
+    },
+    {
+      "check": "T4",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "pass",
+      "summary": "30 tagged test(s)",
+      "details": {
+        "tests": [
+          "example.com/ledger/internal/api::TestAC_led_002_AcceptsBoundaryValues",
+          "example.com/ledger/internal/api::TestAC_led_002_CreatesOpenOrderWithTotal",
+          "example.com/ledger/internal/api::TestAC_led_002_DatabaseFailureReturns500",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/bad_second_line",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/customer_not_integer",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/customer_too_large",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/customer_zero",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/empty_body",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/empty_sku",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/missing_customer",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/missing_lines",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/missing_price",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/missing_quantity",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/missing_sku",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/no_lines",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/not_json",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/null_lines",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/price_negative",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/price_too_large",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/quantity_fractional",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/quantity_too_large",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/quantity_zero",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/sku_too_long",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/too_many_lines",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/unknown_field",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsInvalidBody/unknown_line_field",
+          "example.com/ledger/internal/api::TestAC_led_002_RejectsUnknownCustomer",
+          "example.com/ledger/internal/api::TestAC_led_002_SecondOrderGetsNewID",
+          "example.com/ledger/internal/store::TestAC_led_002_OrdersRequireAnExistingCustomer"
+        ]
+      }
+    },
+    {
+      "check": "T5",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "pass",
+      "summary": "All 30 tagged test(s) pass",
+      "details": {}
+    },
+    {
+      "check": "T6",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "pass",
+      "summary": "Its tests run 56 of its 157 code line(s)",
+      "details": {
+        "executed": {
+          "internal/api/orders.go": [
+            44,
+            46,
+            48,
+            50,
+            52,
+            54,
+            55,
+            57,
+            59,
+            61,
+            63,
+            66,
+            73,
+            74,
+            75,
+            76,
+            77,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            91,
+            92,
+            95,
+            98,
+            99,
+            100,
+            101,
+            105,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116,
+            117,
+            118,
+            119,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            126,
+            127
+          ],
+          "internal/api/router.go": [
+            26
+          ]
+        }
+      }
+    },
+    {
+      "check": "T2",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "pass",
+      "summary": "1 commit(s) reference it: 7ecebf6",
+      "details": {}
+    },
+    {
+      "check": "T3",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "pass",
+      "summary": "36 line(s) from its commits still exist",
+      "details": {
+        "lines": {
+          "internal/api/orders.go": [
+            131,
+            132,
+            133,
+            134,
+            138,
+            139,
+            140,
+            147,
+            148,
+            149,
+            150,
+            151,
+            152,
+            153,
+            154,
+            155,
+            156,
+            157,
+            158,
+            164,
+            166,
+            167,
+            168,
+            169,
+            170,
+            171,
+            172,
+            174,
+            181,
+            182
+          ],
+          "internal/api/payments.go": [
+            127,
+            128,
+            129,
+            130,
+            152
+          ],
+          "internal/api/router.go": [
+            27
+          ]
+        }
+      }
+    },
+    {
+      "check": "T4",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "pass",
+      "summary": "14 tagged test(s)",
+      "details": {
+        "tests": [
+          "example.com/ledger/internal/api::TestAC_led_003_DatabaseFailureReturns500",
+          "example.com/ledger/internal/api::TestAC_led_003_LinesFollowPositionNotInsertionID",
+          "example.com/ledger/internal/api::TestAC_led_003_MissingOrderReturns404",
+          "example.com/ledger/internal/api::TestAC_led_003_MissingOrderReturns404/+1",
+          "example.com/ledger/internal/api::TestAC_led_003_MissingOrderReturns404/-1",
+          "example.com/ledger/internal/api::TestAC_led_003_MissingOrderReturns404/0",
+          "example.com/ledger/internal/api::TestAC_led_003_MissingOrderReturns404/1.0",
+          "example.com/ledger/internal/api::TestAC_led_003_MissingOrderReturns404/1x",
+          "example.com/ledger/internal/api::TestAC_led_003_MissingOrderReturns404/2",
+          "example.com/ledger/internal/api::TestAC_led_003_MissingOrderReturns404/2147483648",
+          "example.com/ledger/internal/api::TestAC_led_003_MissingOrderReturns404/99999999999999999999",
+          "example.com/ledger/internal/api::TestAC_led_003_MissingOrderReturns404/abc",
+          "example.com/ledger/internal/api::TestAC_led_003_ReturnsOrderWithLinesInGivenOrder",
+          "example.com/ledger/internal/api::TestAC_led_003_ReturnsStoredStatus"
+        ]
+      }
+    },
+    {
+      "check": "T5",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "pass",
+      "summary": "All 14 tagged test(s) pass",
+      "details": {}
+    },
+    {
+      "check": "T6",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "pass",
+      "summary": "Its tests run 18 of its 36 code line(s)",
+      "details": {
+        "executed": {
+          "internal/api/orders.go": [
+            139,
+            140,
+            147,
+            148,
+            151,
+            152,
+            153,
+            154,
+            157,
+            167,
+            168,
+            169,
+            170,
+            171,
+            172,
+            174,
+            181
+          ],
+          "internal/api/router.go": [
+            27
+          ]
+        }
+      }
+    },
+    {
+      "check": "T2",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "pass",
+      "summary": "1 commit(s) reference it: 8f31a59",
+      "details": {}
+    },
+    {
+      "check": "T3",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "pass",
+      "summary": "104 line(s) from its commits still exist",
+      "details": {
+        "lines": {
+          "internal/api/orders.go": [
+            159,
+            160,
+            161,
+            162,
+            163
+          ],
+          "internal/api/payments.go": [
+            1,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            10,
+            12,
+            16,
+            17,
+            18,
+            19,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            43,
+            46,
+            47,
+            54,
+            55,
+            62,
+            65,
+            67,
+            78,
+            79,
+            81,
+            82,
+            83,
+            84,
+            85,
+            87,
+            88,
+            98,
+            99,
+            100,
+            102,
+            103,
+            105,
+            108,
+            110,
+            111,
+            113,
+            117,
+            118,
+            120,
+            121,
+            123,
+            125,
+            126,
+            131,
+            132,
+            133,
+            150,
+            151,
+            153,
+            154,
+            155,
+            156,
+            159,
+            160,
+            161,
+            162
+          ],
+          "internal/api/refunds.go": [
+            1,
+            3,
+            4,
+            5,
+            6,
+            22,
+            23,
+            24,
+            25,
+            26
+          ],
+          "internal/api/router.go": [
+            28
+          ],
+          "internal/store/migrations/0003_payments.sql": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            9
+          ]
+        }
+      }
+    },
+    {
+      "check": "T4",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "pass",
+      "summary": "28 tagged test(s)",
+      "details": {
+        "tests": [
+          "example.com/ledger/internal/api::TestAC_led_004_AcceptsLargestAmount",
+          "example.com/ledger/internal/api::TestAC_led_004_DatabaseFailureReturns500",
+          "example.com/ledger/internal/api::TestAC_led_004_MissingOrderReturns404",
+          "example.com/ledger/internal/api::TestAC_led_004_MissingOrderReturns404/-1",
+          "example.com/ledger/internal/api::TestAC_led_004_MissingOrderReturns404/0",
+          "example.com/ledger/internal/api::TestAC_led_004_MissingOrderReturns404/2",
+          "example.com/ledger/internal/api::TestAC_led_004_MissingOrderReturns404/2147483648",
+          "example.com/ledger/internal/api::TestAC_led_004_MissingOrderReturns404/abc",
+          "example.com/ledger/internal/api::TestAC_led_004_PartPaymentsAddUpAndFinalOneMarksPaid",
+          "example.com/ledger/internal/api::TestAC_led_004_PaymentsCountOnlyTowardsTheirOwnOrder",
+          "example.com/ledger/internal/api::TestAC_led_004_RecordsPayment",
+          "example.com/ledger/internal/api::TestAC_led_004_RejectsInvalidBody",
+          "example.com/ledger/internal/api::TestAC_led_004_RejectsInvalidBody/amount_fractional",
+          "example.com/ledger/internal/api::TestAC_led_004_RejectsInvalidBody/amount_negative",
+          "example.com/ledger/internal/api::TestAC_led_004_RejectsInvalidBody/amount_string",
+          "example.com/ledger/internal/api::TestAC_led_004_RejectsInvalidBody/amount_too_large",
+          "example.com/ledger/internal/api::TestAC_led_004_RejectsInvalidBody/amount_zero",
+          "example.com/ledger/internal/api::TestAC_led_004_RejectsInvalidBody/date_not_string",
+          "example.com/ledger/internal/api::TestAC_led_004_RejectsInvalidBody/date_prefixed",
+          "example.com/ledger/internal/api::TestAC_led_004_RejectsInvalidBody/date_short",
+          "example.com/ledger/internal/api::TestAC_led_004_RejectsInvalidBody/date_with_time",
+          "example.com/ledger/internal/api::TestAC_led_004_RejectsInvalidBody/empty_body",
+          "example.com/ledger/internal/api::TestAC_led_004_RejectsInvalidBody/missing_amount",
+          "example.com/ledger/internal/api::TestAC_led_004_RejectsInvalidBody/missing_date",
+          "example.com/ledger/internal/api::TestAC_led_004_RejectsInvalidBody/not_json",
+          "example.com/ledger/internal/api::TestAC_led_004_RejectsInvalidBody/unknown_field",
+          "example.com/ledger/internal/api::TestAC_led_004_RejectsOverpayment",
+          "example.com/ledger/internal/api::TestAC_led_004_SinglePaymentOfTheTotalMarksPaid"
+        ]
+      }
+    },
+    {
+      "check": "T5",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "pass",
+      "summary": "All 28 tagged test(s) pass",
+      "details": {}
+    },
+    {
+      "check": "T6",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "pass",
+      "summary": "Its tests run 38 of its 104 code line(s)",
+      "details": {
+        "executed": {
+          "internal/api/orders.go": [
+            159,
+            162,
+            163
+          ],
+          "internal/api/payments.go": [
+            30,
+            32,
+            34,
+            36,
+            38,
+            40,
+            47,
+            54,
+            55,
+            78,
+            79,
+            81,
+            82,
+            83,
+            84,
+            85,
+            87,
+            88,
+            99,
+            100,
+            103,
+            105,
+            108,
+            111,
+            117,
+            118,
+            126,
+            131,
+            132,
+            133,
+            150,
+            154,
+            156,
+            160
+          ],
+          "internal/api/router.go": [
+            28
+          ]
+        }
+      }
+    },
+    {
+      "check": "T2",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "pass",
+      "summary": "1 commit(s) reference it: 4755ad6",
+      "details": {}
+    },
+    {
+      "check": "T3",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "pass",
+      "summary": "43 line(s) from its commits still exist",
+      "details": {
+        "lines": {
+          "internal/api/payments.go": [
+            14,
+            58,
+            59,
+            60,
+            61,
+            63,
+            64,
+            66,
+            69,
+            70,
+            76,
+            77,
+            80,
+            86,
+            89,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            101,
+            104,
+            106,
+            107,
+            109,
+            112,
+            119,
+            122,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147,
+            148,
+            149,
+            157,
+            158
+          ],
+          "internal/store/migrations/0004_payments_idempotency.sql": [
+            2
+          ]
+        }
+      }
+    },
+    {
+      "check": "T4",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "pass",
+      "summary": "13 tagged test(s)",
+      "details": {
+        "tests": [
+          "example.com/ledger/internal/api::TestAC_led_005_DifferentKeysRecordSeparatePayments",
+          "example.com/ledger/internal/api::TestAC_led_005_KeyDoesNotBypassChecks",
+          "example.com/ledger/internal/api::TestAC_led_005_KeyIsScopedToTheOrder",
+          "example.com/ledger/internal/api::TestAC_led_005_RejectsUnusableKey",
+          "example.com/ledger/internal/api::TestAC_led_005_RejectsUnusableKey/empty",
+          "example.com/ledger/internal/api::TestAC_led_005_RejectsUnusableKey/space",
+          "example.com/ledger/internal/api::TestAC_led_005_RejectsUnusableKey/symbol",
+          "example.com/ledger/internal/api::TestAC_led_005_RejectsUnusableKey/too_long",
+          "example.com/ledger/internal/api::TestAC_led_005_RepeatOfTheFinalPaymentIsNotAnOverpayment",
+          "example.com/ledger/internal/api::TestAC_led_005_RepeatReturnsOriginalEvenWithADifferentBody",
+          "example.com/ledger/internal/api::TestAC_led_005_RepeatedKeyReturnsOriginalPayment",
+          "example.com/ledger/internal/api::TestAC_led_005_RequestsWithoutKeyAreNeverRepeats",
+          "example.com/ledger/internal/store::TestAC_led_005_IdempotencyKeyIsUniquePerOrder"
+        ]
+      }
+    },
+    {
+      "check": "T5",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "pass",
+      "summary": "All 13 tagged test(s) pass",
+      "details": {}
+    },
+    {
+      "check": "T6",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "pass",
+      "summary": "Its tests run 28 of its 43 code line(s)",
+      "details": {
+        "executed": {
+          "internal/api/payments.go": [
+            59,
+            60,
+            61,
+            63,
+            64,
+            69,
+            77,
+            86,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            104,
+            106,
+            107,
+            122,
+            141,
+            142,
+            143,
+            144,
+            145,
+            146,
+            147,
+            149,
+            158
+          ]
+        }
+      }
+    },
+    {
+      "check": "T2",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "pass",
+      "summary": "1 commit(s) reference it: 12bc183",
+      "details": {}
+    },
+    {
+      "check": "T3",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "pass",
+      "summary": "101 line(s) from its commits still exist",
+      "details": {
+        "lines": {
+          "internal/api/payments.go": [
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            68
+          ],
+          "internal/api/refunds.go": [
+            7,
+            9,
+            10,
+            11,
+            12,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            21,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            37,
+            38,
+            39,
+            40,
+            41,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            78,
+            79,
+            80,
+            81,
+            82,
+            83,
+            84,
+            85,
+            86,
+            87,
+            88,
+            90,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            105,
+            106,
+            107,
+            108,
+            109,
+            110,
+            111,
+            112,
+            113,
+            114,
+            115,
+            116
+          ],
+          "internal/api/router.go": [
+            29
+          ],
+          "internal/store/migrations/0005_refunds.sql": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            10
+          ]
+        }
+      }
+    },
+    {
+      "check": "T4",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "pass",
+      "summary": "27 tagged test(s)",
+      "details": {
+        "tests": [
+          "example.com/ledger/internal/api::TestAC_led_006_DatabaseFailureReturns500",
+          "example.com/ledger/internal/api::TestAC_led_006_MissingPaymentReturns404",
+          "example.com/ledger/internal/api::TestAC_led_006_MissingPaymentReturns404/-1",
+          "example.com/ledger/internal/api::TestAC_led_006_MissingPaymentReturns404/0",
+          "example.com/ledger/internal/api::TestAC_led_006_MissingPaymentReturns404/2",
+          "example.com/ledger/internal/api::TestAC_led_006_MissingPaymentReturns404/2147483648",
+          "example.com/ledger/internal/api::TestAC_led_006_MissingPaymentReturns404/abc",
+          "example.com/ledger/internal/api::TestAC_led_006_OrderStaysPaidWhileAmountPaidCoversTotal",
+          "example.com/ledger/internal/api::TestAC_led_006_RecordsRefund",
+          "example.com/ledger/internal/api::TestAC_led_006_RefundReopensOrderAndLowersAmountPaid",
+          "example.com/ledger/internal/api::TestAC_led_006_RefundsCountOnlyAgainstTheirOwnPayment",
+          "example.com/ledger/internal/api::TestAC_led_006_RefundsTheLargestAmountExactly",
+          "example.com/ledger/internal/api::TestAC_led_006_RejectsInvalidBody",
+          "example.com/ledger/internal/api::TestAC_led_006_RejectsInvalidBody/amount_fractional",
+          "example.com/ledger/internal/api::TestAC_led_006_RejectsInvalidBody/amount_negative",
+          "example.com/ledger/internal/api::TestAC_led_006_RejectsInvalidBody/amount_too_large",
+          "example.com/ledger/internal/api::TestAC_led_006_RejectsInvalidBody/amount_zero",
+          "example.com/ledger/internal/api::TestAC_led_006_RejectsInvalidBody/date_malformed",
+          "example.com/ledger/internal/api::TestAC_led_006_RejectsInvalidBody/date_not_string",
+          "example.com/ledger/internal/api::TestAC_led_006_RejectsInvalidBody/date_suffixed",
+          "example.com/ledger/internal/api::TestAC_led_006_RejectsInvalidBody/empty_body",
+          "example.com/ledger/internal/api::TestAC_led_006_RejectsInvalidBody/missing_amount",
+          "example.com/ledger/internal/api::TestAC_led_006_RejectsInvalidBody/missing_date",
+          "example.com/ledger/internal/api::TestAC_led_006_RejectsInvalidBody/not_json",
+          "example.com/ledger/internal/api::TestAC_led_006_RejectsInvalidBody/unknown_field",
+          "example.com/ledger/internal/api::TestAC_led_006_RejectsRefundAboveWhatIsLeft",
+          "example.com/ledger/internal/api::TestAC_led_006_RepeatedPaymentReportsItsRefunds"
+        ]
+      }
+    },
+    {
+      "check": "T5",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "pass",
+      "summary": "All 27 tagged test(s) pass",
+      "details": {}
+    },
+    {
+      "check": "T6",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "pass",
+      "summary": "Its tests run 55 of its 101 code line(s)",
+      "details": {
+        "executed": {
+          "internal/api/payments.go": [
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            68
+          ],
+          "internal/api/refunds.go": [
+            28,
+            30,
+            32,
+            38,
+            39,
+            40,
+            41,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            61,
+            62,
+            65,
+            66,
+            67,
+            68,
+            69,
+            72,
+            78,
+            79,
+            82,
+            83,
+            87,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            105,
+            106,
+            108,
+            110,
+            112,
+            114
+          ],
+          "internal/api/router.go": [
+            29
+          ]
+        }
+      }
+    },
+    {
+      "check": "T2",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "pass",
+      "summary": "1 commit(s) reference it: 9995149",
+      "details": {}
+    },
+    {
+      "check": "T3",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "pass",
+      "summary": "37 line(s) from its commits still exist",
+      "details": {
+        "lines": {
+          "internal/api/ledger.go": [
+            1,
+            3,
+            6,
+            7,
+            8,
+            9,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20
+          ],
+          "internal/api/payments.go": [
+            114,
+            115,
+            116
+          ],
+          "internal/api/refunds.go": [
+            75,
+            76,
+            77
+          ],
+          "internal/store/migrations/0006_ledger_entries.sql": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            10,
+            13,
+            14,
+            15,
+            16,
+            18,
+            19,
+            20,
+            21
+          ]
+        }
+      }
+    },
+    {
+      "check": "T4",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "pass",
+      "summary": "8 tagged test(s)",
+      "details": {
+        "tests": [
+          "example.com/ledger/internal/api::TestAC_led_007_DebitsEqualCreditsAfterMixedActivity",
+          "example.com/ledger/internal/api::TestAC_led_007_PaymentIsNotRecordedWithoutItsEntries",
+          "example.com/ledger/internal/api::TestAC_led_007_PaymentWritesDebitCashAndCreditRevenue",
+          "example.com/ledger/internal/api::TestAC_led_007_RefundIsNotRecordedWithoutItsEntries",
+          "example.com/ledger/internal/api::TestAC_led_007_RefundWritesDebitRevenueAndCreditCash",
+          "example.com/ledger/internal/api::TestAC_led_007_RejectedAndRepeatedRequestsWriteNothing",
+          "example.com/ledger/internal/store::TestAC_led_007_LedgerEntriesReferenceRealPaymentsAndRefunds",
+          "example.com/ledger/internal/store::TestAC_led_007_MigrationWritesEntriesForEarlierPaymentsAndRefunds"
+        ]
+      }
+    },
+    {
+      "check": "T5",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "pass",
+      "summary": "All 8 tagged test(s) pass",
+      "details": {}
+    },
+    {
+      "check": "T6",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "pass",
+      "summary": "Its tests run 10 of its 37 code line(s)",
+      "details": {
+        "executed": {
+          "internal/api/ledger.go": [
+            14,
+            15,
+            18,
+            19
+          ],
+          "internal/api/payments.go": [
+            114,
+            115,
+            116
+          ],
+          "internal/api/refunds.go": [
+            75,
+            76,
+            77
+          ]
+        }
+      }
+    },
+    {
+      "check": "T2",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "pass",
+      "summary": "1 commit(s) reference it: eb3454a",
+      "details": {}
+    },
+    {
+      "check": "T3",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "pass",
+      "summary": "25 line(s) from its commits still exist",
+      "details": {
+        "lines": {
+          "internal/api/accounts.go": [
+            1,
+            3,
+            4,
+            6,
+            7,
+            9,
+            10,
+            11,
+            12,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28
+          ],
+          "internal/api/router.go": [
+            30
+          ]
+        }
+      }
+    },
+    {
+      "check": "T4",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "pass",
+      "summary": "11 tagged test(s)",
+      "details": {
+        "tests": [
+          "example.com/ledger/internal/api::TestAC_led_008_BalanceCountsOnlyTheAccountsOwnEntries",
+          "example.com/ledger/internal/api::TestAC_led_008_BalanceIsDebitsMinusCredits",
+          "example.com/ledger/internal/api::TestAC_led_008_BalancesAreZeroBeforeAnythingIsRecorded",
+          "example.com/ledger/internal/api::TestAC_led_008_DatabaseFailureReturns500",
+          "example.com/ledger/internal/api::TestAC_led_008_UnknownAccountReturns404",
+          "example.com/ledger/internal/api::TestAC_led_008_UnknownAccountReturns404/1",
+          "example.com/ledger/internal/api::TestAC_led_008_UnknownAccountReturns404/Cash",
+          "example.com/ledger/internal/api::TestAC_led_008_UnknownAccountReturns404/REVENUE",
+          "example.com/ledger/internal/api::TestAC_led_008_UnknownAccountReturns404/bank",
+          "example.com/ledger/internal/api::TestAC_led_008_UnknownAccountReturns404/cash2",
+          "example.com/ledger/internal/api::TestAC_led_008_UnknownAccountReturns404/suspense"
+        ]
+      }
+    },
+    {
+      "check": "T5",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "pass",
+      "summary": "All 11 tagged test(s) pass",
+      "details": {}
+    },
+    {
+      "check": "T6",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "pass",
+      "summary": "Its tests run 14 of its 25 code line(s)",
+      "details": {
+        "executed": {
+          "internal/api/accounts.go": [
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27
+          ],
+          "internal/api/router.go": [
+            30
+          ]
+        }
+      }
+    },
+    {
+      "check": "T2",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "pass",
+      "summary": "1 commit(s) reference it: 091ab0f",
+      "details": {}
+    },
+    {
+      "check": "T3",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "pass",
+      "summary": "47 line(s) from its commits still exist",
+      "details": {
+        "lines": {
+          "internal/api/reports.go": [
+            1,
+            3,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            13,
+            14,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37
+          ],
+          "internal/api/router.go": [
+            31
+          ],
+          "internal/store/migrations/0007_daily_revenue.sql": [
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15
+          ]
+        }
+      }
+    },
+    {
+      "check": "T4",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "pass",
+      "summary": "7 tagged test(s)",
+      "details": {
+        "tests": [
+          "example.com/ledger/internal/api::TestAC_led_009_DatabaseFailureReturns500",
+          "example.com/ledger/internal/api::TestAC_led_009_RejectedAndRepeatedRequestsDoNotCount",
+          "example.com/ledger/internal/api::TestAC_led_009_ReportHandlesTheLargestAmounts",
+          "example.com/ledger/internal/api::TestAC_led_009_ReportIsComputedFromPaymentsAndRefundsOnly",
+          "example.com/ledger/internal/api::TestAC_led_009_ReportIsEmptyBeforeAnythingIsRecorded",
+          "example.com/ledger/internal/api::TestAC_led_009_ReportsGrossRefundsAndNetPerDayInDateOrder",
+          "example.com/ledger/internal/store::TestAC_led_009_DailyRevenueViewSumsPaymentsAndRefundsPerDay"
+        ]
+      }
+    },
+    {
+      "check": "T5",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "pass",
+      "summary": "All 7 tagged test(s) pass",
+      "details": {}
+    },
+    {
+      "check": "T6",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "pass",
+      "summary": "Its tests run 14 of its 47 code line(s)",
+      "details": {
+        "executed": {
+          "internal/api/reports.go": [
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            30,
+            32,
+            36
+          ],
+          "internal/api/router.go": [
+            31
+          ]
+        }
+      }
+    },
+    {
+      "check": "T8",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "Implemented or re-verified after its last wording change (7d1aac9)",
+      "details": {}
+    },
+    {
+      "check": "T8",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "pass",
+      "summary": "Implemented or re-verified after its last wording change (7d1aac9)",
+      "details": {}
+    },
+    {
+      "check": "T8",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "pass",
+      "summary": "Implemented or re-verified after its last wording change (0d9ef36)",
+      "details": {}
+    },
+    {
+      "check": "T8",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "pass",
+      "summary": "Implemented or re-verified after its last wording change (7d1aac9)",
+      "details": {}
+    },
+    {
+      "check": "T8",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "pass",
+      "summary": "Implemented or re-verified after its last wording change (7d1aac9)",
+      "details": {}
+    },
+    {
+      "check": "T8",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "pass",
+      "summary": "Implemented or re-verified after its last wording change (0d9ef36)",
+      "details": {}
+    },
+    {
+      "check": "T8",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "pass",
+      "summary": "Implemented or re-verified after its last wording change (7d1aac9)",
+      "details": {}
+    },
+    {
+      "check": "T8",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "pass",
+      "summary": "Implemented or re-verified after its last wording change (7d1aac9)",
+      "details": {}
+    },
+    {
+      "check": "T8",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "pass",
+      "summary": "Implemented or re-verified after its last wording change (7d1aac9)",
+      "details": {}
+    },
+    {
+      "check": "A1",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "Contract covers POST /customers",
+      "details": {}
+    },
+    {
+      "check": "A1",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "pass",
+      "summary": "Contract covers POST /orders",
+      "details": {}
+    },
+    {
+      "check": "A1",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "pass",
+      "summary": "Contract covers GET /orders/{order_id}",
+      "details": {}
+    },
+    {
+      "check": "A1",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "pass",
+      "summary": "Contract covers POST /orders/{order_id}/payments",
+      "details": {}
+    },
+    {
+      "check": "A1",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "pass",
+      "summary": "Contract covers POST /orders/{order_id}/payments",
+      "details": {}
+    },
+    {
+      "check": "A1",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "pass",
+      "summary": "Contract covers POST /payments/{payment_id}/refunds",
+      "details": {}
+    },
+    {
+      "check": "A1",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "skip",
+      "summary": "Not an API requirement",
+      "details": {}
+    },
+    {
+      "check": "A1",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "pass",
+      "summary": "Contract covers GET /accounts/{account}/balance",
+      "details": {}
+    },
+    {
+      "check": "A1",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "pass",
+      "summary": "Contract covers GET /reports/daily-revenue",
+      "details": {}
+    },
+    {
+      "check": "A2",
+      "scope": "operation",
+      "subject": "POST /customers",
+      "verdict": "pass",
+      "summary": "POST /customers \u2192 AC-led-001",
+      "details": {}
+    },
+    {
+      "check": "A2",
+      "scope": "operation",
+      "subject": "POST /orders",
+      "verdict": "pass",
+      "summary": "POST /orders \u2192 AC-led-002",
+      "details": {}
+    },
+    {
+      "check": "A2",
+      "scope": "operation",
+      "subject": "GET /orders/{order_id}",
+      "verdict": "pass",
+      "summary": "GET /orders/{order_id} \u2192 AC-led-003",
+      "details": {}
+    },
+    {
+      "check": "A2",
+      "scope": "operation",
+      "subject": "POST /orders/{order_id}/payments",
+      "verdict": "pass",
+      "summary": "POST /orders/{order_id}/payments \u2192 AC-led-004, AC-led-005",
+      "details": {}
+    },
+    {
+      "check": "A2",
+      "scope": "operation",
+      "subject": "POST /payments/{payment_id}/refunds",
+      "verdict": "pass",
+      "summary": "POST /payments/{payment_id}/refunds \u2192 AC-led-006",
+      "details": {}
+    },
+    {
+      "check": "A2",
+      "scope": "operation",
+      "subject": "GET /accounts/{account}/balance",
+      "verdict": "pass",
+      "summary": "GET /accounts/{account}/balance \u2192 AC-led-008",
+      "details": {}
+    },
+    {
+      "check": "A2",
+      "scope": "operation",
+      "subject": "GET /reports/daily-revenue",
+      "verdict": "pass",
+      "summary": "GET /reports/daily-revenue \u2192 AC-led-009",
+      "details": {}
+    },
+    {
+      "check": "A3",
+      "scope": "project",
+      "subject": "contract",
+      "verdict": "pass",
+      "summary": "Contract passes the lint rules",
+      "details": {}
+    },
+    {
+      "check": "A4",
+      "scope": "project",
+      "subject": "contract",
+      "verdict": "skip",
+      "summary": "No base to compare against",
+      "details": {}
+    },
+    {
+      "check": "A5",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "Its operations are served",
+      "details": {}
+    },
+    {
+      "check": "A5",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "pass",
+      "summary": "Its operations are served",
+      "details": {}
+    },
+    {
+      "check": "A5",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "pass",
+      "summary": "Its operations are served",
+      "details": {}
+    },
+    {
+      "check": "A5",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "pass",
+      "summary": "Its operations are served",
+      "details": {}
+    },
+    {
+      "check": "A5",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "pass",
+      "summary": "Its operations are served",
+      "details": {}
+    },
+    {
+      "check": "A5",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "pass",
+      "summary": "Its operations are served",
+      "details": {}
+    },
+    {
+      "check": "A5",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "pass",
+      "summary": "Its operations are served",
+      "details": {}
+    },
+    {
+      "check": "A5",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "pass",
+      "summary": "Its operations are served",
+      "details": {}
+    },
+    {
+      "check": "D1",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "Data contract covers customers",
+      "details": {}
+    },
+    {
+      "check": "D1",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "pass",
+      "summary": "Data contract covers orders, order_lines",
+      "details": {}
+    },
+    {
+      "check": "D1",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "skip",
+      "summary": "Not a data requirement",
+      "details": {}
+    },
+    {
+      "check": "D1",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "pass",
+      "summary": "Data contract covers payments",
+      "details": {}
+    },
+    {
+      "check": "D1",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "skip",
+      "summary": "Not a data requirement",
+      "details": {}
+    },
+    {
+      "check": "D1",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "pass",
+      "summary": "Data contract covers refunds",
+      "details": {}
+    },
+    {
+      "check": "D1",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "pass",
+      "summary": "Data contract covers ledger_entries",
+      "details": {}
+    },
+    {
+      "check": "D1",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "skip",
+      "summary": "Not a data requirement",
+      "details": {}
+    },
+    {
+      "check": "D1",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "pass",
+      "summary": "Data contract covers daily_revenue",
+      "details": {}
+    },
+    {
+      "check": "D2",
+      "scope": "dataset",
+      "subject": "customers",
+      "verdict": "pass",
+      "summary": "customers \u2192 AC-led-001",
+      "details": {}
+    },
+    {
+      "check": "D2",
+      "scope": "dataset",
+      "subject": "orders",
+      "verdict": "pass",
+      "summary": "orders \u2192 AC-led-002",
+      "details": {}
+    },
+    {
+      "check": "D2",
+      "scope": "dataset",
+      "subject": "order_lines",
+      "verdict": "pass",
+      "summary": "order_lines \u2192 AC-led-002",
+      "details": {}
+    },
+    {
+      "check": "D2",
+      "scope": "dataset",
+      "subject": "payments",
+      "verdict": "pass",
+      "summary": "payments \u2192 AC-led-004",
+      "details": {}
+    },
+    {
+      "check": "D2",
+      "scope": "dataset",
+      "subject": "refunds",
+      "verdict": "pass",
+      "summary": "refunds \u2192 AC-led-006",
+      "details": {}
+    },
+    {
+      "check": "D2",
+      "scope": "dataset",
+      "subject": "ledger_entries",
+      "verdict": "pass",
+      "summary": "ledger_entries \u2192 AC-led-007",
+      "details": {}
+    },
+    {
+      "check": "D2",
+      "scope": "dataset",
+      "subject": "daily_revenue",
+      "verdict": "pass",
+      "summary": "daily_revenue \u2192 AC-led-009",
+      "details": {}
+    },
+    {
+      "check": "D3",
+      "scope": "project",
+      "subject": "data contract",
+      "verdict": "pass",
+      "summary": "7 dataset(s) fully declared, lineage resolves",
+      "details": {}
+    },
+    {
+      "check": "D4",
+      "scope": "project",
+      "subject": "data contract",
+      "verdict": "skip",
+      "summary": "No base to compare against",
+      "details": {}
+    },
+    {
+      "check": "D5",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "Its datasets match the contract: customers",
+      "details": {}
+    },
+    {
+      "check": "D5",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "pass",
+      "summary": "Its datasets match the contract: orders, order_lines",
+      "details": {}
+    },
+    {
+      "check": "D5",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "pass",
+      "summary": "Its datasets match the contract: payments",
+      "details": {}
+    },
+    {
+      "check": "D5",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "pass",
+      "summary": "Its datasets match the contract: refunds",
+      "details": {}
+    },
+    {
+      "check": "D5",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "pass",
+      "summary": "Its datasets match the contract: ledger_entries",
+      "details": {}
+    },
+    {
+      "check": "D5",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "pass",
+      "summary": "Its datasets match the contract: daily_revenue",
+      "details": {}
+    },
+    {
+      "check": "D6",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "skip",
+      "summary": "No derived dataset",
+      "details": {}
+    },
+    {
+      "check": "D6",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "skip",
+      "summary": "No derived dataset",
+      "details": {}
+    },
+    {
+      "check": "D6",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "skip",
+      "summary": "No derived dataset",
+      "details": {}
+    },
+    {
+      "check": "D6",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "skip",
+      "summary": "No derived dataset",
+      "details": {}
+    },
+    {
+      "check": "D6",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "skip",
+      "summary": "No derived dataset",
+      "details": {}
+    },
+    {
+      "check": "D6",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "pass",
+      "summary": "The view definition reads exactly the declared sources: daily_revenue",
+      "details": {}
+    },
+    {
+      "check": "D7",
+      "scope": "project",
+      "subject": "migrations",
+      "verdict": "pass",
+      "summary": "No merged migration was edited or deleted",
+      "details": {}
+    },
+    {
+      "check": "H1",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "pass",
+      "summary": "23 commit subject(s) follow Conventional Commits",
+      "details": {}
+    },
+    {
+      "check": "H2",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "pass",
+      "summary": "10 code commit(s) reference a requirement",
+      "details": {}
+    },
+    {
+      "check": "H3",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "pass",
+      "summary": "Each code commit serves one requirement",
+      "details": {}
+    },
+    {
+      "check": "H4",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "pass",
+      "summary": "No refactor or chore commits change code",
+      "details": {}
+    },
+    {
+      "check": "H5",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "pass",
+      "summary": "Every commit changes at most 400 lines",
+      "details": {}
+    },
+    {
+      "check": "H6",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "pass",
+      "summary": "9 branch name(s) follow the pattern",
+      "details": {}
+    },
+    {
+      "check": "H7",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "not_covered",
+      "summary": "No refs/aqv/verified recorded yet",
+      "details": {}
+    },
+    {
+      "check": "H8",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "pass",
+      "summary": "Every agent commit names the agent",
+      "details": {}
+    },
+    {
+      "check": "H9",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "pass",
+      "summary": "32 commit(s) carry good signatures",
+      "details": {}
+    },
+    {
+      "check": "H10",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "pass",
+      "summary": "No agent commit changes a protected file",
+      "details": {}
+    }
+  ],
+  "scorecard": {
+    "Claude <noreply@anthropic.com>": {
+      "commits": 19,
+      "commits_breaking_git_rules": 0,
+      "requirements_referenced": [
+        "AC-led-001",
+        "AC-led-002",
+        "AC-led-003",
+        "AC-led-004",
+        "AC-led-005",
+        "AC-led-006",
+        "AC-led-007",
+        "AC-led-008",
+        "AC-led-009"
+      ],
+      "git_rule_pass_rate": 1.0
+    }
+  }
+}

@@ -1,0 +1,93 @@
+Agent Quality Verifier: final-tree (HEAD, all history to 0ea730d)
+
+REQUIREMENT  STATUS       FAILING CHECKS
+AC-led-001   Sync         -
+AC-led-002   Missing      A5, A6, D5, T2, T4
+AC-led-003   Missing      A5, A6, T2, T4
+AC-led-004   Missing      A5, A6, D5, T2, T4
+AC-led-005   Missing      A5, A6, T2, T4
+AC-led-006   Missing      A5, A6, D5, T2, T4
+AC-led-007   Missing      D5, T2, T4
+AC-led-008   Missing      A5, A6, T2, T4
+AC-led-009   Missing      A5, A6, A7, D5, T2, T4
+
+Tests prove the spec
+  T1  pass         Requirement IDs are valid and never reused
+  T2  FAIL         A code commit references the requirement
+        AC-led-002: No commit that changes code references it
+        AC-led-003: No commit that changes code references it
+        AC-led-004: No commit that changes code references it
+        AC-led-005: No commit that changes code references it
+        AC-led-006: No commit that changes code references it
+        AC-led-007: No commit that changes code references it
+        AC-led-008: No commit that changes code references it
+        AC-led-009: No commit that changes code references it
+  T3  pass         The code from those commits still exists
+  T4  FAIL         Tests are tagged to the requirement
+        AC-led-002: No test name mentions it
+        AC-led-003: No test name mentions it
+        AC-led-004: No test name mentions it
+        AC-led-005: No test name mentions it
+        AC-led-006: No test name mentions it
+        AC-led-007: No test name mentions it
+        AC-led-008: No test name mentions it
+        AC-led-009: No test name mentions it
+  T5  pass         The tagged tests pass
+  T6  pass         The tagged tests run the requirement's code
+  T7  pass         The tagged tests fail when the code is broken
+  T8  pass         Results reset when the requirement changes
+
+The API matches its OpenAPI contract
+  A1  pass         Every API requirement has an operation
+  A2  pass         Every operation references a requirement
+  A3  pass         The contract passes the lint rules
+  A4  skip         No breaking change unless the spec changed
+  A5  FAIL         The service serves exactly the documented routes
+        AC-led-002: Documented but not served: POST /orders
+        AC-led-003: Documented but not served: GET /orders/{order_id}
+        AC-led-004: Documented but not served: POST /orders/{order_id}/payments
+        AC-led-005: Documented but not served: POST /orders/{order_id}/payments
+        AC-led-006: Documented but not served: POST /payments/{payment_id}/refunds
+        AC-led-008: Documented but not served: GET /accounts/{account}/balance
+        AC-led-009: Documented but not served: GET /reports/daily-revenue
+  A6  FAIL         Responses in the tagged tests match the contract
+        AC-led-002: No tagged test calls POST /orders
+        AC-led-003: No tagged test calls GET /orders/{order_id}
+        AC-led-004: No tagged test calls POST /orders/{order_id}/payments
+        AC-led-005: No tagged test calls POST /orders/{order_id}/payments
+        AC-led-006: No tagged test calls POST /payments/{payment_id}/refunds
+        AC-led-008: No tagged test calls GET /accounts/{account}/balance
+        AC-led-009: No tagged test calls GET /reports/daily-revenue
+  A7  FAIL         The running service conforms to the contract
+        GET /reports/daily-revenue: GET /reports/daily-revenue failed generated requests: 1. Test Case ID: yD1F7o
+        AC-led-009: Generated requests failed on GET /reports/daily-revenue
+
+The database matches its data contract
+  D1  pass         Every data requirement has a dataset
+  D2  pass         Every dataset references a requirement
+  D3  pass         The data contract is complete and consistent
+  D4  skip         No breaking data change unless the spec changed
+  D5  FAIL         The database has exactly the declared schema
+        AC-led-002: orders is declared but the database doesn't have it; order_lines is declared but the database doesn't have it
+        AC-led-004: payments is declared but the database doesn't have it
+        AC-led-006: refunds is declared but the database doesn't have it
+        AC-led-007: ledger_entries is declared but the database doesn't have it
+        AC-led-009: daily_revenue is declared but the database doesn't have it
+  D6  skip         Derived data reads only its declared sources
+  D7  pass         Merged migrations are never edited
+
+Git follows the conventions
+  H1  pass         Subjects follow Conventional Commits
+  H2  pass         Code commits carry a Refs: trailer
+  H3  pass         One requirement per code commit
+  H4  pass         refactor and chore commits change no status
+  H5  pass         Commit size under the limit
+  H6  pass         Branch names follow the pattern
+  H7  not covered  Main is never rewritten
+        No refs/aqv/verified recorded yet
+  H8  pass         The agent is named on its commits
+  H9  pass         Commits are signed
+  H10 pass         Protected files are changed only by people
+
+Agent scorecard (this range)
+  Claude <noreply@anthropic.com>: 2 commit(s), git rule pass rate 100%, requirements AC-led-001
