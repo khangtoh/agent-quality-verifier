@@ -1,0 +1,87 @@
+# Data contract for Ledgerline. Owned by people; the service's database must match it exactly.
+# kind: source  = written by the service.   kind: derived = built from other datasets (from:).
+version: 1
+datasets:
+  customers:
+    kind: source
+    x-requirements: [AC-led-001]
+    primary_key: [id]
+    columns:
+      id:    {type: integer, nullable: false}
+      name:  {type: text,    nullable: false}
+      email: {type: text,    nullable: false}
+
+  orders:
+    kind: source
+    x-requirements: [AC-led-002]
+    primary_key: [id]
+    columns:
+      id:          {type: integer, nullable: false}
+      customer_id: {type: integer, nullable: false}
+      status:      {type: text,    nullable: false}
+      total_cents: {type: integer, nullable: false}
+    foreign_keys:
+      - {columns: [customer_id], references: customers.id}
+
+  order_lines:
+    kind: source
+    x-requirements: [AC-led-002]
+    primary_key: [id]
+    columns:
+      id:               {type: integer, nullable: false}
+      order_id:         {type: integer, nullable: false}
+      position:         {type: integer, nullable: false}
+      sku:              {type: text,    nullable: false}
+      quantity:         {type: integer, nullable: false}
+      unit_price_cents: {type: integer, nullable: false}
+    foreign_keys:
+      - {columns: [order_id], references: orders.id}
+
+  payments:
+    kind: source
+    x-requirements: [AC-led-004]
+    primary_key: [id]
+    columns:
+      id:              {type: integer, nullable: false}
+      order_id:        {type: integer, nullable: false}
+      amount_cents:    {type: integer, nullable: false}
+      paid_on:         {type: text,    nullable: false}
+      idempotency_key: {type: text,    nullable: true}
+    foreign_keys:
+      - {columns: [order_id], references: orders.id}
+
+  refunds:
+    kind: source
+    x-requirements: [AC-led-006]
+    primary_key: [id]
+    columns:
+      id:           {type: integer, nullable: false}
+      payment_id:   {type: integer, nullable: false}
+      amount_cents: {type: integer, nullable: false}
+      refunded_on:  {type: text,    nullable: false}
+    foreign_keys:
+      - {columns: [payment_id], references: payments.id}
+
+  ledger_entries:
+    kind: source
+    x-requirements: [AC-led-007]
+    primary_key: [id]
+    columns:
+      id:           {type: integer, nullable: false}
+      account:      {type: text,    nullable: false}   # cash | revenue
+      direction:    {type: text,    nullable: false}   # debit | credit
+      amount_cents: {type: integer, nullable: false}
+      payment_id:   {type: integer, nullable: true}    # set for a payment's entries
+      refund_id:    {type: integer, nullable: true}    # set for a refund's entries
+    foreign_keys:
+      - {columns: [payment_id], references: payments.id}
+      - {columns: [refund_id],  references: refunds.id}
+
+  daily_revenue:
+    kind: derived
+    x-requirements: [AC-led-009]
+    columns:
+      day:          {type: text,    nullable: false, from: [payments.paid_on, refunds.refunded_on]}
+      gross_cents:  {type: integer, nullable: false, from: [payments.amount_cents]}
+      refund_cents: {type: integer, nullable: false, from: [refunds.amount_cents]}
+      net_cents:    {type: integer, nullable: false, from: [payments.amount_cents, refunds.amount_cents]}
