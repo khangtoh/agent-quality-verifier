@@ -81,7 +81,8 @@ func put(t *testing.T, dir, rel, text string) {
 func commitAll(t *testing.T, dir, subject string, as ...string) {
 	t.Helper()
 	gitIn(t, dir, "add", "-A")
-	args := []string{"-c", "commit.gpgsign=false"}
+	// A name too, for machines with no git identity of their own (CI).
+	args := []string{"-c", "commit.gpgsign=false", "-c", "user.name=Pat"}
 	if len(as) > 0 {
 		args = append(args, "-c", "user.email="+as[0])
 	}
