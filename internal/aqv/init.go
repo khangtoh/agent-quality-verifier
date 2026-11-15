@@ -159,6 +159,13 @@ func Init(o InitOptions) (*InitResult, error) {
 		return string(data)
 	}
 
+	// Refuse before writing siblings when an existing .aqv.yml will be kept and cannot be parsed.
+	if exists(filepath.Join(repo, ".aqv.yml")) && !o.Force {
+		if _, err := LoadConfig(read(".aqv.yml")); err != nil {
+			return nil, fmt.Errorf("the .aqv.yml already here can't be read: %w", err)
+		}
+	}
+
 	for _, f := range initFiles[lang] {
 		data, err := adapters.Files.ReadFile(f[1])
 		if err != nil {
