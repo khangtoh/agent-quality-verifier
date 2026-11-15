@@ -56,7 +56,7 @@ var lightChecks = map[string]bool{"T2": true, "T3": true, "T4": true, "T5": true
 	"A5": true, "A6": true}
 
 // Status order: the first problem found decides what a requirement shows.
-var statusOrder = []string{"Missing", "Gone", "Untested", "Failing", "Unexercised", "Weak", "Contract", "Drift", "Sync"}
+var statusOrder = []string{"Missing", "Gone", "Untested", "Failing", "Unexercised", "Weak", "Contract", "Data", "Drift", "Sync"}
 var statusByCheck = map[string]string{"T2": "Missing", "T3": "Gone", "T4": "Untested", "T5": "Failing",
 	"T6": "Unexercised", "T7": "Weak", "A1": "Contract", "A5": "Contract", "A6": "Contract", "A7": "Contract",
 	"T8": "Drift"}
@@ -127,6 +127,10 @@ type Engine struct {
 	svcPort     int
 	svcLog      *os.File
 	svcExited   chan struct{}
+
+	// Config-dependent checks (data.go): the extra check IDs this run reports, and the data guardrail's state.
+	extra    []string
+	datasets []*Dataset
 }
 
 func NewEngine(repo string, o Options) (*Engine, error) {
@@ -196,6 +200,7 @@ func NewEngine(repo string, o Options) (*Engine, error) {
 		}
 		e.Cfg = cfg
 	}
+	e.enableExtras(o)
 	return e, nil
 }
 
@@ -325,7 +330,10 @@ func (e *Engine) Run() *OMap {
 		defer e.stopService(nil)
 		e.checkContract()
 	}()
+	e.checkData()
+	e.checkConsistency()
 	e.checkHistory()
+	e.checkProtected()
 	return e.report()
 }
 
@@ -864,6 +872,7 @@ func (e *Engine) checkContract() {
 	if e.want("A7") {
 		e.checkA7(apiReqs)
 	}
+	e.checkA8(apiReqs)
 }
 
 func (e *Engine) scrub(text string) string {
@@ -1652,7 +1661,7 @@ func (e *Engine) statuses() map[string]string {
 func (e *Engine) report() *OMap {
 	statuses := e.statuses()
 	summary := NewOMap()
-	for _, chk := range CheckIDs {
+	for _, chk := range allCheckIDs(e.extra) {
 		var rs []*Result
 		for _, r := range e.Results {
 			if r.Check == chk {
@@ -1714,6 +1723,9 @@ func (e *Engine) report() *OMap {
 		}
 		o := om("id", rid, "text", r.Text, "api", api, "status", statuses[rid], "not_covered", notCovered,
 			"failing_checks", failing)
+		if len(r.DataSets) > 0 {
+			o.Set("data", r.DataSets)
+		}
 		if v := views[rid]; v != nil {
 			for _, k := range v.Keys() {
 				o.Set(k, v.Get(k))
@@ -1775,7 +1787,9 @@ func (e *Engine) vitals(rid string, req *Requirement) *OMap {
 	switch {
 	case t1:
 		v.Set("spec", "bad")
-	case e.verdicts([]string{"T8"}, rid)["fail"]:
+	case e.verdicts([]string{"C1", "C2", "C3", "C7"}, rid)["fail"]:
+		v.Set("spec", "bad")
+	case e.verdicts([]string{"T8", "C5"}, rid)["fail"]:
 		v.Set("spec", "warn")
 	default:
 		v.Set("spec", "ok")
@@ -1801,6 +1815,17 @@ func (e *Engine) vitals(rid string, req *Requirement) *OMap {
 		}
 	} else {
 		v.Set("api", "none")
+	}
+	if len(req.DataSets) > 0 {
+		data := e.verdicts([]string{"D1", "D5", "D6"}, rid)
+		switch {
+		case data["fail"] || data["error"]:
+			v.Set("data", "bad")
+		case data["pass"]:
+			v.Set("data", "ok")
+		default:
+			v.Set("data", "none")
+		}
 	}
 	t := e.verdicts([]string{"T4", "T5", "T6", "T7"}, rid)
 	switch {

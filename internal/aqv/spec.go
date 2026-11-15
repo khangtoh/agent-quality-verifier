@@ -59,6 +59,7 @@ type Requirement struct {
 	Tags      string
 	Text      string
 	APIOps    [][2]string
+	DataSets  []string
 	TagErrors []string
 }
 
@@ -86,6 +87,17 @@ func parseSpec(path, content string) []*Requirement {
 		if r.Tags != "" {
 			for _, tag := range strings.Split(r.Tags, ";") {
 				key, val, _ := strings.Cut(tag, ":")
+				if strip(key) == "data" {
+					// (data: orders, payments) names the datasets in the data contract this requirement owns.
+					for _, name := range strings.Split(val, ",") {
+						if name = strip(name); datasetName.MatchString(name) {
+							r.DataSets = append(r.DataSets, name)
+						} else {
+							r.TagErrors = append(r.TagErrors, "bad dataset name '"+name+"'")
+						}
+					}
+					continue
+				}
 				if strip(key) != "api" {
 					r.TagErrors = append(r.TagErrors, "unknown tag '"+strip(key)+"'")
 					continue
