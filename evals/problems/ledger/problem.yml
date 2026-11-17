@@ -1,0 +1,29 @@
+# One eval problem: what an agent is asked to build, and how its result is judged.
+name: ledger
+title: Ledgerline
+summary: Orders, payments, refunds, a double-entry ledger and a daily revenue report over HTTP and SQLite.
+guardrails: [openapi, data]
+prompt: |
+  Build Ledgerline in this repository. Read AGENTS.md first and follow it exactly, then implement
+  every requirement in specs/ledger.md, in order, one requirement per branch, merging each into
+  main as you finish it. Work on your own until every requirement is done: do not ask questions,
+  and do not stop after the first requirement.
+stacks:
+  go:
+    # Copied into tools/aqvcapture/ (the A6 test helper).
+    vendor: {"tools/aqvcapture/capture.go": "adapters/go/aqvcapture/capture.go"}
+    # The oracle builds the service once and starts a fresh copy, with an empty database, per test.
+    build: "go build -o {bin} ./cmd/server"
+    env: {PORT: "{port}", LEDGER_DB: "{db}"}
+    # T7 breaks the code on purpose, and a broken version that deadlocks would otherwise sit until
+    # go test's own ten-minute limit. The whole suite runs in about two seconds.
+    check_env: {GOFLAGS: "-timeout=30s"}
+  rust:
+    vendor:
+      "tools/aqvcapture/Cargo.toml": "adapters/rust/aqvcapture/Cargo.toml"
+      "tools/aqvcapture/src/lib.rs": "adapters/rust/aqvcapture/src/lib.rs"
+    build: "cargo build -q --bin ledger && cp \"${{CARGO_TARGET_DIR:-target}}/debug/ledger\" {bin}"
+    env: {PORT: "{port}", LEDGER_DB: "{db}"}
+    # Every check is a fresh checkout, which would compile every dependency again. The verifier and
+    # the oracle share one build folder per run instead; the agent keeps its own.
+    check_env: {CARGO_TARGET_DIR: "{run}/cargo-target"}

@@ -1,0 +1,59 @@
+# Agent Quality Verifier config for Ledgerline (Rust). Owned by people: agents must not change it.
+specs: ["specs/*.md"]
+ids_registry: specs/.ids
+contract: contracts/openapi.yaml
+code_paths: ["src/", "migrations/"]
+test_paths: ["tests/"]
+protected_paths: ["specs/", "contracts/", "tools/", ".config/", "build.rs", ".aqv.yml", ".spectral.yaml", "AGENTS.md", "CLAUDE.md", "GOAL.md", "PLAN.md"]
+
+# Runner profile: how to run the tests and where the reports go.
+runner:
+  # nextest writes its JUnit report under target/, wherever CARGO_TARGET_DIR points. A project with
+  # no tests yet is not a failure to run them (--no-tests=pass).
+  test: "rm -f target/nextest/ci/junit.xml; cargo nextest run --profile ci --no-fail-fast --no-tests=pass {extra} {filter}; code=$?; cp target/nextest/ci/junit.xml {junit} 2>/dev/null; exit $code"
+  coverage: "cargo llvm-cov nextest --lcov --output-path {lcov} --no-fail-fast --no-tests=pass {filter}"
+  filter: "-E 'test(/{id_underscore}/)'"
+  select_nothing: "-E 'test(=aqv_selects_no_tests)'"
+  comment_prefix: ["//", "/*", "*", "--"]
+
+api:
+  # A5: axum can't list its routes, so they are read from the source: a declared, partial check.
+  # AGENTS.md fixes how routes are written so that the scan sees all of them. Only the methods
+  # chained in the route call itself count (`get(a).post(b)`), so a later `row.get(0)` is not a route.
+  routes_scan:
+    files: ["src/**/*.rs"]
+    route: '\.route\(\s*"([^"]+)"'
+    methods: '(?<=\A\s*,\s*(?:[\w:]+\([^()]*\)\s*\.\s*)*(?:\w+::)*)(get|post|put|delete|patch)\s*\('
+  # A7: the service on $PORT with a fresh database.
+  serve: "PORT={port} LEDGER_DB=$(mktemp -d)/ledger.db cargo run -q --bin ledger"
+  serve_timeout: 600
+  # A6: tests send requests through tools/aqvcapture.
+  capture: true
+
+data:
+  contract: contracts/data.yaml
+  # D5, D6: build a fresh database the service's own way, then read back what is in it.
+  schema_from_code: "cargo run -q --features aqvtools --bin aqvschema -- {db} && {python} {aqv}/adapters/sqlite/schema.py {db}"
+  ignore: ["schema_migrations"]
+  # D7: a merged migration is never edited.
+  migrations: ["migrations/*.sql"]
+
+consistency:
+  # C4, C6: the documents the requirements were written from.
+  design: ["PLAN.md", "GOAL.md"]
+
+mutation:
+  family: c
+  invalid_exit_codes: [101]   # nextest: the build failed, so the mutant doesn't count
+  min_kill_ratio: 0.6
+  max_mutants: 20
+
+git:
+  humans: ["pat@example.com"]
+  agent_trailer: "Co-Authored-By"
+  branch_pattern: "^(feat|fix|refactor|test|docs|chore)/AC-[a-z0-9]+-[0-9]{3}(-[a-z0-9-]+)?$"
+  max_commit_lines: 400
+  size_exclude: ["Cargo.lock", "contracts/*"]
+  verified_ref: refs/aqv/verified
+  # H10: only the people above change protected_paths.
+  protect: true

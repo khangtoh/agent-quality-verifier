@@ -1,0 +1,6 @@
+.aqv-out/
+.aqv-live/
+.claude/
+*.db
+*.db-wal
+*.db-shm

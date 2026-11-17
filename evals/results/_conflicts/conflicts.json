@@ -1,0 +1,409 @@
+{
+  "build": "ledger-go-claude-guarded-1",
+  "seed_false_alarms": [],
+  "build_false_alarms": [],
+  "conflicts": [
+    {
+      "name": "status-in-spec",
+      "what": "AC-led-006 says an over-refund is rejected with 400; the contract documents 409.",
+      "between": "requirement ↔ API contract",
+      "kind": "targeted",
+      "expect": [
+        "C1"
+      ],
+      "before": {
+        "new_checks": [],
+        "statuses_moved": {},
+        "said": [],
+        "ok": false
+      },
+      "after": {
+        "new_checks": [
+          "C1"
+        ],
+        "statuses_moved": {
+          "AC-led-006": "Missing → Conflict"
+        },
+        "said": [
+          "The requirement says 400; POST /payments/{payment_id}/refunds documents 201, 404, 409, 422"
+        ],
+        "ok": true
+      },
+      "before_result": "missed",
+      "result": "caught"
+    },
+    {
+      "name": "status-in-contract",
+      "what": "The contract documents 400 for an over-payment; AC-led-004 says 409.",
+      "between": "requirement ↔ API contract",
+      "kind": "targeted",
+      "expect": [
+        "C1"
+      ],
+      "before": {
+        "new_checks": [],
+        "statuses_moved": {},
+        "said": [],
+        "ok": false
+      },
+      "after": {
+        "new_checks": [
+          "C1"
+        ],
+        "statuses_moved": {
+          "AC-led-004": "Missing → Conflict"
+        },
+        "said": [
+          "The requirement says 409; POST /orders/{order_id}/payments documents 200, 201, 404, 400, 422"
+        ],
+        "ok": true
+      },
+      "before_result": "missed",
+      "result": "caught"
+    },
+    {
+      "name": "value-in-contract",
+      "what": "The contract allows order status \"pending\" or \"paid\"; AC-led-002 says a new order is \"open\".",
+      "between": "requirement ↔ API contract",
+      "kind": "targeted",
+      "expect": [
+        "C2"
+      ],
+      "before": {
+        "new_checks": [],
+        "statuses_moved": {},
+        "said": [],
+        "ok": false
+      },
+      "after": {
+        "new_checks": [
+          "C2",
+          "C7"
+        ],
+        "statuses_moved": {
+          "AC-led-002": "Missing → Conflict",
+          "AC-led-003": "Missing → Conflict",
+          "AC-led-004": "Missing → Conflict",
+          "AC-led-006": "Missing → Conflict"
+        },
+        "said": [
+          "The requirement says \"open\"; POST /orders, orders, order_lines allows status: pending | paid",
+          "The requirement says \"open\"; the contracts allow status: pending | paid",
+          "Carries status, which is in dispute (see C2 on AC-led-002, AC-led-006)",
+          "Quotes \"paid\", a value of status, which is in dispute (see C2 on AC-led-002, AC-led-006)"
+        ],
+        "ok": true
+      },
+      "before_result": "missed",
+      "result": "caught"
+    },
+    {
+      "name": "value-in-spec",
+      "what": "AC-led-008 names the account \"income\"; the contract allows \"cash\" or \"revenue\".",
+      "between": "requirement ↔ API contract",
+      "kind": "targeted",
+      "expect": [
+        "C2"
+      ],
+      "before": {
+        "new_checks": [],
+        "statuses_moved": {},
+        "said": [],
+        "ok": false
+      },
+      "after": {
+        "new_checks": [
+          "C2",
+          "C7"
+        ],
+        "statuses_moved": {
+          "AC-led-007": "Missing → Conflict",
+          "AC-led-008": "Missing → Conflict"
+        },
+        "said": [
+          "The requirement says \"income\"; GET /accounts/{account}/balance allows account: cash | revenue",
+          "Quotes \"cash\", a value of account, which is in dispute (see C2 on AC-led-008)"
+        ],
+        "ok": true
+      },
+      "before_result": "missed",
+      "result": "caught"
+    },
+    {
+      "name": "type-across-contracts",
+      "what": "refunds.amount_cents is real in the data contract and integer in the API contract.",
+      "between": "API contract ↔ data contract",
+      "kind": "targeted",
+      "expect": [
+        "C3"
+      ],
+      "before": {
+        "new_checks": [],
+        "statuses_moved": {},
+        "said": [],
+        "ok": false
+      },
+      "after": {
+        "new_checks": [
+          "C3"
+        ],
+        "statuses_moved": {
+          "AC-led-006": "Missing → Conflict"
+        },
+        "said": [
+          "amount_cents is integer in the API contract and real in refunds"
+        ],
+        "ok": true
+      },
+      "before_result": "missed",
+      "result": "caught"
+    },
+    {
+      "name": "status-in-plan",
+      "what": "The plan says conflicts return 400; no operation documents 400.",
+      "between": "design ↔ API contract",
+      "kind": "targeted",
+      "expect": [
+        "C4"
+      ],
+      "before": {
+        "new_checks": [],
+        "statuses_moved": {},
+        "said": [],
+        "ok": false
+      },
+      "after": {
+        "new_checks": [
+          "C4"
+        ],
+        "statuses_moved": {},
+        "said": [
+          "PLAN.md says status 400, which no operation documents"
+        ],
+        "ok": true
+      },
+      "before_result": "missed",
+      "result": "caught"
+    },
+    {
+      "name": "operation-in-plan",
+      "what": "The plan describes DELETE /orders/{order_id}; the contract has no such operation.",
+      "between": "design ↔ API contract",
+      "kind": "targeted",
+      "expect": [
+        "C4"
+      ],
+      "before": {
+        "new_checks": [],
+        "statuses_moved": {},
+        "said": [],
+        "ok": false
+      },
+      "after": {
+        "new_checks": [
+          "C4"
+        ],
+        "statuses_moved": {},
+        "said": [
+          "PLAN.md describes DELETE /orders/{order_id}, which the contract doesn't have"
+        ],
+        "ok": true
+      },
+      "before_result": "missed",
+      "result": "caught"
+    },
+    {
+      "name": "meaning-between-requirements",
+      "what": "Probe: AC-led-003 now says amount paid ignores refunds; AC-led-006 still says a refund lowers it.",
+      "between": "requirement ↔ requirement",
+      "kind": "probe",
+      "expect": [],
+      "before": {
+        "new_checks": [],
+        "statuses_moved": {},
+        "said": [],
+        "ok": false
+      },
+      "after": {
+        "new_checks": [],
+        "statuses_moved": {},
+        "said": [],
+        "ok": false
+      },
+      "before_result": "missed",
+      "result": "missed"
+    },
+    {
+      "name": "meaning-in-goal",
+      "what": "Probe: the goal says amounts are decimal dollars; both contracts use integer cents.",
+      "between": "design ↔ contracts",
+      "kind": "probe",
+      "expect": [],
+      "before": {
+        "new_checks": [],
+        "statuses_moved": {},
+        "said": [],
+        "ok": false
+      },
+      "after": {
+        "new_checks": [],
+        "statuses_moved": {},
+        "said": [],
+        "ok": false
+      },
+      "before_result": "missed",
+      "result": "missed"
+    }
+  ],
+  "drift": [
+    {
+      "name": "contract-limit-tightened",
+      "what": "A person lowers the most lines an order may have from 100 to 50 in the API contract. The build still accepts 100.",
+      "between": "",
+      "kind": "targeted",
+      "expect": [
+        "C5"
+      ],
+      "before": {
+        "new_checks": [],
+        "statuses_moved": {},
+        "said": [],
+        "ok": false
+      },
+      "after": {
+        "new_checks": [
+          "C5"
+        ],
+        "statuses_moved": {
+          "AC-led-002": "Sync → Drift"
+        },
+        "said": [
+          "Its contract changed in 84a1070 after its last code or test commit: POST /orders › requestBody › content › application/json › schema › properties › lines › maxItems: 100 → 50"
+        ],
+        "ok": true
+      },
+      "before_result": "missed",
+      "result": "caught"
+    },
+    {
+      "name": "data-contract-tightened",
+      "what": "Reference: a person makes payments.idempotency_key not nullable in the data contract. The existing D5 check already catches this.",
+      "between": "",
+      "kind": "targeted",
+      "expect": [
+        "D5"
+      ],
+      "before": {
+        "new_checks": [
+          "D5"
+        ],
+        "statuses_moved": {
+          "AC-led-004": "Sync → Data"
+        },
+        "said": [
+          "payments.idempotency_key is nullable in the database, not null in the contract"
+        ],
+        "ok": true
+      },
+      "after": {
+        "new_checks": [
+          "C5",
+          "D5"
+        ],
+        "statuses_moved": {
+          "AC-led-004": "Sync → Data"
+        },
+        "said": [
+          "payments.idempotency_key is nullable in the database, not null in the contract",
+          "Its contract changed in 8089264 after its last code or test commit: payments › columns › idempotency_key › nullable: True → False"
+        ],
+        "ok": true
+      },
+      "before_result": "caught",
+      "result": "caught"
+    },
+    {
+      "name": "design-changed",
+      "what": "A person changes the plan (ledger entries move to a nightly job) and no requirement or contract follows.",
+      "between": "",
+      "kind": "targeted",
+      "expect": [
+        "C6"
+      ],
+      "before": {
+        "new_checks": [],
+        "statuses_moved": {},
+        "said": [],
+        "ok": false
+      },
+      "after": {
+        "new_checks": [
+          "C6"
+        ],
+        "statuses_moved": {},
+        "said": [
+          "PLAN.md changed in cc46dca after 9 requirement(s) were built, and no requirement or contract changed with it. Carry the change into the spec, or mark the commit Spec-Impact: none"
+        ],
+        "ok": true
+      },
+      "before_result": "missed",
+      "result": "caught"
+    },
+    {
+      "name": "design-typo-acknowledged",
+      "what": "Control: a person rewords the plan and marks the commit Spec-Impact: none. Nothing should fail.",
+      "between": "",
+      "kind": "control",
+      "expect": null,
+      "before": {
+        "new_checks": [],
+        "statuses_moved": {},
+        "said": [],
+        "ok": true
+      },
+      "after": {
+        "new_checks": [],
+        "statuses_moved": {},
+        "said": [],
+        "ok": true
+      },
+      "before_result": "clean",
+      "result": "clean"
+    },
+    {
+      "name": "requirement-reworded",
+      "what": "Reference: a person rewords a requirement. The existing T8 check already catches this.",
+      "between": "",
+      "kind": "targeted",
+      "expect": [
+        "T8"
+      ],
+      "before": {
+        "new_checks": [
+          "T8"
+        ],
+        "statuses_moved": {
+          "AC-led-008": "Sync → Drift"
+        },
+        "said": [
+          "Wording changed in c323b7a (0 → null) after its last code or test commit"
+        ],
+        "ok": true
+      },
+      "after": {
+        "new_checks": [
+          "T8"
+        ],
+        "statuses_moved": {
+          "AC-led-008": "Sync → Drift"
+        },
+        "said": [
+          "Wording changed in c323b7a (0 → null) after its last code or test commit"
+        ],
+        "ok": true
+      },
+      "before_result": "caught",
+      "result": "caught"
+    }
+  ]
+}

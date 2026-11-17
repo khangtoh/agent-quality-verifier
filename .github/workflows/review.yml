@@ -1,0 +1,34 @@
+# Puts the eval runs in front of a reviewer. See docs/evals.md.
+#
+#   pages  every push and pull request: the pages of every run kept in evals/results/ are written
+#          again by the verifier built from the commit, and uploaded as the artifact "review-pages"
+#          (open index.html). The job summary has each run's score. The job fails if the verifier
+#          can no longer read a recorded result.
+name: review
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  pages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: go build -o bin/aqv ./cmd/aqv
+      - name: Review pages
+        env:
+          REVIEW_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: python scripts/review_bundle.py --out review-bundle --summary "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: review-pages
+          path: review-bundle
+          if-no-files-found: error

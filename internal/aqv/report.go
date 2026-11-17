@@ -12,17 +12,17 @@ import (
 var mark = map[string]string{"pass": "pass", "fail": "FAIL", "error": "ERROR", "skip": "skip",
 	"not_covered": "not covered", "not_run": "not run"}
 
-var groups = [][2]string{{"Tests prove the spec", "T"}, {"The API matches its OpenAPI contract", "A"},
-	{"Git follows the conventions", "H"}}
+var groups = [][2]string{{"The spec, the contracts and the design agree", "C"}, {"Tests prove the spec", "T"}, {"The API matches its OpenAPI contract", "A"},
+	{"The database matches its data contract", "D"}, {"Git follows the conventions", "H"}}
 
 var statusTone = map[string]string{"Sync": "ok", "Drift": "warn", "Untested": "warn", "Unexercised": "warn",
-	"Weak": "warn", "Missing": "muted", "Gone": "bad", "Failing": "bad", "Contract": "bad"}
+	"Weak": "warn", "Missing": "muted", "Gone": "bad", "Failing": "bad", "Contract": "bad", "Data": "bad", "Conflict": "bad"}
 var verdictTone = map[string]string{"pass": "ok", "fail": "bad", "error": "bad", "skip": "muted",
 	"not_covered": "warn", "not_run": "muted"}
 var verdictLabel = map[string]string{"pass": "pass", "fail": "fail", "error": "error", "skip": "skip",
 	"not_covered": "not covered", "not_run": "not run"}
-var goals = [][2]string{{"T", "Tests prove the spec"}, {"A", "The API matches its OpenAPI contract"},
-	{"H", "Git follows the conventions"}}
+var goals = [][2]string{{"C", "The spec, the contracts and the design agree"}, {"T", "Tests prove the spec"}, {"A", "The API matches its OpenAPI contract"},
+	{"D", "The database matches its data contract"}, {"H", "Git follows the conventions"}}
 
 func pad(s string, w int) string {
 	n := utf8.RuneCountInString(s)
@@ -66,9 +66,13 @@ func TextReport(rep *OMap) string {
 	out = append(out, "")
 	results := maps(rep.Get("results"))
 	checks := rep.Map("checks")
+	ids := reportCheckIDs(rep)
 	for _, g := range groups {
+		if (g[1] == "D" && !checks.Has("D1")) || (g[1] == "C" && !checks.Has("C1")) {
+			continue
+		}
 		out = append(out, g[0])
-		for _, chk := range CheckIDs {
+		for _, chk := range ids {
 			if !strings.HasPrefix(chk, g[1]) {
 				continue
 			}
@@ -78,7 +82,7 @@ func TextReport(rep *OMap) string {
 				if r.Str("check") == chk && (v == "fail" || v == "error" || v == "not_covered") {
 					subj := r.Str("subject") + ": "
 					switch r.Str("subject") {
-					case "history", "project", "spec", "contract":
+					case "history", "project", "spec", "contract", "data contract", "database", "migrations", "design":
 						subj = ""
 					}
 					out = append(out, "        "+subj+r.Str("summary"))
@@ -159,7 +163,8 @@ var dot = map[string]string{"ok": "var(--ok-fg)", "warn": "var(--warn-fg)", "bad
 var vitalNames = []string{"spec", "code", "api", "tests"}
 var phrase = map[string]string{"Missing": "not implemented", "Gone": "with their code gone", "Untested": "untested",
 	"Failing": "failing", "Unexercised": "not exercised by their tests", "Weak": "with weak tests",
-	"Contract": "breaking the API contract", "Drift": "changed in the spec since implemented"}
+	"Contract": "breaking the API contract", "Data": "breaking the data contract", "Drift": "changed in the spec since implemented",
+	"Conflict": "contradicted by a contract"}
 
 func dotFor(state string) string {
 	if d, ok := dot[state]; ok {
@@ -182,7 +187,11 @@ func requirementBlock(r *OMap, open *bool) string {
 		tone = "bad"
 	}
 	var rail, chips strings.Builder
-	for _, k := range vitalNames {
+	names := vitalNames
+	if v.Has("data") {
+		names = []string{"spec", "code", "api", "data", "tests"}
+	}
+	for _, k := range names {
 		fmt.Fprintf(&rail, `<span class="v-%s" title="%s: %s"></span>`, val(k), k, val(k))
 		fmt.Fprintf(&chips, `<span><i style="background:%s"></i>%s</span>`, dot[val(k)], k)
 	}
@@ -217,6 +226,9 @@ func requirementBlock(r *OMap, open *bool) string {
 	api := ""
 	if a := strList(r.Get("api")); len(a) > 0 {
 		api = " · " + escapeHTML(strings.Join(a, ", "))
+	}
+	if ds := strList(r.Get("data")); len(ds) > 0 {
+		api += " · data: " + escapeHTML(strings.Join(ds, ", "))
 	}
 	return `<div class="clause" id="` + escapeHTML(r.Str("id")) + `"><div class="rail" aria-hidden="true">` + rail.String() +
 		`</div><details` + openAttr + `><summary><div class="head"><span class="rid">` + escapeHTML(r.Str("id")) + api +
@@ -264,8 +276,12 @@ func HTMLReport(rep *OMap, nav *string) string {
 	for _, r := range reqs {
 		blocks.WriteString(requirementBlock(r, nil))
 	}
+	railNames := "spec, code, api, tests"
+	if checks := rep.Map("checks"); checks.Has("D1") {
+		railNames = "spec, code, api, data, tests"
+	}
 	body = append(body, `<section><div class="sheet">`+blocks.String()+`</div>`+
-		`<div class="vlegend"><span>Rail, top to bottom: spec, code, api, tests</span>`+
+		`<div class="vlegend"><span>Rail, top to bottom: `+railNames+`</span>`+
 		`<span><i class="v-ok"></i>Proven</span><span><i class="v-warn"></i>Needs attention</span>`+
 		`<span><i class="v-bad"></i>Missing or failing</span><span><i class="v-none"></i>Not applicable</span>`+
 		`</div></section>`)
@@ -284,8 +300,9 @@ func HTMLReport(rep *OMap, nav *string) string {
 
 	checks := rep.Map("checks")
 	results := maps(rep.Get("results"))
+	ids := reportCheckIDs(rep)
 	gitN, passing := 0, 0
-	for _, c := range CheckIDs {
+	for _, c := range ids {
 		if strings.HasPrefix(c, "H") {
 			gitN++
 			if v := checks.Str(c); v == "pass" || v == "skip" {
@@ -312,7 +329,7 @@ func HTMLReport(rep *OMap, nav *string) string {
 
 	var crow strings.Builder
 	for _, g := range goals {
-		for _, chk := range CheckIDs {
+		for _, chk := range ids {
 			if !strings.HasPrefix(chk, g[0]) {
 				continue
 			}
@@ -330,7 +347,7 @@ func HTMLReport(rep *OMap, nav *string) string {
 				`</span><span>` + escapeHTML(Checks[chk]) + strings.Join(msgs, "") + `</span></div>`)
 		}
 	}
-	body = append(body, fmt.Sprintf(`<section><details class="all"><summary>All %d checks</summary>`, len(CheckIDs))+
+	body = append(body, fmt.Sprintf(`<section><details class="all"><summary>All %d checks</summary>`, len(ids))+
 		`<div class="panel goal-list" style="margin-top:12px">`+crow.String()+`</div></details></section>`)
 	if sc := rep.Map("scorecard"); sc.Len() > 0 {
 		var srows strings.Builder
@@ -362,5 +379,8 @@ func WriteOutputs(dir string, rep *OMap) (string, error) {
 	if err := writeFile(filepath.Join(dir, "report.txt"), txt+"\n"); err != nil {
 		return "", err
 	}
-	return txt, writeFile(filepath.Join(dir, "report.html"), HTMLReport(rep, nil))
+	if err := writeFile(filepath.Join(dir, "report.html"), HTMLReport(rep, nil)); err != nil {
+		return "", err
+	}
+	return txt, writeFile(filepath.Join(dir, "review.html"), ReviewHTML(rep))
 }

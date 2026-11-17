@@ -1,0 +1,199 @@
+{
+  "seq": 19,
+  "time": "2026-11-15T08:46:32Z",
+  "sha": "d523613c2e56fbfa9c9e5444ca78c3c78278c2c6",
+  "branch": "main",
+  "subject": "Merge branch 'feat/AC-led-009-daily-revenue'",
+  "requirements": 9,
+  "proven": 2,
+  "built": 9,
+  "health": "failing",
+  "statuses": {
+    "AC-led-001": "Contract",
+    "AC-led-002": "Conflict",
+    "AC-led-003": "Conflict",
+    "AC-led-004": "Conflict",
+    "AC-led-005": "Sync",
+    "AC-led-006": "Conflict",
+    "AC-led-007": "Sync",
+    "AC-led-008": "Contract",
+    "AC-led-009": "Contract"
+  },
+  "counts": {
+    "Contract": 3,
+    "Conflict": 4,
+    "Sync": 2
+  },
+  "checks": {
+    "C1": "fail",
+    "C2": "fail",
+    "C3": "fail",
+    "C4": "pass",
+    "C5": "pass",
+    "C6": "pass",
+    "C7": "fail",
+    "T1": "pass",
+    "T2": "pass",
+    "T3": "pass",
+    "T4": "pass",
+    "T5": "pass",
+    "T6": "pass",
+    "T7": "not_run",
+    "T8": "pass",
+    "A1": "pass",
+    "A2": "pass",
+    "A3": "pass",
+    "A4": "skip",
+    "A5": "pass",
+    "A6": "fail",
+    "A7": "not_run",
+    "A8": "fail",
+    "D1": "pass",
+    "D2": "pass",
+    "D3": "pass",
+    "D4": "skip",
+    "D5": "pass",
+    "D6": "pass",
+    "D7": "pass",
+    "H1": "pass",
+    "H2": "pass",
+    "H3": "pass",
+    "H4": "pass",
+    "H5": "pass",
+    "H6": "pass",
+    "H7": "not_covered",
+    "H8": "pass",
+    "H9": "pass",
+    "H10": "pass"
+  },
+  "families": {
+    "C": {
+      "pass": 3,
+      "fail": 4,
+      "other": 0
+    },
+    "T": {
+      "pass": 7,
+      "fail": 0,
+      "other": 1
+    },
+    "A": {
+      "pass": 4,
+      "fail": 2,
+      "other": 2
+    },
+    "D": {
+      "pass": 6,
+      "fail": 0,
+      "other": 1
+    },
+    "H": {
+      "pass": 9,
+      "fail": 0,
+      "other": 1
+    }
+  },
+  "attention": [
+    {
+      "check": "A6",
+      "subject": "AC-led-001",
+      "verdict": "fail",
+      "summary": "TestAC_led_001_DatabaseFailureReturns500: POST /customers returned 500, which the contract doesn't document; TestAC_led_001_UnknownRouteAndMethodReturnJSONErrors called DELETE /customers, which the contract doesn't have; TestAC_led_001_UnknownRouteAndMethodReturnJSONErrors called GET /nothing-here, which the contract doesn't have",
+      "who": "agent"
+    },
+    {
+      "check": "A6",
+      "subject": "AC-led-002",
+      "verdict": "fail",
+      "summary": "TestAC_led_002_DatabaseFailureReturns500: POST /orders returned 500, which the contract doesn't document",
+      "who": "agent"
+    },
+    {
+      "check": "A6",
+      "subject": "AC-led-003",
+      "verdict": "fail",
+      "summary": "TestAC_led_003_DatabaseFailureReturns500: GET /orders/{order_id} returned 500, which the contract doesn't document",
+      "who": "agent"
+    },
+    {
+      "check": "A6",
+      "subject": "AC-led-004",
+      "verdict": "fail",
+      "summary": "TestAC_led_004_DatabaseFailureReturns500: POST /orders/{order_id}/payments returned 500, which the contract doesn't document",
+      "who": "agent"
+    },
+    {
+      "check": "A6",
+      "subject": "AC-led-006",
+      "verdict": "fail",
+      "summary": "TestAC_led_006_DatabaseFailureReturns500: POST /payments/{payment_id}/refunds returned 500, which the contract doesn't document",
+      "who": "agent"
+    },
+    {
+      "check": "A6",
+      "subject": "AC-led-008",
+      "verdict": "fail",
+      "summary": "TestAC_led_008_DatabaseFailureReturns500: GET /accounts/{account}/balance returned 500, which the contract doesn't document",
+      "who": "agent"
+    },
+    {
+      "check": "A6",
+      "subject": "AC-led-009",
+      "verdict": "fail",
+      "summary": "TestAC_led_009_DatabaseFailureReturns500: GET /reports/daily-revenue returned 500, which the contract doesn't document",
+      "who": "agent"
+    },
+    {
+      "check": "A8",
+      "subject": "AC-led-006",
+      "verdict": "fail",
+      "summary": "The requirement says 400; its tagged tests saw only 201, 404, 409, 422, 500 from POST /payments/{payment_id}/refunds",
+      "who": "agent"
+    },
+    {
+      "check": "C2",
+      "subject": "AC-led-002",
+      "verdict": "fail",
+      "summary": "The requirement says \"open\"; POST /orders, orders, order_lines allows status: pending | paid",
+      "who": "person"
+    },
+    {
+      "check": "C1",
+      "subject": "AC-led-006",
+      "verdict": "fail",
+      "summary": "The requirement says 400; POST /payments/{payment_id}/refunds documents 201, 404, 409, 422",
+      "who": "person"
+    },
+    {
+      "check": "C2",
+      "subject": "AC-led-006",
+      "verdict": "fail",
+      "summary": "The requirement says \"open\"; the contracts allow status: pending | paid",
+      "who": "person"
+    },
+    {
+      "check": "C3",
+      "subject": "AC-led-006",
+      "verdict": "fail",
+      "summary": "amount_cents is integer in the API contract and real in refunds",
+      "who": "person"
+    },
+    {
+      "check": "C7",
+      "subject": "AC-led-003",
+      "verdict": "fail",
+      "summary": "Carries status, which is in dispute (see C2 on AC-led-002, AC-led-006)",
+      "who": "person"
+    },
+    {
+      "check": "C7",
+      "subject": "AC-led-004",
+      "verdict": "fail",
+      "summary": "Quotes \"paid\", a value of status, which is in dispute (see C2 on AC-led-002, AC-led-006)",
+      "who": "person"
+    }
+  ],
+  "pending": 0,
+  "regressed": [],
+  "on_main": true
+}

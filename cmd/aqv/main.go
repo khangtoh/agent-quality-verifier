@@ -2,6 +2,8 @@
 //
 //	aqv init  [--repo .] [--goal GOAL.md] [--plan PLAN.md] [--lang go] [--human EMAIL] [--force]
 //	aqv check [--repo .] [--base main] [--out out/] [--skip T7,A7] [--only H1,H2] [--record]
+//	aqv watch [--repo .] [--main main] [--out DIR] [--skip T7,A7] [--interval 5] [--once] [--feedback FILE] [--replay TIMELINE]
+//	aqv render DIR                      rewrite the pages in a results or watch folder, checking nothing again
 //	aqv pages --work demo/.work-go --meta demo/langs.json --out demo/results-go
 //	aqv site  --root . --meta demo/langs.json --py-work demo/.work --go-work demo/.work-go
 package main
@@ -12,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/khangtoh/agent-quality-verifier/internal/aqv"
 )
@@ -84,7 +87,43 @@ func initProject(args []string) {
 		"  3. Read the spec, commit it yourself, then run the aqv-build workflow.")
 }
 
+func watch(args []string) {
+	fs := flag.NewFlagSet("watch", flag.ExitOnError)
+	repo := fs.String("repo", ".", "repository the agent is working in")
+	mainBranch := fs.String("main", "main", "the branch requirements merge into")
+	out := fs.String("out", "", "folder for timeline.jsonl, state.json, state.md, live.html and each commit's report")
+	skip := fs.String("skip", "T7,A7", "comma-separated checks to leave out of each commit's check")
+	interval := fs.Int("interval", 5, "seconds between looks for a new commit")
+	once := fs.Bool("once", false, "check the current commit and exit")
+	feedback := fs.String("feedback", "", "also write state.md here, for the agent to read")
+	replay := fs.String("replay", "", "a timeline.jsonl from an earlier watch: check the same commits again with this verifier, then exit")
+	fs.Parse(args)
+	dir := *out
+	if dir == "" {
+		dir = filepath.Join(*repo, ".aqv-live")
+	}
+	err := aqv.Watch(aqv.WatchOptions{Repo: *repo, Main: *mainBranch, Out: dir, Skip: split(*skip),
+		Interval: time.Duration(*interval) * time.Second, Once: *once, Feedback: *feedback, Replay: *replay,
+		Log: func(s string) { fmt.Println(time.Now().Format("15:04:05"), s) }})
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
 func main() {
+	if len(os.Args) >= 2 && os.Args[1] == "watch" {
+		watch(os.Args[2:])
+		return
+	}
+	if len(os.Args) >= 3 && os.Args[1] == "render" {
+		if err := aqv.Render(os.Args[2]); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			os.Exit(1)
+		}
+		fmt.Println("Wrote the pages in", os.Args[2])
+		return
+	}
 	if len(os.Args) >= 2 && os.Args[1] == "init" {
 		initProject(os.Args[2:])
 		return
@@ -99,6 +138,8 @@ func main() {
 	}
 	if len(os.Args) < 2 || os.Args[1] != "check" {
 		fmt.Fprintln(os.Stderr, "usage: aqv check [--repo .] [--base REF] [--out DIR] [--skip T7,A7] [--only H1,H2] [--record]\n"+
+			"       aqv watch [--repo .] [--main main] [--out DIR] [--skip T7,A7] [--once] [--feedback FILE]\n"+
+			"       aqv render DIR\n"+
 			"       aqv init  [--repo .] [--goal FILE] [--plan FILE] [--lang go] [--human EMAIL] [--force]\n"+
 			"       aqv pages [--work DIR] [--meta FILE] [--out DIR]\n"+
 			"       aqv site  [--root DIR] [--meta FILE] [--py-work DIR] [--go-work DIR]")

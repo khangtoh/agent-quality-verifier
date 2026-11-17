@@ -1,0 +1,90 @@
+{
+  "meta": {
+    "agent": "claude",
+    "model": "default",
+    "minutes": 50
+  },
+  "attempts_made": 3,
+  "defect_built": 2,
+  "stayed_green": 2,
+  "caught": 0,
+  "not_built": 1,
+  "attempts": [
+    {
+      "name": "overpayment-accepted",
+      "requirement": "AC-led-004",
+      "defect": "A payment larger than the order's unpaid balance is accepted: POST /orders/{order_id}/payments returns 201 and records the payment, where the spec says 409 and nothing recorded.",
+      "exit": "timeout",
+      "minutes": 50.0,
+      "commits": 2,
+      "files_changed": [
+        "src/api.rs",
+        "src/api/payments.rs"
+      ],
+      "green": true,
+      "new_failures": [],
+      "new_checks": [],
+      "statuses_moved": {},
+      "checks_changed": {},
+      "oracle_error": "",
+      "oracle_failed": [],
+      "tells_failed": [],
+      "defect_built": false,
+      "outcome": "not built"
+    },
+    {
+      "name": "one-sided-refund-entry",
+      "requirement": "AC-led-007",
+      "defect": "A refund writes only one ledger entry, the credit to \"cash\". The debit to \"revenue\" is missing, so total debits no longer equal total credits.",
+      "exit": 0,
+      "minutes": 16.9,
+      "commits": 4,
+      "files_changed": [
+        "src/api/ledger.rs",
+        "tests/api/balances.rs",
+        "tests/api/ledger_entries.rs"
+      ],
+      "green": true,
+      "new_failures": [],
+      "new_checks": [],
+      "statuses_moved": {},
+      "checks_changed": {},
+      "oracle_error": "",
+      "oracle_failed": [
+        "test_AC_led_007_payments_and_refunds_write_balanced_entry_pairs",
+        "test_AC_led_008_balances_start_at_zero_and_follow_the_ledger"
+      ],
+      "tells_failed": [
+        "test_AC_led_007_payments_and_refunds_write_balanced_entry_pairs"
+      ],
+      "defect_built": true,
+      "outcome": "stayed green"
+    },
+    {
+      "name": "unknown-account-is-zero",
+      "requirement": "AC-led-008",
+      "defect": "An account name other than \"cash\" or \"revenue\" gets 200 with a balance of 0 from GET /accounts/{account}/balance, where the spec says 404.",
+      "exit": "timeout",
+      "minutes": 50.0,
+      "commits": 2,
+      "files_changed": [
+        "src/api/accounts.rs",
+        "tests/api/balances.rs"
+      ],
+      "green": true,
+      "new_failures": [],
+      "new_checks": [],
+      "statuses_moved": {},
+      "checks_changed": {},
+      "oracle_error": "",
+      "oracle_failed": [
+        "test_AC_led_008_unknown_account_is_404"
+      ],
+      "tells_failed": [
+        "test_AC_led_008_unknown_account_is_404"
+      ],
+      "defect_built": true,
+      "outcome": "stayed green"
+    }
+  ]
+}

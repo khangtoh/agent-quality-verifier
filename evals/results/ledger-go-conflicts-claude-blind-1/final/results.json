@@ -1,0 +1,2271 @@
+{
+  "repo": "evals/runs/ledger-go-conflicts-claude-blind-1/final-tree",
+  "head": "0ea730dbb4c79a08e271c0cc7daa6cdd2b5e7a8d",
+  "base": null,
+  "head_branch": "HEAD",
+  "checks": {
+    "T1": "pass",
+    "T2": "fail",
+    "T3": "pass",
+    "T4": "fail",
+    "T5": "pass",
+    "T6": "pass",
+    "T7": "pass",
+    "T8": "pass",
+    "A1": "pass",
+    "A2": "pass",
+    "A3": "pass",
+    "A4": "skip",
+    "A5": "fail",
+    "A6": "fail",
+    "A7": "fail",
+    "D1": "pass",
+    "D2": "pass",
+    "D3": "pass",
+    "D4": "skip",
+    "D5": "fail",
+    "D6": "skip",
+    "D7": "pass",
+    "H1": "pass",
+    "H2": "pass",
+    "H3": "pass",
+    "H4": "pass",
+    "H5": "pass",
+    "H6": "pass",
+    "H7": "not_covered",
+    "H8": "pass",
+    "H9": "pass",
+    "H10": "pass"
+  },
+  "requirements": [
+    {
+      "id": "AC-led-001",
+      "text": "A customer is created with a name and an email address and gets a new ID; a second customer with an email address already in use is rejected with 409 and is not stored.",
+      "api": [
+        "POST /customers"
+      ],
+      "status": "Sync",
+      "not_covered": [
+        "H7"
+      ],
+      "failing_checks": [],
+      "data": [
+        "customers"
+      ],
+      "vitals": {
+        "spec": "ok",
+        "code": "ok",
+        "api": "ok",
+        "data": "ok",
+        "tests": "ok"
+      },
+      "note": "Implemented, tested, and matching the contract.",
+      "segments": [
+        {
+          "t": "A customer is created with a name and an email address and gets a new ID; a second customer with an email address already in use is rejected with 409 and is not stored.",
+          "m": false
+        }
+      ],
+      "timeline": [
+        {
+          "sha": "b1d482b",
+          "label": "Spec added",
+          "state": "neutral"
+        },
+        {
+          "sha": "cf529e1",
+          "label": "feat(store): open the database and create the customers table (69 lines still in the code)",
+          "state": "ok"
+        },
+        {
+          "sha": "87858bf",
+          "label": "feat(customers): create customers and reject emails already in use (129 lines still in the code)",
+          "state": "ok"
+        }
+      ],
+      "now": [
+        {
+          "label": "TestAC_led_001_AcceptsBoundaryLengths: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_CreatesCustomerWithNewID: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsEmailAlreadyInUse: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/email_ends_with_@: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/email_not_a_string: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/email_of_2: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/email_of_255: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/email_with_a_space: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/email_with_two_@: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/email_without_@: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/empty_body: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/empty_name: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/missing_email: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/missing_name: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/name_not_a_string: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/name_of_201: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/not_JSON: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/not_an_object: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/null: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/null_email: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/null_name: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/trailing_text: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/two_objects: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_RejectsInvalidBody/unknown_field: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_SameNameDifferentEmailIsAccepted: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_FailedMigrationIsRolledBackAndNotRecorded: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_MigrationsApplyInOrder: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_OpenCreatesCustomersTable: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_OpenFailsOnUnusablePath: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_OpenRecordsEachMigrationOnce: pass",
+          "state": "ok"
+        },
+        {
+          "label": "TestAC_led_001_OpenTurnsForeignKeysOn: pass",
+          "state": "ok"
+        },
+        {
+          "label": "Its tests run 91 of its 198 code line(s)",
+          "state": "ok"
+        },
+        {
+          "label": "Its tests caught 20 of 20 broken versions (100%; needs 60%)",
+          "state": "ok"
+        },
+        {
+          "label": "POST /customers: 32 call(s) from tagged tests match the contract",
+          "state": "ok"
+        },
+        {
+          "label": "POST /customers: generated requests got documented responses",
+          "state": "ok"
+        }
+      ]
+    },
+    {
+      "id": "AC-led-002",
+      "text": "An order is created for an existing customer with one or more lines, starts with status \"open\", and its total is the sum of quantity times unit price over its lines; an order for a customer that does not exist is rejected with 404.",
+      "api": [
+        "POST /orders"
+      ],
+      "status": "Missing",
+      "not_covered": [
+        "H7"
+      ],
+      "failing_checks": [
+        "A5",
+        "A6",
+        "D5",
+        "T2",
+        "T4"
+      ],
+      "data": [
+        "orders",
+        "order_lines"
+      ],
+      "vitals": {
+        "spec": "ok",
+        "code": "bad",
+        "api": "bad",
+        "data": "bad",
+        "tests": "warn"
+      },
+      "note": "Exists only in the spec. No commit references it.",
+      "segments": [
+        {
+          "t": "An order is created for an existing customer with one or more lines, starts with status \"open\", and its total is the sum of quantity times unit price over its lines; an order for a customer that does not exist is rejected with 404.",
+          "m": false
+        }
+      ],
+      "timeline": [
+        {
+          "sha": "b1d482b",
+          "label": "Spec added",
+          "state": "neutral"
+        }
+      ],
+      "now": [
+        {
+          "label": "No tagged test",
+          "state": "warn"
+        },
+        {
+          "label": "A5: Documented but not served: POST /orders",
+          "state": "bad"
+        },
+        {
+          "label": "A6: No tagged test calls POST /orders",
+          "state": "bad"
+        },
+        {
+          "label": "POST /orders: generated requests got documented responses",
+          "state": "ok"
+        }
+      ]
+    },
+    {
+      "id": "AC-led-003",
+      "text": "An order is returned with its lines in the order they were given, its total, the amount paid so far (its payments, ignoring refunds) and its status; an order that does not exist returns 404.",
+      "api": [
+        "GET /orders/{order_id}"
+      ],
+      "status": "Missing",
+      "not_covered": [
+        "H7"
+      ],
+      "failing_checks": [
+        "A5",
+        "A6",
+        "T2",
+        "T4"
+      ],
+      "vitals": {
+        "spec": "ok",
+        "code": "bad",
+        "api": "bad",
+        "tests": "warn"
+      },
+      "note": "Exists only in the spec. No commit references it.",
+      "segments": [
+        {
+          "t": "An order is returned with its lines in the order they were given, its total, the amount paid so far (its payments, ignoring refunds) and its status; an order that does not exist returns 404.",
+          "m": false
+        }
+      ],
+      "timeline": [
+        {
+          "sha": "b1d482b",
+          "label": "Spec added",
+          "state": "neutral"
+        },
+        {
+          "sha": "78b95ce",
+          "label": "Spec changed: (payments minus \u2192 (its payments, ignoring",
+          "state": "neutral"
+        }
+      ],
+      "now": [
+        {
+          "label": "No tagged test",
+          "state": "warn"
+        },
+        {
+          "label": "A5: Documented but not served: GET /orders/{order_id}",
+          "state": "bad"
+        },
+        {
+          "label": "A6: No tagged test calls GET /orders/{order_id}",
+          "state": "bad"
+        },
+        {
+          "label": "GET /orders/{order_id}: generated requests got documented responses",
+          "state": "ok"
+        }
+      ]
+    },
+    {
+      "id": "AC-led-004",
+      "text": "A payment records an amount and a payment date against an order and returns 201; a payment larger than the order's unpaid balance is rejected with 409 and not recorded; when the amount paid reaches the order's total, its status becomes \"paid\".",
+      "api": [
+        "POST /orders/{order_id}/payments"
+      ],
+      "status": "Missing",
+      "not_covered": [
+        "H7"
+      ],
+      "failing_checks": [
+        "A5",
+        "A6",
+        "D5",
+        "T2",
+        "T4"
+      ],
+      "data": [
+        "payments"
+      ],
+      "vitals": {
+        "spec": "ok",
+        "code": "bad",
+        "api": "bad",
+        "data": "bad",
+        "tests": "warn"
+      },
+      "note": "Exists only in the spec. No commit references it.",
+      "segments": [
+        {
+          "t": "A payment records an amount and a payment date against an order and returns 201; a payment larger than the order's unpaid balance is rejected with 409 and not recorded; when the amount paid reaches the order's total, its status becomes \"paid\".",
+          "m": false
+        }
+      ],
+      "timeline": [
+        {
+          "sha": "b1d482b",
+          "label": "Spec added",
+          "state": "neutral"
+        }
+      ],
+      "now": [
+        {
+          "label": "No tagged test",
+          "state": "warn"
+        },
+        {
+          "label": "A5: Documented but not served: POST /orders/{order_id}/payments",
+          "state": "bad"
+        },
+        {
+          "label": "A6: No tagged test calls POST /orders/{order_id}/payments",
+          "state": "bad"
+        },
+        {
+          "label": "POST /orders/{order_id}/payments: generated requests got documented responses",
+          "state": "ok"
+        }
+      ]
+    },
+    {
+      "id": "AC-led-005",
+      "text": "A payment request that repeats an Idempotency-Key already used on the same order returns the original payment with 200 and records nothing new; requests without the header are never treated as repeats.",
+      "api": [
+        "POST /orders/{order_id}/payments"
+      ],
+      "status": "Missing",
+      "not_covered": [
+        "H7"
+      ],
+      "failing_checks": [
+        "A5",
+        "A6",
+        "T2",
+        "T4"
+      ],
+      "vitals": {
+        "spec": "ok",
+        "code": "bad",
+        "api": "bad",
+        "tests": "warn"
+      },
+      "note": "Exists only in the spec. No commit references it.",
+      "segments": [
+        {
+          "t": "A payment request that repeats an Idempotency-Key already used on the same order returns the original payment with 200 and records nothing new; requests without the header are never treated as repeats.",
+          "m": false
+        }
+      ],
+      "timeline": [
+        {
+          "sha": "b1d482b",
+          "label": "Spec added",
+          "state": "neutral"
+        }
+      ],
+      "now": [
+        {
+          "label": "No tagged test",
+          "state": "warn"
+        },
+        {
+          "label": "A5: Documented but not served: POST /orders/{order_id}/payments",
+          "state": "bad"
+        },
+        {
+          "label": "A6: No tagged test calls POST /orders/{order_id}/payments",
+          "state": "bad"
+        },
+        {
+          "label": "POST /orders/{order_id}/payments: generated requests got documented responses",
+          "state": "ok"
+        }
+      ]
+    },
+    {
+      "id": "AC-led-006",
+      "text": "A refund records an amount and a refund date against a payment and returns 201; a refund larger than what is left of the payment after its earlier refunds is rejected with 400 and not recorded; a refund puts the order's status back to \"open\" when the amount paid falls below its total.",
+      "api": [
+        "POST /payments/{payment_id}/refunds"
+      ],
+      "status": "Missing",
+      "not_covered": [
+        "H7"
+      ],
+      "failing_checks": [
+        "A5",
+        "A6",
+        "D5",
+        "T2",
+        "T4"
+      ],
+      "data": [
+        "refunds"
+      ],
+      "vitals": {
+        "spec": "ok",
+        "code": "bad",
+        "api": "bad",
+        "data": "bad",
+        "tests": "warn"
+      },
+      "note": "Exists only in the spec. No commit references it.",
+      "segments": [
+        {
+          "t": "A refund records an amount and a refund date against a payment and returns 201; a refund larger than what is left of the payment after its earlier refunds is rejected with 400 and not recorded; a refund puts the order's status back to \"open\" when the amount paid falls below its total.",
+          "m": false
+        }
+      ],
+      "timeline": [
+        {
+          "sha": "b1d482b",
+          "label": "Spec added",
+          "state": "neutral"
+        },
+        {
+          "sha": "78b95ce",
+          "label": "Spec changed: 409 \u2192 400",
+          "state": "neutral"
+        }
+      ],
+      "now": [
+        {
+          "label": "No tagged test",
+          "state": "warn"
+        },
+        {
+          "label": "A5: Documented but not served: POST /payments/{payment_id}/refunds",
+          "state": "bad"
+        },
+        {
+          "label": "A6: No tagged test calls POST /payments/{payment_id}/refunds",
+          "state": "bad"
+        },
+        {
+          "label": "POST /payments/{payment_id}/refunds: generated requests got documented responses",
+          "state": "ok"
+        }
+      ]
+    },
+    {
+      "id": "AC-led-007",
+      "text": "Every payment writes two ledger entries for its amount, a debit to \"cash\" and a credit to \"revenue\", and every refund writes two for its amount, a debit to \"revenue\" and a credit to \"cash\", so total debits always equal total credits.",
+      "api": [],
+      "status": "Missing",
+      "not_covered": [
+        "H7"
+      ],
+      "failing_checks": [
+        "D5",
+        "T2",
+        "T4"
+      ],
+      "data": [
+        "ledger_entries"
+      ],
+      "vitals": {
+        "spec": "ok",
+        "code": "bad",
+        "api": "none",
+        "data": "bad",
+        "tests": "warn"
+      },
+      "note": "Exists only in the spec. No commit references it.",
+      "segments": [
+        {
+          "t": "Every payment writes two ledger entries for its amount, a debit to \"cash\" and a credit to \"revenue\", and every refund writes two for its amount, a debit to \"revenue\" and a credit to \"cash\", so total debits always equal total credits.",
+          "m": false
+        }
+      ],
+      "timeline": [
+        {
+          "sha": "b1d482b",
+          "label": "Spec added",
+          "state": "neutral"
+        }
+      ],
+      "now": [
+        {
+          "label": "No tagged test",
+          "state": "warn"
+        }
+      ]
+    },
+    {
+      "id": "AC-led-008",
+      "text": "The balance of the \"cash\" or \"revenue\" account is the sum of its debits minus the sum of its credits, and is 0 before anything is recorded; any other account name returns 404.",
+      "api": [
+        "GET /accounts/{account}/balance"
+      ],
+      "status": "Missing",
+      "not_covered": [
+        "H7"
+      ],
+      "failing_checks": [
+        "A5",
+        "A6",
+        "T2",
+        "T4"
+      ],
+      "vitals": {
+        "spec": "ok",
+        "code": "bad",
+        "api": "bad",
+        "tests": "warn"
+      },
+      "note": "Exists only in the spec. No commit references it.",
+      "segments": [
+        {
+          "t": "The balance of the \"cash\" or \"revenue\" account is the sum of its debits minus the sum of its credits, and is 0 before anything is recorded; any other account name returns 404.",
+          "m": false
+        }
+      ],
+      "timeline": [
+        {
+          "sha": "b1d482b",
+          "label": "Spec added",
+          "state": "neutral"
+        }
+      ],
+      "now": [
+        {
+          "label": "No tagged test",
+          "state": "warn"
+        },
+        {
+          "label": "A5: Documented but not served: GET /accounts/{account}/balance",
+          "state": "bad"
+        },
+        {
+          "label": "A6: No tagged test calls GET /accounts/{account}/balance",
+          "state": "bad"
+        },
+        {
+          "label": "GET /accounts/{account}/balance: generated requests got documented responses",
+          "state": "ok"
+        }
+      ]
+    },
+    {
+      "id": "AC-led-009",
+      "text": "The daily revenue report lists, for every date that has a payment or a refund, the payments dated that day (gross), the refunds dated that day, and gross minus refunds (net), in date order; it is computed from the payments and refunds datasets only.",
+      "api": [
+        "GET /reports/daily-revenue"
+      ],
+      "status": "Missing",
+      "not_covered": [
+        "H7"
+      ],
+      "failing_checks": [
+        "A5",
+        "A6",
+        "A7",
+        "D5",
+        "T2",
+        "T4"
+      ],
+      "data": [
+        "daily_revenue"
+      ],
+      "vitals": {
+        "spec": "ok",
+        "code": "bad",
+        "api": "bad",
+        "data": "bad",
+        "tests": "warn"
+      },
+      "note": "Exists only in the spec. No commit references it.",
+      "segments": [
+        {
+          "t": "The daily revenue report lists, for every date that has a payment or a refund, the payments dated that day (gross), the refunds dated that day, and gross minus refunds (net), in date order; it is computed from the payments and refunds datasets only.",
+          "m": false
+        }
+      ],
+      "timeline": [
+        {
+          "sha": "b1d482b",
+          "label": "Spec added",
+          "state": "neutral"
+        }
+      ],
+      "now": [
+        {
+          "label": "No tagged test",
+          "state": "warn"
+        },
+        {
+          "label": "A5: Documented but not served: GET /reports/daily-revenue",
+          "state": "bad"
+        },
+        {
+          "label": "A6: No tagged test calls GET /reports/daily-revenue",
+          "state": "bad"
+        },
+        {
+          "label": "A7: Generated requests failed on GET /reports/daily-revenue",
+          "state": "bad"
+        }
+      ]
+    }
+  ],
+  "outside": [
+    {
+      "check": "A7",
+      "subject": "GET /reports/daily-revenue",
+      "summary": "GET /reports/daily-revenue failed generated requests: 1. Test Case ID: yD1F7o",
+      "state": "bad"
+    }
+  ],
+  "results": [
+    {
+      "check": "T1",
+      "scope": "project",
+      "subject": "spec",
+      "verdict": "pass",
+      "summary": "9 requirement IDs valid and registered",
+      "details": {}
+    },
+    {
+      "check": "T2",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "2 commit(s) reference it: cf529e1, 87858bf",
+      "details": {}
+    },
+    {
+      "check": "T3",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "198 line(s) from its commits still exist",
+      "details": {
+        "lines": {
+          "cmd/server/main.go": [
+            2,
+            4,
+            5,
+            6,
+            7,
+            9,
+            10,
+            11,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29
+          ],
+          "internal/api/api.go": [
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            11,
+            12,
+            14,
+            15,
+            16,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            26,
+            27,
+            28,
+            29,
+            30,
+            32,
+            33,
+            34,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47
+          ],
+          "internal/api/customers.go": [
+            1,
+            3,
+            4,
+            5,
+            6,
+            7,
+            9,
+            10,
+            11,
+            13,
+            14,
+            15,
+            16,
+            18,
+            19,
+            20,
+            21,
+            22,
+            24,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            74,
+            75,
+            76,
+            77
+          ],
+          "internal/store/migrations/0001_customers.sql": [
+            1,
+            2,
+            3,
+            4,
+            5
+          ],
+          "internal/store/store.go": [
+            2,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            12,
+            13,
+            16,
+            20,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64,
+            65,
+            66,
+            67,
+            68,
+            69,
+            70,
+            71,
+            72,
+            73,
+            74,
+            75,
+            76,
+            77
+          ]
+        }
+      }
+    },
+    {
+      "check": "T4",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "32 tagged test(s)",
+      "details": {
+        "tests": [
+          "example.com/ledger/internal/api::TestAC_led_001_AcceptsBoundaryLengths",
+          "example.com/ledger/internal/api::TestAC_led_001_CreatesCustomerWithNewID",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsEmailAlreadyInUse",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/email_ends_with_@",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/email_not_a_string",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/email_of_2",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/email_of_255",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/email_with_a_space",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/email_with_two_@",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/email_without_@",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/empty_body",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/empty_name",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/missing_email",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/missing_name",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/name_not_a_string",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/name_of_201",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/not_JSON",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/not_an_object",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/null",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/null_email",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/null_name",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/trailing_text",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/two_objects",
+          "example.com/ledger/internal/api::TestAC_led_001_RejectsInvalidBody/unknown_field",
+          "example.com/ledger/internal/api::TestAC_led_001_SameNameDifferentEmailIsAccepted",
+          "example.com/ledger/internal/store::TestAC_led_001_FailedMigrationIsRolledBackAndNotRecorded",
+          "example.com/ledger/internal/store::TestAC_led_001_MigrationsApplyInOrder",
+          "example.com/ledger/internal/store::TestAC_led_001_OpenCreatesCustomersTable",
+          "example.com/ledger/internal/store::TestAC_led_001_OpenFailsOnUnusablePath",
+          "example.com/ledger/internal/store::TestAC_led_001_OpenRecordsEachMigrationOnce",
+          "example.com/ledger/internal/store::TestAC_led_001_OpenTurnsForeignKeysOn"
+        ]
+      }
+    },
+    {
+      "check": "T5",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "All 32 tagged test(s) pass",
+      "details": {}
+    },
+    {
+      "check": "T6",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "Its tests run 91 of its 198 code line(s)",
+      "details": {
+        "executed": {
+          "internal/api/api.go": [
+            20,
+            21,
+            22,
+            23,
+            24,
+            27,
+            28,
+            29,
+            30,
+            33,
+            34,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46
+          ],
+          "internal/api/customers.go": [
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            66,
+            67,
+            71,
+            75,
+            76,
+            77
+          ],
+          "internal/store/store.go": [
+            22,
+            23,
+            24,
+            27,
+            28,
+            29,
+            30,
+            31,
+            36,
+            37,
+            38,
+            39,
+            40,
+            43,
+            44,
+            45,
+            46,
+            47,
+            49,
+            54,
+            55,
+            58,
+            59,
+            60,
+            63,
+            64,
+            65,
+            66,
+            67,
+            70,
+            71,
+            72,
+            73,
+            76
+          ]
+        }
+      }
+    },
+    {
+      "check": "T7",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "Its tests caught 20 of 20 broken versions (100%; needs 60%)",
+      "details": {
+        "survivors": [],
+        "uncompilable": 4
+      }
+    },
+    {
+      "check": "T2",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "fail",
+      "summary": "No commit that changes code references it",
+      "details": {}
+    },
+    {
+      "check": "T3",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "skip",
+      "summary": "No linked commits",
+      "details": {}
+    },
+    {
+      "check": "T4",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "fail",
+      "summary": "No test name mentions it",
+      "details": {}
+    },
+    {
+      "check": "T5",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T6",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T7",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T2",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "fail",
+      "summary": "No commit that changes code references it",
+      "details": {}
+    },
+    {
+      "check": "T3",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "skip",
+      "summary": "No linked commits",
+      "details": {}
+    },
+    {
+      "check": "T4",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "fail",
+      "summary": "No test name mentions it",
+      "details": {}
+    },
+    {
+      "check": "T5",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T6",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T7",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T2",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "fail",
+      "summary": "No commit that changes code references it",
+      "details": {}
+    },
+    {
+      "check": "T3",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "skip",
+      "summary": "No linked commits",
+      "details": {}
+    },
+    {
+      "check": "T4",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "fail",
+      "summary": "No test name mentions it",
+      "details": {}
+    },
+    {
+      "check": "T5",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T6",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T7",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T2",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "fail",
+      "summary": "No commit that changes code references it",
+      "details": {}
+    },
+    {
+      "check": "T3",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "skip",
+      "summary": "No linked commits",
+      "details": {}
+    },
+    {
+      "check": "T4",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "fail",
+      "summary": "No test name mentions it",
+      "details": {}
+    },
+    {
+      "check": "T5",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T6",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T7",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T2",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "fail",
+      "summary": "No commit that changes code references it",
+      "details": {}
+    },
+    {
+      "check": "T3",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "skip",
+      "summary": "No linked commits",
+      "details": {}
+    },
+    {
+      "check": "T4",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "fail",
+      "summary": "No test name mentions it",
+      "details": {}
+    },
+    {
+      "check": "T5",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T6",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T7",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T2",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "fail",
+      "summary": "No commit that changes code references it",
+      "details": {}
+    },
+    {
+      "check": "T3",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "skip",
+      "summary": "No linked commits",
+      "details": {}
+    },
+    {
+      "check": "T4",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "fail",
+      "summary": "No test name mentions it",
+      "details": {}
+    },
+    {
+      "check": "T5",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T6",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T7",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T2",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "fail",
+      "summary": "No commit that changes code references it",
+      "details": {}
+    },
+    {
+      "check": "T3",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "skip",
+      "summary": "No linked commits",
+      "details": {}
+    },
+    {
+      "check": "T4",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "fail",
+      "summary": "No test name mentions it",
+      "details": {}
+    },
+    {
+      "check": "T5",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T6",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T7",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T2",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "fail",
+      "summary": "No commit that changes code references it",
+      "details": {}
+    },
+    {
+      "check": "T3",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "skip",
+      "summary": "No linked commits",
+      "details": {}
+    },
+    {
+      "check": "T4",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "fail",
+      "summary": "No test name mentions it",
+      "details": {}
+    },
+    {
+      "check": "T5",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T6",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T7",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "skip",
+      "summary": "No tagged tests",
+      "details": {}
+    },
+    {
+      "check": "T8",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "Implemented or re-verified after its last wording change (b1d482b)",
+      "details": {}
+    },
+    {
+      "check": "T8",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "skip",
+      "summary": "Not implemented yet",
+      "details": {}
+    },
+    {
+      "check": "T8",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "skip",
+      "summary": "Not implemented yet",
+      "details": {}
+    },
+    {
+      "check": "T8",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "skip",
+      "summary": "Not implemented yet",
+      "details": {}
+    },
+    {
+      "check": "T8",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "skip",
+      "summary": "Not implemented yet",
+      "details": {}
+    },
+    {
+      "check": "T8",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "skip",
+      "summary": "Not implemented yet",
+      "details": {}
+    },
+    {
+      "check": "T8",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "skip",
+      "summary": "Not implemented yet",
+      "details": {}
+    },
+    {
+      "check": "T8",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "skip",
+      "summary": "Not implemented yet",
+      "details": {}
+    },
+    {
+      "check": "T8",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "skip",
+      "summary": "Not implemented yet",
+      "details": {}
+    },
+    {
+      "check": "A1",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "Contract covers POST /customers",
+      "details": {}
+    },
+    {
+      "check": "A1",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "pass",
+      "summary": "Contract covers POST /orders",
+      "details": {}
+    },
+    {
+      "check": "A1",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "pass",
+      "summary": "Contract covers GET /orders/{order_id}",
+      "details": {}
+    },
+    {
+      "check": "A1",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "pass",
+      "summary": "Contract covers POST /orders/{order_id}/payments",
+      "details": {}
+    },
+    {
+      "check": "A1",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "pass",
+      "summary": "Contract covers POST /orders/{order_id}/payments",
+      "details": {}
+    },
+    {
+      "check": "A1",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "pass",
+      "summary": "Contract covers POST /payments/{payment_id}/refunds",
+      "details": {}
+    },
+    {
+      "check": "A1",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "skip",
+      "summary": "Not an API requirement",
+      "details": {}
+    },
+    {
+      "check": "A1",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "pass",
+      "summary": "Contract covers GET /accounts/{account}/balance",
+      "details": {}
+    },
+    {
+      "check": "A1",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "pass",
+      "summary": "Contract covers GET /reports/daily-revenue",
+      "details": {}
+    },
+    {
+      "check": "A2",
+      "scope": "operation",
+      "subject": "POST /customers",
+      "verdict": "pass",
+      "summary": "POST /customers \u2192 AC-led-001",
+      "details": {}
+    },
+    {
+      "check": "A2",
+      "scope": "operation",
+      "subject": "POST /orders",
+      "verdict": "pass",
+      "summary": "POST /orders \u2192 AC-led-002",
+      "details": {}
+    },
+    {
+      "check": "A2",
+      "scope": "operation",
+      "subject": "GET /orders/{order_id}",
+      "verdict": "pass",
+      "summary": "GET /orders/{order_id} \u2192 AC-led-003",
+      "details": {}
+    },
+    {
+      "check": "A2",
+      "scope": "operation",
+      "subject": "POST /orders/{order_id}/payments",
+      "verdict": "pass",
+      "summary": "POST /orders/{order_id}/payments \u2192 AC-led-004, AC-led-005",
+      "details": {}
+    },
+    {
+      "check": "A2",
+      "scope": "operation",
+      "subject": "POST /payments/{payment_id}/refunds",
+      "verdict": "pass",
+      "summary": "POST /payments/{payment_id}/refunds \u2192 AC-led-006",
+      "details": {}
+    },
+    {
+      "check": "A2",
+      "scope": "operation",
+      "subject": "GET /accounts/{account}/balance",
+      "verdict": "pass",
+      "summary": "GET /accounts/{account}/balance \u2192 AC-led-008",
+      "details": {}
+    },
+    {
+      "check": "A2",
+      "scope": "operation",
+      "subject": "GET /reports/daily-revenue",
+      "verdict": "pass",
+      "summary": "GET /reports/daily-revenue \u2192 AC-led-009",
+      "details": {}
+    },
+    {
+      "check": "A3",
+      "scope": "project",
+      "subject": "contract",
+      "verdict": "pass",
+      "summary": "Contract passes the lint rules",
+      "details": {}
+    },
+    {
+      "check": "A4",
+      "scope": "project",
+      "subject": "contract",
+      "verdict": "skip",
+      "summary": "No base to compare against",
+      "details": {}
+    },
+    {
+      "check": "A5",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "Its operations are served",
+      "details": {}
+    },
+    {
+      "check": "A5",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "fail",
+      "summary": "Documented but not served: POST /orders",
+      "details": {}
+    },
+    {
+      "check": "A5",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "fail",
+      "summary": "Documented but not served: GET /orders/{order_id}",
+      "details": {}
+    },
+    {
+      "check": "A5",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "fail",
+      "summary": "Documented but not served: POST /orders/{order_id}/payments",
+      "details": {}
+    },
+    {
+      "check": "A5",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "fail",
+      "summary": "Documented but not served: POST /orders/{order_id}/payments",
+      "details": {}
+    },
+    {
+      "check": "A5",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "fail",
+      "summary": "Documented but not served: POST /payments/{payment_id}/refunds",
+      "details": {}
+    },
+    {
+      "check": "A5",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "fail",
+      "summary": "Documented but not served: GET /accounts/{account}/balance",
+      "details": {}
+    },
+    {
+      "check": "A5",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "fail",
+      "summary": "Documented but not served: GET /reports/daily-revenue",
+      "details": {}
+    },
+    {
+      "check": "A6",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "32 call(s) from tagged tests match the contract",
+      "details": {}
+    },
+    {
+      "check": "A6",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "fail",
+      "summary": "No tagged test calls POST /orders",
+      "details": {}
+    },
+    {
+      "check": "A6",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "fail",
+      "summary": "No tagged test calls GET /orders/{order_id}",
+      "details": {}
+    },
+    {
+      "check": "A6",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "fail",
+      "summary": "No tagged test calls POST /orders/{order_id}/payments",
+      "details": {}
+    },
+    {
+      "check": "A6",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "fail",
+      "summary": "No tagged test calls POST /orders/{order_id}/payments",
+      "details": {}
+    },
+    {
+      "check": "A6",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "fail",
+      "summary": "No tagged test calls POST /payments/{payment_id}/refunds",
+      "details": {}
+    },
+    {
+      "check": "A6",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "fail",
+      "summary": "No tagged test calls GET /accounts/{account}/balance",
+      "details": {}
+    },
+    {
+      "check": "A6",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "fail",
+      "summary": "No tagged test calls GET /reports/daily-revenue",
+      "details": {}
+    },
+    {
+      "check": "A7",
+      "scope": "operation",
+      "subject": "GET /reports/daily-revenue",
+      "verdict": "fail",
+      "summary": "GET /reports/daily-revenue failed generated requests: 1. Test Case ID: yD1F7o",
+      "details": {
+        "output": "1. Test Case ID: yD1F7o\n\n- Undocumented HTTP status code\n\n    Received: 404\n    Documented: 200\n\n[404] Not Found:\n\n    `404 page not found`\n\nReproduce with:\n\n    curl -X GET http://127.0.0.1:59852/reports/daily-revenue"
+      }
+    },
+    {
+      "check": "A7",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "Generated requests got documented responses",
+      "details": {}
+    },
+    {
+      "check": "A7",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "pass",
+      "summary": "Generated requests got documented responses",
+      "details": {}
+    },
+    {
+      "check": "A7",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "pass",
+      "summary": "Generated requests got documented responses",
+      "details": {}
+    },
+    {
+      "check": "A7",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "pass",
+      "summary": "Generated requests got documented responses",
+      "details": {}
+    },
+    {
+      "check": "A7",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "pass",
+      "summary": "Generated requests got documented responses",
+      "details": {}
+    },
+    {
+      "check": "A7",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "pass",
+      "summary": "Generated requests got documented responses",
+      "details": {}
+    },
+    {
+      "check": "A7",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "pass",
+      "summary": "Generated requests got documented responses",
+      "details": {}
+    },
+    {
+      "check": "A7",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "fail",
+      "summary": "Generated requests failed on GET /reports/daily-revenue",
+      "details": {}
+    },
+    {
+      "check": "D1",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "Data contract covers customers",
+      "details": {}
+    },
+    {
+      "check": "D1",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "pass",
+      "summary": "Data contract covers orders, order_lines",
+      "details": {}
+    },
+    {
+      "check": "D1",
+      "scope": "requirement",
+      "subject": "AC-led-003",
+      "verdict": "skip",
+      "summary": "Not a data requirement",
+      "details": {}
+    },
+    {
+      "check": "D1",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "pass",
+      "summary": "Data contract covers payments",
+      "details": {}
+    },
+    {
+      "check": "D1",
+      "scope": "requirement",
+      "subject": "AC-led-005",
+      "verdict": "skip",
+      "summary": "Not a data requirement",
+      "details": {}
+    },
+    {
+      "check": "D1",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "pass",
+      "summary": "Data contract covers refunds",
+      "details": {}
+    },
+    {
+      "check": "D1",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "pass",
+      "summary": "Data contract covers ledger_entries",
+      "details": {}
+    },
+    {
+      "check": "D1",
+      "scope": "requirement",
+      "subject": "AC-led-008",
+      "verdict": "skip",
+      "summary": "Not a data requirement",
+      "details": {}
+    },
+    {
+      "check": "D1",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "pass",
+      "summary": "Data contract covers daily_revenue",
+      "details": {}
+    },
+    {
+      "check": "D2",
+      "scope": "dataset",
+      "subject": "customers",
+      "verdict": "pass",
+      "summary": "customers \u2192 AC-led-001",
+      "details": {}
+    },
+    {
+      "check": "D2",
+      "scope": "dataset",
+      "subject": "orders",
+      "verdict": "pass",
+      "summary": "orders \u2192 AC-led-002",
+      "details": {}
+    },
+    {
+      "check": "D2",
+      "scope": "dataset",
+      "subject": "order_lines",
+      "verdict": "pass",
+      "summary": "order_lines \u2192 AC-led-002",
+      "details": {}
+    },
+    {
+      "check": "D2",
+      "scope": "dataset",
+      "subject": "payments",
+      "verdict": "pass",
+      "summary": "payments \u2192 AC-led-004",
+      "details": {}
+    },
+    {
+      "check": "D2",
+      "scope": "dataset",
+      "subject": "refunds",
+      "verdict": "pass",
+      "summary": "refunds \u2192 AC-led-006",
+      "details": {}
+    },
+    {
+      "check": "D2",
+      "scope": "dataset",
+      "subject": "ledger_entries",
+      "verdict": "pass",
+      "summary": "ledger_entries \u2192 AC-led-007",
+      "details": {}
+    },
+    {
+      "check": "D2",
+      "scope": "dataset",
+      "subject": "daily_revenue",
+      "verdict": "pass",
+      "summary": "daily_revenue \u2192 AC-led-009",
+      "details": {}
+    },
+    {
+      "check": "D3",
+      "scope": "project",
+      "subject": "data contract",
+      "verdict": "pass",
+      "summary": "7 dataset(s) fully declared, lineage resolves",
+      "details": {}
+    },
+    {
+      "check": "D4",
+      "scope": "project",
+      "subject": "data contract",
+      "verdict": "skip",
+      "summary": "No base to compare against",
+      "details": {}
+    },
+    {
+      "check": "D5",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "pass",
+      "summary": "Its datasets match the contract: customers",
+      "details": {}
+    },
+    {
+      "check": "D5",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "fail",
+      "summary": "orders is declared but the database doesn't have it; order_lines is declared but the database doesn't have it",
+      "details": {
+        "problems": [
+          "orders is declared but the database doesn't have it",
+          "order_lines is declared but the database doesn't have it"
+        ]
+      }
+    },
+    {
+      "check": "D5",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "fail",
+      "summary": "payments is declared but the database doesn't have it",
+      "details": {
+        "problems": [
+          "payments is declared but the database doesn't have it"
+        ]
+      }
+    },
+    {
+      "check": "D5",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "fail",
+      "summary": "refunds is declared but the database doesn't have it",
+      "details": {
+        "problems": [
+          "refunds is declared but the database doesn't have it"
+        ]
+      }
+    },
+    {
+      "check": "D5",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "fail",
+      "summary": "ledger_entries is declared but the database doesn't have it",
+      "details": {
+        "problems": [
+          "ledger_entries is declared but the database doesn't have it"
+        ]
+      }
+    },
+    {
+      "check": "D5",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "fail",
+      "summary": "daily_revenue is declared but the database doesn't have it",
+      "details": {
+        "problems": [
+          "daily_revenue is declared but the database doesn't have it"
+        ]
+      }
+    },
+    {
+      "check": "D6",
+      "scope": "requirement",
+      "subject": "AC-led-001",
+      "verdict": "skip",
+      "summary": "No derived dataset",
+      "details": {}
+    },
+    {
+      "check": "D6",
+      "scope": "requirement",
+      "subject": "AC-led-002",
+      "verdict": "skip",
+      "summary": "No derived dataset",
+      "details": {}
+    },
+    {
+      "check": "D6",
+      "scope": "requirement",
+      "subject": "AC-led-004",
+      "verdict": "skip",
+      "summary": "No derived dataset",
+      "details": {}
+    },
+    {
+      "check": "D6",
+      "scope": "requirement",
+      "subject": "AC-led-006",
+      "verdict": "skip",
+      "summary": "No derived dataset",
+      "details": {}
+    },
+    {
+      "check": "D6",
+      "scope": "requirement",
+      "subject": "AC-led-007",
+      "verdict": "skip",
+      "summary": "No derived dataset",
+      "details": {}
+    },
+    {
+      "check": "D6",
+      "scope": "requirement",
+      "subject": "AC-led-009",
+      "verdict": "skip",
+      "summary": "Its derived datasets are not in the database",
+      "details": {}
+    },
+    {
+      "check": "D7",
+      "scope": "project",
+      "subject": "migrations",
+      "verdict": "pass",
+      "summary": "No merged migration was edited or deleted",
+      "details": {}
+    },
+    {
+      "check": "H1",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "pass",
+      "summary": "6 commit subject(s) follow Conventional Commits",
+      "details": {}
+    },
+    {
+      "check": "H2",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "pass",
+      "summary": "2 code commit(s) reference a requirement",
+      "details": {}
+    },
+    {
+      "check": "H3",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "pass",
+      "summary": "Each code commit serves one requirement",
+      "details": {}
+    },
+    {
+      "check": "H4",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "pass",
+      "summary": "No refactor or chore commits change code",
+      "details": {}
+    },
+    {
+      "check": "H5",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "pass",
+      "summary": "Every commit changes at most 400 lines",
+      "details": {}
+    },
+    {
+      "check": "H6",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "pass",
+      "summary": "1 branch name(s) follow the pattern",
+      "details": {}
+    },
+    {
+      "check": "H7",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "not_covered",
+      "summary": "No refs/aqv/verified recorded yet",
+      "details": {}
+    },
+    {
+      "check": "H8",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "pass",
+      "summary": "Every agent commit names the agent",
+      "details": {}
+    },
+    {
+      "check": "H9",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "pass",
+      "summary": "7 commit(s) carry good signatures",
+      "details": {}
+    },
+    {
+      "check": "H10",
+      "scope": "project",
+      "subject": "history",
+      "verdict": "pass",
+      "summary": "No agent commit changes a protected file",
+      "details": {}
+    }
+  ],
+  "scorecard": {
+    "Claude <noreply@anthropic.com>": {
+      "commits": 2,
+      "commits_breaking_git_rules": 0,
+      "requirements_referenced": [
+        "AC-led-001"
+      ],
+      "git_rule_pass_rate": 1.0
+    }
+  }
+}

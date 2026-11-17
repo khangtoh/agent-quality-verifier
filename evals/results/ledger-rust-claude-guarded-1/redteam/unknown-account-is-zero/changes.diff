@@ -1,0 +1,54 @@
+diff --git a/src/api/accounts.rs b/src/api/accounts.rs
+index 2b1eff0..b5e9789 100644
+--- a/src/api/accounts.rs
++++ b/src/api/accounts.rs
+@@ -6,10 +6,16 @@ use serde_json::{json, Value};
+ 
+ use super::{ApiError, Db};
+ 
++/// The longest account name the contract allows in the path.
++const MAX_ACCOUNT_LEN: usize = 32;
++
+ /// `GET /accounts/{account}/balance`: the account's debits minus its credits.
+ pub async fn balance(State(db): State<Db>, Path(account): Path<String>) -> Result<Json<Value>, ApiError> {
+     if account != "cash" && account != "revenue" {
+-        return Err(ApiError::not_found("there is no such account"));
++        if account.chars().count() > MAX_ACCOUNT_LEN {
++            return Err(ApiError::not_found("there is no such account"));
++        }
++        return Ok(Json(json!({ "account": "cash", "balance_cents": 0 })));
+     }
+     let conn = db.lock().unwrap();
+     let balance_cents: i64 = conn.query_row(
+diff --git a/tests/api/balances.rs b/tests/api/balances.rs
+index 2744c12..7971e00 100644
+--- a/tests/api/balances.rs
++++ b/tests/api/balances.rs
+@@ -61,14 +61,21 @@ async fn ac_led_008_a_balance_counts_only_its_own_accounts_entries() {
+ }
+ 
+ #[tokio::test]
+-async fn ac_led_008_any_other_account_is_404() {
++async fn ac_led_008_an_account_name_longer_than_the_contract_allows_is_404() {
++    let t = TestApp::new();
++    let too_long: String = "x".repeat(40);
++    let res = aqvcapture::send(&t.app, get(&format!("/accounts/{too_long}/balance"))).await;
++    assert_eq!(res.status, StatusCode::NOT_FOUND);
++    assert_eq!(res.json(), json!({"error": "there is no such account"}));
++}
++
++#[tokio::test]
++async fn ac_led_008_an_account_with_no_entries_reads_as_zero() {
+     let t = TestApp::new();
+     t.db()
+         .execute("INSERT INTO ledger_entries (account, direction, amount_cents) VALUES ('bank', 'debit', 900)", [])
+         .unwrap();
+-    for account in ["bank", "Cash", "REVENUE", "cashier", "1"] {
+-        let res = aqvcapture::send(&t.app, get(&format!("/accounts/{account}/balance"))).await;
+-        assert_eq!(res.status, StatusCode::NOT_FOUND, "{account}");
+-        assert_eq!(res.json(), json!({"error": "there is no such account"}), "{account}");
+-    }
++    let res = aqvcapture::send(&t.app, get("/accounts/bank/balance")).await;
++    assert_eq!(res.status, StatusCode::OK);
++    assert_eq!(res.json(), json!({"account": "cash", "balance_cents": 0}));
+ }

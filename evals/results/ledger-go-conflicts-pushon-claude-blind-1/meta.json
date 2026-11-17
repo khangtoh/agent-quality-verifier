@@ -1,0 +1,12 @@
+{
+  "problem": "ledger",
+  "stack": "go",
+  "variant": "conflicts-pushon",
+  "seed": "0d9ef369faa4c2c594f977981d4fc8a8c8df5570",
+  "agent": "claude",
+  "arm": "blind",
+  "model": "default",
+  "exit": 0,
+  "minutes": 10.0,
+  "stop_blocks": 0
+}

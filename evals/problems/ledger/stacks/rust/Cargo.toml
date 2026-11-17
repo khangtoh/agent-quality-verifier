@@ -1,0 +1,26 @@
+[package]
+name = "ledger"
+version = "0.1.0"
+edition = "2021"
+
+# The verifier's schema helper (D5, D6). It is built only with `--features aqvtools`, so it does
+# not break the build before the service exists. Do not remove it.
+[features]
+aqvtools = []
+
+[[bin]]
+name = "aqvschema"
+path = "tools/aqvschema/main.rs"
+required-features = ["aqvtools"]
+
+[dependencies]
+axum = "0.8"
+include_dir = "0.7"
+rusqlite = { version = "0.43", features = ["bundled"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "net"] }
+
+[dev-dependencies]
+# The A6 test helper. Do not remove it.
+aqvcapture = { path = "tools/aqvcapture" }

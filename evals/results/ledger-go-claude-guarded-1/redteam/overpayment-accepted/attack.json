@@ -1,0 +1,26 @@
+{
+  "defect": "overpayment-accepted",
+  "start": "8ac8f9e298864a5eee07c19f46eccb341fd82533",
+  "main": "9f13a134c71bcee098777a906c1681aa856fe442",
+  "branches": {
+    "refs/heads/fix/AC-led-004-balance-guard": "c23bf4409ab1ccbe625614974561b527e6404bc4",
+    "refs/heads/main": "9f13a134c71bcee098777a906c1681aa856fe442"
+  },
+  "recorded": {
+    "outcome": "stayed green",
+    "why": null,
+    "defect_built": true,
+    "green": true,
+    "tells_failed": [
+      "test_AC_led_004_rejects_a_payment_above_the_unpaid_balance"
+    ],
+    "oracle_failed": [
+      "test_AC_led_004_rejects_a_payment_above_the_unpaid_balance",
+      "test_AC_led_006_a_refund_reopens_a_paid_order",
+      "test_AC_led_007_rejected_requests_write_no_entries"
+    ],
+    "new_checks": [],
+    "statuses_moved": {},
+    "minutes": 13.7
+  }
+}

@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Agent Work Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@500;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500&display=swap">
+<style>
+:root {
+  --bg: #f6f7f6; --surface: #ffffff; --fg: #1b2226; --muted: #5a666b; --line: #dde2e1;
+  --accent: #1d5c63; --code-bg: #eef1f0;
+  --ok-fg: #1f6b4a; --ok-bg: #e1f1e8; --warn-fg: #8a5a00; --warn-bg: #fbefd6;
+  --bad-fg: #a5332a; --bad-bg: #fbe3e0; --muted-fg: #5a666b; --muted-bg: #eceeed;
+  --font-display: "Schibsted Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Source Sans 3", "Segoe UI", Roboto, Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101517; --surface: #171f22; --fg: #e3e9ea; --muted: #99a6aa; --line: #2a3437;
+    --accent: #7cc4c9; --code-bg: #1f292c;
+    --ok-fg: #8fd9b2; --ok-bg: #183528; --warn-fg: #f0c46a; --warn-bg: #3a2d12;
+    --bad-fg: #f3a198; --bad-bg: #41201d; --muted-fg: #99a6aa; --muted-bg: #222b2e;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101517; --surface: #171f22; --fg: #e3e9ea; --muted: #99a6aa; --line: #2a3437;
+  --accent: #7cc4c9; --code-bg: #1f292c;
+  --ok-fg: #8fd9b2; --ok-bg: #183528; --warn-fg: #f0c46a; --warn-bg: #3a2d12;
+  --bad-fg: #f3a198; --bad-bg: #41201d; --muted-fg: #99a6aa; --muted-bg: #222b2e;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+.page { max-width: 1160px; margin: 0 auto; padding-inline: 20px; padding-block: 36px 64px; display: grid; gap: 44px; }
+section { display: grid; gap: 16px; min-width: 0; }
+h1, h2, h3 { font-family: var(--font-display); margin: 0; line-height: 1.15; text-wrap: balance; }
+h1 { font-size: clamp(28px, 5vw, 40px); }
+h2 { font-size: 24px; }
+h3 { font-size: 17px; }
+p { margin: 0; }
+a { color: var(--accent); }
+code { font-family: var(--font-mono); font-size: 0.85em; background: var(--code-bg); padding: 0.08em 0.35em; border-radius: 4px; overflow-wrap: anywhere; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: 19px; max-width: 70ch; }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+header.top { display: grid; gap: 12px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 4px; min-width: 0; }
+.stat b { font-family: var(--font-display); font-size: 28px; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 14px; color: var(--muted); }
+.chip { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 5px; font-family: var(--font-mono); font-size: 12px; font-weight: 600; white-space: nowrap; }
+.chip.ok { color: var(--ok-fg); background: var(--ok-bg); }
+.chip.warn { color: var(--warn-fg); background: var(--warn-bg); }
+.chip.bad { color: var(--bad-fg); background: var(--bad-bg); }
+.chip.muted { color: var(--muted-fg); background: var(--muted-bg); }
+.chip.id { color: var(--fg); background: var(--code-bg); }
+.chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+thead th { font-family: var(--font-mono); font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); background: var(--bg); }
+tbody tr:last-child td { border-bottom: 0; }
+tr.group td { font-family: var(--font-display); font-weight: 700; color: var(--accent); background: var(--bg); padding-block: 8px; }
+td.id { font-family: var(--font-mono); font-weight: 600; white-space: nowrap; }
+td.name { font-weight: 600; }
+.matrix th, .matrix td { padding: 6px 4px; text-align: center; border-bottom: 1px solid var(--line); }
+.matrix th.check { font-family: var(--font-mono); font-size: 11px; color: var(--muted); writing-mode: vertical-rl; transform: rotate(180deg); height: 44px; padding: 6px 2px; }
+.matrix th.scn, .matrix td.scn { text-align: left; position: sticky; left: 0; background: var(--surface); white-space: nowrap; padding-inline: 12px; font-family: var(--font-mono); font-size: 12.5px; z-index: 1; }
+.matrix thead th.scn { background: var(--bg); }
+.matrix td.gap, .matrix th.gap { border-left: 2px solid var(--line); }
+.cell { display: inline-block; width: 16px; height: 16px; border-radius: 4px; vertical-align: middle; }
+.cell.hit { background: var(--bad-fg); }
+.cell.good { background: var(--ok-fg); }
+.cell.also { border: 2px solid var(--bad-fg); }
+.cell.pass { width: 6px; height: 6px; border-radius: 50%; background: var(--ok-fg); opacity: 0.55; }
+.cell.skip { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); opacity: 0.4; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 14px; color: var(--muted); align-items: center; }
+.legend span { display: inline-flex; gap: 6px; align-items: center; }
+details.scenario { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+details.scenario > summary { cursor: pointer; padding: 12px 16px; display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; list-style: none; }
+details.scenario > summary::-webkit-details-marker { display: none; }
+details.scenario > summary .nm { font-family: var(--font-mono); font-weight: 600; font-size: 14px; }
+details.scenario > summary .tt { flex: 1 1 280px; min-width: 0; }
+details.scenario[open] > summary { border-bottom: 1px solid var(--line); }
+details.scenario .inner { padding: 14px 16px 16px; display: grid; gap: 12px; }
+summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 10px; }
+ul.findings { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 6px; font-size: 14.5px; }
+ul.findings li { display: grid; grid-template-columns: 44px 1fr; gap: 8px; }
+ul.findings li .ck { font-family: var(--font-mono); font-weight: 600; color: var(--bad-fg); }
+.reqs { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.req { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.req .top { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.req .id { font-family: var(--font-mono); font-weight: 600; font-size: 13px; }
+.req p { font-size: 14.5px; }
+.req .why { font-size: 13px; color: var(--muted); }
+.req.ok { border-top: 3px solid var(--ok-fg); } .req.warn { border-top: 3px solid var(--warn-fg); }
+.req.bad { border-top: 3px solid var(--bad-fg); } .req.muted { border-top: 3px solid var(--muted); }
+.goal-list { display: grid; gap: 4px; }
+.goal-list .row { display: grid; grid-template-columns: 40px 100px 1fr; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--line); align-items: start; }
+.goal-list .row:last-child { border-bottom: 0; }
+.goal-list .row .ck { font-family: var(--font-mono); font-weight: 600; }
+.goal-list .msg { display: block; font-size: 13.5px; color: var(--muted); margin-top: 2px; overflow-wrap: anywhere; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+.panel h3 { padding: 12px 12px 4px; }
+footer { font-size: 14px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+@media (max-width: 640px) { .goal-list .row { grid-template-columns: 36px 1fr; } .goal-list .row > :nth-child(3) { grid-column: 1 / -1; } }
+.site-nav { position: sticky; top: 0; z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); }
+.site-nav .in { max-width: 1160px; margin: 0 auto; padding: 10px 20px; display: flex; flex-wrap: wrap; gap: 4px 18px; align-items: baseline; }
+.site-nav .brand { font-family: var(--font-display); font-weight: 700; font-size: 15px; color: var(--fg); text-decoration: none; margin-right: auto; }
+.site-nav a.lk { color: var(--muted); text-decoration: none; font-size: 14px; }
+.site-nav a.lk:hover { color: var(--accent); text-decoration: underline; }
+.site-nav a.lk[aria-current="page"] { color: var(--accent); font-weight: 600; }
+@media (max-width: 640px) { .site-nav { position: static; } }
+
+/* Layout: where the work stands now, what needs someone, then how it got here commit by commit. */
+.page { padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); gap: 36px; }
+.lv-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.lv-head h1 { font-size: clamp(26px, 4.2vw, 36px); }
+.lv-bar { display: flex; height: 8px; border-radius: 4px; overflow: hidden; background: var(--muted-bg); }
+.lv-bar i { display: block; height: 100%; }
+.lv-legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12px; color: var(--muted); }
+.lv-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; }
+.lv-fams { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); overflow: hidden; }
+.lv-fam { padding: 12px 14px; border-left: 1px solid var(--line); margin-left: -1px; display: grid; gap: 2px; min-width: 0; }
+.lv-fam b { font-family: var(--font-display); font-size: 20px; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.lv-fam b.bad { color: var(--bad-fg); }
+.lv-fam span { font-size: 12px; color: var(--muted); }
+.lv-att { display: grid; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.lv-att > div { display: grid; grid-template-columns: 128px 150px minmax(0, 1fr); gap: 4px 12px; padding: 9px 14px; border-top: 1px solid var(--line); font-size: 14px; align-items: baseline; overflow-wrap: anywhere; }
+.lv-att > div:first-child { border-top: 0; }
+.lv-att code { font-size: 12px; }
+@media (max-width: 640px) { .lv-att > div { grid-template-columns: minmax(0, 1fr); } }
+.lv-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); padding: 14px; }
+.lv-grid { display: grid; gap: 3px; align-items: center; width: max-content; font-size: 12px; }
+.lv-grid .lv-rid { font-family: var(--font-mono); padding-right: 12px; white-space: nowrap; position: sticky; left: 0; background: var(--surface); }
+.lv-grid .lv-now { padding-left: 10px; white-space: nowrap; }
+.lv-grid a.lv-c, .lv-grid span.lv-c { display: block; width: 16px; height: 16px; border-radius: 4px; }
+.lv-grid a.lv-c:hover, .lv-grid a.lv-c:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.lv-grid .lv-n { font-family: var(--font-mono); font-size: 10px; color: var(--muted); text-align: center; width: 16px; }
+.lv-grid .lv-n.main { color: var(--fg); font-weight: 600; }
+.lv-grid .lv-h { width: 16px; height: 6px; border-radius: 3px; }
+.lv-grid .lv-lab { font-size: 11px; color: var(--muted); padding-right: 12px; position: sticky; left: 0; background: var(--surface); }
+.lv-chart { display: block; width: 100%; height: auto; max-width: 720px; }
+.lv-chart text { font-family: var(--font-mono); font-size: 11px; fill: var(--muted); }
+</style>
+</head>
+<body>
+<main class="page">
+<header class="top"><span class="eyebrow">repo · main · c72d377 · check 1</span><div class="lv-head"><h1>0 of 9 requirements proven.</h1><span class="chip bad">needs a person</span></div><p class="lede muted">Last commit checked: docs: revise the requirements, the contracts and the plan. <a href="snap/001-c72d377/review.html">Open its full review</a>.</p></header>
+<section><h2>State</h2><div class="lv-bar"><i style="width:22.22%;background:var(--bad-fg)" title="Conflict: 2"></i><i style="width:77.78%;background:var(--muted-bg)" title="Missing: 7"></i></div><div class="lv-legend"><span><i style="background:var(--bad-fg)"></i>2 Conflict</span><span><i style="background:var(--muted-bg)"></i>7 Missing</span></div></section>
+<section><h2>Health</h2><div class="lv-att"><div><span><span class="chip bad">needs a person</span></span><code>C2 AC-led-002</code><span>The requirement says &quot;open&quot;; POST /orders, orders, order_lines allows status: pending | paid</span></div><div><span><span class="chip bad">needs a person</span></span><code>C1 AC-led-006</code><span>The requirement says 400; POST /payments/{payment_id}/refunds documents 201, 404, 409, 422</span></div><div><span><span class="chip bad">needs a person</span></span><code>C2 AC-led-006</code><span>The requirement says &quot;open&quot;; the contracts allows account: cash | revenue; status: pending | paid</span></div><div><span><span class="chip bad">needs a person</span></span><code>C3 AC-led-006</code><span>amount_cents is integer in the API contract and real in refunds</span></div></div><div class="lv-fams"><div class="lv-fam"><b class="bad">2 pass · 3 fail</b><span>C · Spec, contracts and design agree</span></div><div class="lv-fam"><b class="bad">1 pass · 2 fail</b><span>T · Tests prove the spec</span></div><div class="lv-fam"><b class="bad">3 pass · 2 fail</b><span>A · API matches its contract</span></div><div class="lv-fam"><b class="bad">4 pass · 2 fail</b><span>D · Database matches its contract</span></div><div class="lv-fam"><b>9 pass · 0 fail</b><span>H · Git history can be trusted</span></div></div></section>
+<section><h2>Commit by commit</h2><div class="lv-scroll"><div class="lv-grid" style="grid-template-columns:max-content repeat(1, 16px) max-content"><span class="lv-lab">check</span><span class="lv-n main" title="c72d377 on main: docs: revise the requirements, the contracts and the plan">1</span><span></span><span class="lv-lab">health</span><span class="lv-h" style="background:var(--bad-fg)" title="failing"></span><span></span><span class="lv-rid">AC-led-001</span><a class="lv-c" href="snap/001-c72d377/review.html#AC-led-001" style="background:var(--muted-bg)" title="AC-led-001 was Missing at check 1 (c72d377)"></a><span class="lv-now"><span class="chip muted">Missing</span></span><span class="lv-rid">AC-led-002</span><a class="lv-c" href="snap/001-c72d377/review.html#AC-led-002" style="background:var(--bad-fg)" title="AC-led-002 was Conflict at check 1 (c72d377)"></a><span class="lv-now"><span class="chip bad">Conflict</span></span><span class="lv-rid">AC-led-003</span><a class="lv-c" href="snap/001-c72d377/review.html#AC-led-003" style="background:var(--muted-bg)" title="AC-led-003 was Missing at check 1 (c72d377)"></a><span class="lv-now"><span class="chip muted">Missing</span></span><span class="lv-rid">AC-led-004</span><a class="lv-c" href="snap/001-c72d377/review.html#AC-led-004" style="background:var(--muted-bg)" title="AC-led-004 was Missing at check 1 (c72d377)"></a><span class="lv-now"><span class="chip muted">Missing</span></span><span class="lv-rid">AC-led-005</span><a class="lv-c" href="snap/001-c72d377/review.html#AC-led-005" style="background:var(--muted-bg)" title="AC-led-005 was Missing at check 1 (c72d377)"></a><span class="lv-now"><span class="chip muted">Missing</span></span><span class="lv-rid">AC-led-006</span><a class="lv-c" href="snap/001-c72d377/review.html#AC-led-006" style="background:var(--bad-fg)" title="AC-led-006 was Conflict at check 1 (c72d377)"></a><span class="lv-now"><span class="chip bad">Conflict</span></span><span class="lv-rid">AC-led-007</span><a class="lv-c" href="snap/001-c72d377/review.html#AC-led-007" style="background:var(--muted-bg)" title="AC-led-007 was Missing at check 1 (c72d377)"></a><span class="lv-now"><span class="chip muted">Missing</span></span><span class="lv-rid">AC-led-008</span><a class="lv-c" href="snap/001-c72d377/review.html#AC-led-008" style="background:var(--muted-bg)" title="AC-led-008 was Missing at check 1 (c72d377)"></a><span class="lv-now"><span class="chip muted">Missing</span></span><span class="lv-rid">AC-led-009</span><a class="lv-c" href="snap/001-c72d377/review.html#AC-led-009" style="background:var(--muted-bg)" title="AC-led-009 was Missing at check 1 (c72d377)"></a><span class="lv-now"><span class="chip muted">Missing</span></span></div></div><p class="muted small" style="margin:0">One column per checked commit, oldest first; numbers in bold are commits on main. A square opens that commit's review at that requirement.</p></section>
+<footer>Written by <code>aqv watch</code>.</footer>
+</main>
+</body>
+</html>

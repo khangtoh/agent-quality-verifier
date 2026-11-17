@@ -1,0 +1,256 @@
+{
+  "meta": {
+    "problem": "ledger",
+    "stack": "go",
+    "variant": "conflicts",
+    "seed": "78b95ce5eb33122a980ce3a3abdcdad5de678cf2",
+    "agent": "claude",
+    "arm": "blind",
+    "model": "default",
+    "exit": 0,
+    "minutes": 2.9,
+    "stop_blocks": 0
+  },
+  "requirements": [
+    {
+      "id": "AC-led-001",
+      "verifier": "Sync",
+      "failing_checks": [],
+      "oracle_tests": 3,
+      "oracle_failed": [],
+      "oracle_messages": [],
+      "cell": "confirmed"
+    },
+    {
+      "id": "AC-led-002",
+      "verifier": "Missing",
+      "failing_checks": [
+        "A5",
+        "A6",
+        "D5",
+        "T2",
+        "T4"
+      ],
+      "oracle_tests": 3,
+      "oracle_failed": [
+        "test_AC_led_002_creates_an_open_order_with_the_right_total",
+        "test_AC_led_002_rejects_an_unknown_customer",
+        "test_AC_led_002_rejects_bad_lines"
+      ],
+      "oracle_messages": [
+        "AssertionError: 404 page not found",
+        "json.decoder.JSONDecodeError: Extra data: line 1 column 5 (char 4)",
+        "AssertionError: []"
+      ],
+      "cell": "caught"
+    },
+    {
+      "id": "AC-led-003",
+      "verifier": "Missing",
+      "failing_checks": [
+        "A5",
+        "A6",
+        "T2",
+        "T4"
+      ],
+      "oracle_tests": 2,
+      "oracle_failed": [
+        "test_AC_led_003_returns_the_order_with_lines_total_paid_and_status",
+        "test_AC_led_003_unknown_order_is_404"
+      ],
+      "oracle_messages": [
+        "AssertionError: 404 page not found",
+        "json.decoder.JSONDecodeError: Extra data: line 1 column 5 (char 4)"
+      ],
+      "cell": "caught"
+    },
+    {
+      "id": "AC-led-004",
+      "verifier": "Missing",
+      "failing_checks": [
+        "A5",
+        "A6",
+        "D5",
+        "T2",
+        "T4"
+      ],
+      "oracle_tests": 3,
+      "oracle_failed": [
+        "test_AC_led_004_records_part_payments_and_marks_the_order_paid",
+        "test_AC_led_004_rejects_a_payment_above_the_unpaid_balance",
+        "test_AC_led_004_unknown_order_and_bad_bodies"
+      ],
+      "oracle_messages": [
+        "AssertionError: 404 page not found",
+        "AssertionError: 404 page not found",
+        "AssertionError: 404 page not found"
+      ],
+      "cell": "caught"
+    },
+    {
+      "id": "AC-led-005",
+      "verifier": "Missing",
+      "failing_checks": [
+        "A5",
+        "A6",
+        "T2",
+        "T4"
+      ],
+      "oracle_tests": 3,
+      "oracle_failed": [
+        "test_AC_led_005_a_repeat_is_recognised_even_when_the_order_is_fully_paid",
+        "test_AC_led_005_a_repeated_key_returns_the_original_and_records_nothing",
+        "test_AC_led_005_keys_are_scoped_to_the_order_and_optional"
+      ],
+      "oracle_messages": [
+        "AssertionError: 404 page not found",
+        "AssertionError: 404 page not found",
+        "AssertionError: 404 page not found"
+      ],
+      "cell": "caught"
+    },
+    {
+      "id": "AC-led-006",
+      "verifier": "Missing",
+      "failing_checks": [
+        "A5",
+        "A6",
+        "D5",
+        "T2",
+        "T4"
+      ],
+      "oracle_tests": 3,
+      "oracle_failed": [
+        "test_AC_led_006_a_refund_reopens_a_paid_order",
+        "test_AC_led_006_records_refunds_up_to_what_is_left_of_the_payment",
+        "test_AC_led_006_unknown_payment_and_bad_bodies"
+      ],
+      "oracle_messages": [
+        "AssertionError: 404 page not found",
+        "AssertionError: 404 page not found",
+        "AssertionError: 404 page not found"
+      ],
+      "cell": "caught"
+    },
+    {
+      "id": "AC-led-007",
+      "verifier": "Missing",
+      "failing_checks": [
+        "D5",
+        "T2",
+        "T4"
+      ],
+      "oracle_tests": 2,
+      "oracle_failed": [
+        "test_AC_led_007_payments_and_refunds_write_balanced_entry_pairs",
+        "test_AC_led_007_rejected_requests_write_no_entries"
+      ],
+      "oracle_messages": [
+        "AssertionError: 404 page not found",
+        "AssertionError: 404 page not found"
+      ],
+      "cell": "caught"
+    },
+    {
+      "id": "AC-led-008",
+      "verifier": "Missing",
+      "failing_checks": [
+        "A5",
+        "A6",
+        "T2",
+        "T4"
+      ],
+      "oracle_tests": 2,
+      "oracle_failed": [
+        "test_AC_led_008_balances_start_at_zero_and_follow_the_ledger",
+        "test_AC_led_008_unknown_account_is_404"
+      ],
+      "oracle_messages": [
+        "assert (404 == 200)",
+        "json.decoder.JSONDecodeError: Extra data: line 1 column 5 (char 4)"
+      ],
+      "cell": "caught"
+    },
+    {
+      "id": "AC-led-009",
+      "verifier": "Missing",
+      "failing_checks": [
+        "A5",
+        "A6",
+        "A7",
+        "D5",
+        "T2",
+        "T4"
+      ],
+      "oracle_tests": 3,
+      "oracle_failed": [
+        "test_AC_led_009_report_is_empty_before_anything_is_recorded",
+        "test_AC_led_009_report_lists_gross_refunds_and_net_per_day_in_date_order",
+        "test_AC_led_009_the_daily_revenue_dataset_agrees_with_the_report"
+      ],
+      "oracle_messages": [
+        "assert (404 == 200)",
+        "AssertionError: 404 page not found",
+        "AssertionError: 404 page not found"
+      ],
+      "cell": "caught"
+    }
+  ],
+  "cells": {
+    "confirmed": 1,
+    "false_assurance": 0,
+    "caught": 8,
+    "unproven_but_working": 0
+  },
+  "oracle_error": "",
+  "checks": {
+    "T1": "pass",
+    "T2": "fail",
+    "T3": "pass",
+    "T4": "fail",
+    "T5": "pass",
+    "T6": "pass",
+    "T7": "pass",
+    "T8": "pass",
+    "A1": "pass",
+    "A2": "pass",
+    "A3": "pass",
+    "A4": "skip",
+    "A5": "fail",
+    "A6": "fail",
+    "A7": "fail",
+    "D1": "pass",
+    "D2": "pass",
+    "D3": "pass",
+    "D4": "skip",
+    "D5": "fail",
+    "D6": "skip",
+    "D7": "pass",
+    "H1": "pass",
+    "H2": "pass",
+    "H3": "pass",
+    "H4": "pass",
+    "H5": "pass",
+    "H6": "pass",
+    "H7": "not_covered",
+    "H8": "pass",
+    "H9": "pass",
+    "H10": "pass"
+  },
+  "project_level_failures": [
+    "A7 GET /reports/daily-revenue: GET /reports/daily-revenue failed generated requests: 1. Test Case ID: yD1F7o"
+  ],
+  "protected_files_changed": [],
+  "timeline": {
+    "commits_checked": 3,
+    "on_main": 2,
+    "checks_with_failing_health": 0,
+    "checks_with_regressions": 0,
+    "first_check_with_everything_proven": null,
+    "proven_over_time": [
+      0,
+      0,
+      1
+    ]
+  }
+}

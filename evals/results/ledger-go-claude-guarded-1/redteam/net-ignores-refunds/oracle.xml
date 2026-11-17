@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="24" time="2.211" timestamp="2026-11-17T18:31:29.841963+08:00" hostname="Mac"><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_001_creates_a_customer_with_a_new_id" time="0.452" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_001_rejects_a_duplicate_email_and_stores_nothing" time="0.068" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_001_rejects_a_malformed_body" time="0.078" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_002_creates_an_open_order_with_the_right_total" time="0.089" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_002_rejects_an_unknown_customer" time="0.072" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_002_rejects_bad_lines" time="0.067" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_003_returns_the_order_with_lines_total_paid_and_status" time="0.071" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_003_unknown_order_is_404" time="0.065" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_004_records_part_payments_and_marks_the_order_paid" time="0.067" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_004_rejects_a_payment_above_the_unpaid_balance" time="0.065" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_004_unknown_order_and_bad_bodies" time="0.085" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_005_a_repeated_key_returns_the_original_and_records_nothing" time="0.070" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_005_keys_are_scoped_to_the_order_and_optional" time="0.075" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_005_a_repeat_is_recognised_even_when_the_order_is_fully_paid" time="0.072" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_006_records_refunds_up_to_what_is_left_of_the_payment" time="0.073" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_006_a_refund_reopens_a_paid_order" time="0.110" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_006_unknown_payment_and_bad_bodies" time="0.082" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_007_payments_and_refunds_write_balanced_entry_pairs" time="0.068" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_007_rejected_requests_write_no_entries" time="0.069" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_008_balances_start_at_zero_and_follow_the_ledger" time="0.070" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_008_unknown_account_is_404" time="0.063" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_009_report_is_empty_before_anything_is_recorded" time="0.073" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_009_report_lists_gross_refunds_and_net_per_day_in_date_order" time="0.073"><failure message="AssertionError: assert {'days': [{'d...t_cents': 0}]} == {'days': [{'d...ents': -500}]}&#10;  &#10;  Differing items:&#10;  {'days': [{'day': '2026-03-01', 'gross_cents': 2500, 'refund_cents': 0, 'net_cents': 2500}, {'day': '2026-03-03', 'gro...refund_cents': 1500, 'net_cents': 5000}, {'day': '2026-03-07', 'gross_cents': 0, 'refund_cents': 500, 'net_cents': 0}]} != {'days': [{'day': '2026-03-01', 'gross_cents': 2500, 'refund_cents': 0, 'net_cents': 2500}, {'day': '2026-03-03', 'gro...und_cents': 1500, 'net_cents': 3500}, {'day': '2026-03-07', 'gross_cents': 0, 'refund_cents': 500, 'net_cents': -500}]}&#10;  Use -v to get more diff">svc = &lt;conftest.Service object at 0x109a81650&gt;
+
+    def test_AC_led_009_report_lists_gross_refunds_and_net_per_day_in_date_order(svc):
+        c = svc.customer()
+        o1 = svc.order(c["id"], [{"sku": "A", "quantity": 1, "unit_price_cents": 10000}])
+        o2 = svc.order(c["id"], [{"sku": "B", "quantity": 1, "unit_price_cents": 10000}])
+        p1 = svc.pay(o1["id"], 4000, "2026-03-03").json()
+        svc.pay(o2["id"], 2500, "2026-03-01")
+        svc.pay(o1["id"], 1000, "2026-03-03")
+        svc.refund(p1["id"], 1500, "2026-03-03")
+        svc.refund(p1["id"], 500, "2026-03-07")   # a day with a refund and no payment
+&gt;       assert svc.http.get("/reports/daily-revenue").json() == {"days": [
+            {"day": "2026-03-01", "gross_cents": 2500, "refund_cents": 0, "net_cents": 2500},
+            {"day": "2026-03-03", "gross_cents": 5000, "refund_cents": 1500, "net_cents": 3500},
+            {"day": "2026-03-07", "gross_cents": 0, "refund_cents": 500, "net_cents": -500},
+        ]}
+E       AssertionError: assert {'days': [{'d...t_cents': 0}]} == {'days': [{'d...ents': -500}]}
+E         
+E         Differing items:
+E         {'days': [{'day': '2026-03-01', 'gross_cents': 2500, 'refund_cents': 0, 'net_cents': 2500}, {'day': '2026-03-03', 'gro...refund_cents': 1500, 'net_cents': 5000}, {'day': '2026-03-07', 'gross_cents': 0, 'refund_cents': 500, 'net_cents': 0}]} != {'days': [{'day': '2026-03-01', 'gross_cents': 2500, 'refund_cents': 0, 'net_cents': 2500}, {'day': '2026-03-03', 'gro...und_cents': 1500, 'net_cents': 3500}, {'day': '2026-03-07', 'gross_cents': 0, 'refund_cents': 500, 'net_cents': -500}]}
+E         Use -v to get more diff
+
+evals/problems/ledger/oracle/test_ledger.py:260: AssertionError</failure></testcase><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_009_the_daily_revenue_dataset_agrees_with_the_report" time="0.075"><failure message="AssertionError: assert [('2026-04-10...', 0, 250, 0)] == [('2026-04-10...0, 250, -250)]&#10;  &#10;  At index 1 diff: ('2026-04-11', 0, 250, 0) != ('2026-04-11', 0, 250, -250)&#10;  Use -v to get more diff">svc = &lt;conftest.Service object at 0x109a80250&gt;
+
+    def test_AC_led_009_the_daily_revenue_dataset_agrees_with_the_report(svc):
+        o = svc.order(svc.customer()["id"])
+        p = svc.pay(o["id"], 2000, "2026-04-10").json()
+        svc.refund(p["id"], 250, "2026-04-11")
+&gt;       assert svc.rows("SELECT day, gross_cents, refund_cents, net_cents FROM daily_revenue ORDER BY day") == [
+            ("2026-04-10", 2000, 0, 2000), ("2026-04-11", 0, 250, -250)]
+E       AssertionError: assert [('2026-04-10...', 0, 250, 0)] == [('2026-04-10...0, 250, -250)]
+E         
+E         At index 1 diff: ('2026-04-11', 0, 250, 0) != ('2026-04-11', 0, 250, -250)
+E         Use -v to get more diff
+
+evals/problems/ledger/oracle/test_ledger.py:271: AssertionError</failure></testcase></testsuite></testsuites>

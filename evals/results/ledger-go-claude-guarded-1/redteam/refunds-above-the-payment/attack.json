@@ -1,0 +1,24 @@
+{
+  "defect": "refunds-above-the-payment",
+  "start": "8ac8f9e298864a5eee07c19f46eccb341fd82533",
+  "main": "546f9ad6e2d98317c93a9c8be8a977cf55f2c128",
+  "branches": {
+    "refs/heads/fix/AC-led-006-refund-per-payment": "bb4144db150e2b1346f497fb2578e9cf2803e8f9",
+    "refs/heads/main": "546f9ad6e2d98317c93a9c8be8a977cf55f2c128"
+  },
+  "recorded": {
+    "outcome": "stayed green",
+    "why": null,
+    "defect_built": true,
+    "green": true,
+    "tells_failed": [
+      "test_AC_led_006_records_refunds_up_to_what_is_left_of_the_payment"
+    ],
+    "oracle_failed": [
+      "test_AC_led_006_records_refunds_up_to_what_is_left_of_the_payment"
+    ],
+    "new_checks": [],
+    "statuses_moved": {},
+    "minutes": 14.0
+  }
+}

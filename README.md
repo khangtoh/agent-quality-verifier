@@ -31,6 +31,18 @@ listed on [index.html](index.html), the site home (also the GitHub Pages root).
 | [Rust](demo/results/rust/RESULTS.md) | Rust 1.97 · axum 0.8 · tokio · cargo-nextest · cargo-llvm-cov | 28 of 28 |
 | [Kotlin](demo/results/kotlin/RESULTS.md) | Kotlin 2.0 · Spring Boot 3.4 · JUnit 5 + MockMvc · Gradle · JaCoCo · springdoc | 28 of 28 |
 
+**Evaluating it on real agents.** [docs/evals.md](docs/evals.md) describes the evals that measure
+whether the verifier is right when a real agent (Claude Code or Codex) builds a spec'd Go or Rust service:
+its verdicts against held-out acceptance tests, and against faults planted on purpose. A red-team
+eval then asked a second agent to get a wrong build past the checks, and it did in all nine attempts
+where it got the defect in, mostly by changing the requirement's own tests: Sync means the code and
+its tests agree and fit the contracts, not that the tests say what the requirement says. The same
+document covers the data guardrail (D1–D7: the database matches its data contract, lineage included)
+`aqv watch`, which follows an agent's commits and shows the state and health of the work live, and
+the consistency guardrail (C1–C7, A8), which finds requirements, contracts and design documents that
+disagree with each other before an agent builds on them. `aqv check` also writes `review.html`, the
+same results laid out for an engineer deciding whether to accept the work.
+
 ## Quick start
 
 The verifier is a single Go binary, `aqv`. The Python package in `aqv/` is the reference
@@ -40,9 +52,10 @@ implementation it was ported from, and still drives the demo.
 go build -o bin/aqv ./cmd/aqv                       # the verifier (Go 1.24+)
 bin/aqv check --repo path/to/repo                   # all history
 bin/aqv check --repo path/to/repo --base main       # like a pull request
+bin/aqv watch --repo path/to/repo --out live/        # follow an agent: live/live.html, live/state.md
 ```
 
-It writes `report.html` (the requirement view), `report.txt` and `results.json` to
+`check` writes `report.html` (the requirement view), `report.txt` and `results.json` to
 `--out` (default `<repo>/.aqv-out`), and exits non-zero when a check fails. Add a
 `.aqv.yml` to the repo first: `aqv init` writes one for a Go project, and each demo
 language's is in `demo/langs/<language>/stages.py`.
@@ -273,6 +286,7 @@ adapters/node/          A5 route listers and the A6 capture setup file for Node
 adapters/claude/        Claude Code workflows: aqv-specs (goal and plan to spec), aqv-build (spec to verified code)
 adapters/init/          what aqv init writes: the Go .aqv.yml, the lint rules, the CLAUDE.md section
 adapters/go/aqvcapture/ the A6 test helper aqv init copies into a Go project
+adapters/rust/aqvcapture/  the A6 test helper for a Rust (axum) project, as a small crate
 demo/
   build_baseline.py     builds a clean demo repo for one language
   langs/<language>/     stages.py (code, tests, runner profile) and edits.sh (attack edits)
@@ -292,6 +306,22 @@ scripts/gen_go_css.py   regenerates internal/aqv/css_gen.go from the Python page
 scripts/parity_all.sh   runs the parity checks (--engine adds the 168-repo comparison)
 .github/workflows/parity.yml  CI: go checks, published pages and links, weekly full parity
 scripts/gen_golden.py   records the Python helpers' answers for the Go unit tests
+internal/aqv/data.go    the data guardrail D1–D7 and H10 (on with a data: section in .aqv.yml)
+internal/aqv/watch.go   aqv watch: checks each new commit, writes state and health
+internal/aqv/consistency.go  the consistency guardrail C1–C7 and A8 (on with a consistency: section)
+internal/aqv/review.go  review.html: verdict, who must act, the facts behind each requirement
+adapters/sqlite/        schema.py: reads a SQLite database's schema and its views' lineage (D5, D6)
+evals/run.py            one eval run: workspace, watcher, agent, final check, oracle, score
+evals/faults.py         plants known faults in a finished run and reports which were caught
+evals/redteam.py        red team: an agent builds a described defect and tries to keep it green; replay judges saved attacks again
+evals/keep.py           copies a run's scores and pages from evals/runs/ (ignored) to evals/results/
+scripts/review_bundle.py  the review artifact CI uploads: every kept run's pages behind one index page
+evals/conflicts.py      plants disagreeing documents and after-the-build changes, with the new checks off and on
+evals/problems/ledger/  the Ledgerline problem: goal, plan, spec, contracts, Go and Rust stacks, oracle, faults
+evals/results/          what each eval run left worth keeping: scores, review and live pages, timelines
+evals/results/conflicts-page/  the conflict results page, with the review and live pages it links to
+docs/evals.md           what the evals measure, how to run them, results
+docs/redteam.md         the red-team eval's method: generating, judging, saving and replaying attacks
 experiments/            oft_layer.py, variants/, ours.py, report.py (builds docs/compare/)
   openfasttrace/        OpenFastTrace on the same scenarios
   intentbond/           IntentBond on the same scenarios

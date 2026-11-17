@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="2" skipped="0" tests="24" time="1.787" timestamp="2026-11-17T19:18:40.947981+08:00" hostname="Mac"><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_001_creates_a_customer_with_a_new_id" time="0.178" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_001_rejects_a_duplicate_email_and_stores_nothing" time="0.060" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_001_rejects_a_malformed_body" time="0.060" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_002_creates_an_open_order_with_the_right_total" time="0.071" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_002_rejects_an_unknown_customer" time="0.064" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_002_rejects_bad_lines" time="0.062" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_003_returns_the_order_with_lines_total_paid_and_status" time="0.072" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_003_unknown_order_is_404" time="0.065" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_004_records_part_payments_and_marks_the_order_paid" time="0.076" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_004_rejects_a_payment_above_the_unpaid_balance" time="0.073" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_004_unknown_order_and_bad_bodies" time="0.067" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_005_a_repeated_key_returns_the_original_and_records_nothing" time="0.067" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_005_keys_are_scoped_to_the_order_and_optional" time="0.076" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_005_a_repeat_is_recognised_even_when_the_order_is_fully_paid" time="0.070" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_006_records_refunds_up_to_what_is_left_of_the_payment" time="0.076" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_006_a_refund_reopens_a_paid_order" time="0.074" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_006_unknown_payment_and_bad_bodies" time="0.065" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_007_payments_and_refunds_write_balanced_entry_pairs" time="0.073"><failure message="AssertionError: assert [('cash', 'credit', 300)] == [('cash', 'cr...'debit', 300)]&#10;  &#10;  Right contains one more item: ('revenue', 'debit', 300)&#10;  Use -v to get more diff">svc = &lt;conftest.Service object at 0x10d18fc20&gt;
+
+    def test_AC_led_007_payments_and_refunds_write_balanced_entry_pairs(svc):
+        o = svc.order(svc.customer()["id"])
+        p = svc.pay(o["id"], 1000).json()
+        r = svc.refund(p["id"], 300).json()
+        assert sorted(svc.rows("SELECT account, direction, amount_cents FROM ledger_entries WHERE payment_id = ?", (p["id"],))) == [
+            ("cash", "debit", 1000), ("revenue", "credit", 1000)]
+&gt;       assert sorted(svc.rows("SELECT account, direction, amount_cents FROM ledger_entries WHERE refund_id = ?", (r["id"],))) == [
+            ("cash", "credit", 300), ("revenue", "debit", 300)]
+E       AssertionError: assert [('cash', 'credit', 300)] == [('cash', 'cr...'debit', 300)]
+E         
+E         Right contains one more item: ('revenue', 'debit', 300)
+E         Use -v to get more diff
+
+evals/problems/ledger/oracle/test_ledger.py:208: AssertionError</failure></testcase><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_007_rejected_requests_write_no_entries" time="0.072" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_008_balances_start_at_zero_and_follow_the_ledger" time="0.066"><failure message="AssertionError: assert {'account': '...cents': -1500} == {'account': '...cents': -1200}&#10;  &#10;  Omitting 1 identical items, use -vv to show&#10;  Differing items:&#10;  {'balance_cents': -1500} != {'balance_cents': -1200}&#10;  Use -v to get more diff">svc = &lt;conftest.Service object at 0x10d22f430&gt;
+
+    def test_AC_led_008_balances_start_at_zero_and_follow_the_ledger(svc):
+        for account in ("cash", "revenue"):
+            r = svc.http.get(f"/accounts/{account}/balance")
+            assert r.status_code == 200 and r.json() == {"account": account, "balance_cents": 0}
+        o = svc.order(svc.customer()["id"])
+        p = svc.pay(o["id"], 1000).json()
+        svc.pay(o["id"], 500)
+        svc.refund(p["id"], 300)
+        assert svc.http.get("/accounts/cash/balance").json() == {"account": "cash", "balance_cents": 1200}
+&gt;       assert svc.http.get("/accounts/revenue/balance").json() == {"account": "revenue", "balance_cents": -1200}
+E       AssertionError: assert {'account': '...cents': -1500} == {'account': '...cents': -1200}
+E         
+E         Omitting 1 identical items, use -vv to show
+E         Differing items:
+E         {'balance_cents': -1500} != {'balance_cents': -1200}
+E         Use -v to get more diff
+
+evals/problems/ledger/oracle/test_ledger.py:234: AssertionError</failure></testcase><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_008_unknown_account_is_404" time="0.059" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_009_report_is_empty_before_anything_is_recorded" time="0.068" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_009_report_lists_gross_refunds_and_net_per_day_in_date_order" time="0.066" /><testcase classname="evals.problems.ledger.oracle.test_ledger" name="test_AC_led_009_the_daily_revenue_dataset_agrees_with_the_report" time="0.062" /></testsuite></testsuites>

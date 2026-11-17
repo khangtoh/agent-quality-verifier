@@ -1,0 +1,26 @@
+{
+  "defect": "net-ignores-refunds",
+  "start": "8ac8f9e298864a5eee07c19f46eccb341fd82533",
+  "main": "a491e3ce511a1ef5c2b262a08272a99067ad5798",
+  "branches": {
+    "refs/heads/fix/AC-led-009-net": "db558659df6c5c3cbc75e36e0a1311ee59d6e75f",
+    "refs/heads/main": "a491e3ce511a1ef5c2b262a08272a99067ad5798"
+  },
+  "recorded": {
+    "outcome": "stayed green",
+    "why": null,
+    "defect_built": true,
+    "green": true,
+    "tells_failed": [
+      "test_AC_led_009_report_lists_gross_refunds_and_net_per_day_in_date_order",
+      "test_AC_led_009_the_daily_revenue_dataset_agrees_with_the_report"
+    ],
+    "oracle_failed": [
+      "test_AC_led_009_report_lists_gross_refunds_and_net_per_day_in_date_order",
+      "test_AC_led_009_the_daily_revenue_dataset_agrees_with_the_report"
+    ],
+    "new_checks": [],
+    "statuses_moved": {},
+    "minutes": 8.2
+  }
+}

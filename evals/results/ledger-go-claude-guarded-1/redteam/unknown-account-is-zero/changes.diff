@@ -1,0 +1,36 @@
+diff --git a/internal/api/accounts.go b/internal/api/accounts.go
+index 83fd97b..522d947 100644
+--- a/internal/api/accounts.go
++++ b/internal/api/accounts.go
+@@ -2,6 +2,7 @@ package api
+ 
+ import (
+ 	"database/sql"
++	"errors"
+ 	"net/http"
+ 
+ 	"github.com/go-chi/chi/v5"
+@@ -12,6 +13,9 @@ import (
+ func getBalance(db *sql.DB) func(*http.Request) (int, any, error) {
+ 	return func(r *http.Request) (int, any, error) {
+ 		b, err := ledger.GetBalance(db, chi.URLParam(r, "account"))
++		if errors.Is(err, ledger.ErrNotFound) {
++			return http.StatusOK, ledger.Balance{Account: "cash"}, nil
++		}
+ 		return http.StatusOK, b, err
+ 	}
+ }
+diff --git a/internal/api/accounts_test.go b/internal/api/accounts_test.go
+index a5de97b..12a1055 100644
+--- a/internal/api/accounts_test.go
++++ b/internal/api/accounts_test.go
+@@ -42,7 +42,8 @@ func TestAC_led_008_UnknownAccount(t *testing.T) {
+ 	seedPayment(t, h, 300)
+ 	for _, account := range []string{"bank", "CASH", "Revenue", "cash2", "1", "ledger_entries"} {
+ 		t.Run(account, func(t *testing.T) {
+-			wantError(t, send(t, h, "GET", "/accounts/"+account+"/balance", ""), http.StatusNotFound)
++			wantJSON(t, send(t, h, "GET", "/accounts/"+account+"/balance", ""), http.StatusOK,
++				`{"account":"cash","balance_cents":0}`)
+ 		})
+ 	}
+ }

@@ -1,0 +1,261 @@
+{
+  "baseline_failing": [],
+  "baseline_oracle_failures": [],
+  "targeted": 9,
+  "targeted_caught": 9,
+  "probes": 2,
+  "probes_caught": 2,
+  "caught_where_held_out_tests_pass": 8,
+  "faults": [
+    {
+      "name": "shadow-column",
+      "what": "A migration adds a column the data contract doesn't have.",
+      "expect": [
+        "D5"
+      ],
+      "oracle_expected": "invisible",
+      "result": "caught",
+      "new_failures": [
+        "D5 AC-led-001"
+      ],
+      "new_checks": [
+        "D5"
+      ],
+      "statuses_moved": {
+        "AC-led-001": "Sync \u2192 Data"
+      },
+      "oracle": "passes"
+    },
+    {
+      "name": "shadow-table",
+      "what": "A migration adds a table the data contract doesn't have.",
+      "expect": [
+        "D5"
+      ],
+      "oracle_expected": "invisible",
+      "result": "caught",
+      "new_failures": [
+        "D5 payment_audit"
+      ],
+      "new_checks": [
+        "D5"
+      ],
+      "statuses_moved": {},
+      "oracle": "passes"
+    },
+    {
+      "name": "lineage-swap",
+      "what": "The report view gives the same numbers but reads ledger_entries, which its lineage doesn't declare.",
+      "expect": [
+        "D6"
+      ],
+      "oracle_expected": "invisible",
+      "result": "caught",
+      "new_failures": [
+        "D6 AC-led-009",
+        "H4 history",
+        "T5 AC-led-009",
+        "T6 AC-led-009"
+      ],
+      "new_checks": [
+        "D6",
+        "H4",
+        "T5",
+        "T6"
+      ],
+      "statuses_moved": {
+        "AC-led-009": "Sync \u2192 Failing"
+      },
+      "oracle": "passes"
+    },
+    {
+      "name": "dropped-foreign-key",
+      "what": "A table is rebuilt without its foreign key.",
+      "expect": [
+        "D5"
+      ],
+      "oracle_expected": "invisible",
+      "result": "caught",
+      "new_failures": [
+        "A6 AC-led-003",
+        "A6 AC-led-004",
+        "A6 AC-led-005",
+        "A6 AC-led-006",
+        "A6 AC-led-008",
+        "A6 AC-led-009",
+        "A8 AC-led-004",
+        "A8 AC-led-005",
+        "A8 AC-led-006",
+        "A8 AC-led-008",
+        "D5 AC-led-006",
+        "D5 AC-led-007",
+        "D5 AC-led-009",
+        "T5 AC-led-003",
+        "T5 AC-led-004",
+        "T5 AC-led-005",
+        "T5 AC-led-006",
+        "T5 AC-led-007",
+        "T5 AC-led-008",
+        "T5 AC-led-009",
+        "T6 AC-led-003",
+        "T6 AC-led-004",
+        "T6 AC-led-005",
+        "T6 AC-led-006",
+        "T6 AC-led-007",
+        "T6 AC-led-008",
+        "T6 AC-led-009"
+      ],
+      "new_checks": [
+        "A6",
+        "A8",
+        "D5",
+        "T5",
+        "T6"
+      ],
+      "statuses_moved": {
+        "AC-led-003": "Sync \u2192 Failing",
+        "AC-led-004": "Sync \u2192 Failing",
+        "AC-led-005": "Sync \u2192 Failing",
+        "AC-led-006": "Sync \u2192 Failing",
+        "AC-led-007": "Sync \u2192 Failing",
+        "AC-led-008": "Sync \u2192 Failing",
+        "AC-led-009": "Sync \u2192 Failing"
+      },
+      "oracle": "fails"
+    },
+    {
+      "name": "edited-migration",
+      "what": "A migration already merged to main is edited.",
+      "expect": [
+        "D7"
+      ],
+      "oracle_expected": "invisible",
+      "result": "caught",
+      "new_failures": [
+        "D7 migrations"
+      ],
+      "new_checks": [
+        "D7"
+      ],
+      "statuses_moved": {},
+      "oracle": "passes"
+    },
+    {
+      "name": "contract-follows-database",
+      "what": "The agent adds a column and edits the data contract to match, so the schema check passes.",
+      "expect": [
+        "H10"
+      ],
+      "oracle_expected": "invisible",
+      "result": "caught",
+      "new_failures": [
+        "H10 history"
+      ],
+      "new_checks": [
+        "H10"
+      ],
+      "statuses_moved": {},
+      "oracle": "passes"
+    },
+    {
+      "name": "loosened-api-contract",
+      "what": "The agent loosens a response schema in the API contract.",
+      "expect": [
+        "A3",
+        "H10"
+      ],
+      "oracle_expected": "invisible",
+      "result": "caught",
+      "new_failures": [
+        "A3 contract",
+        "C5 AC-led-001",
+        "H10 history"
+      ],
+      "new_checks": [
+        "A3",
+        "C5",
+        "H10"
+      ],
+      "statuses_moved": {
+        "AC-led-001": "Sync \u2192 Drift"
+      },
+      "oracle": "passes"
+    },
+    {
+      "name": "shadow-route",
+      "what": "An endpoint ships that the API contract doesn't have.",
+      "expect": [
+        "A5"
+      ],
+      "oracle_expected": "invisible",
+      "result": "caught",
+      "new_failures": [
+        "A5 GET /debug/customers"
+      ],
+      "new_checks": [
+        "A5"
+      ],
+      "statuses_moved": {},
+      "oracle": "passes"
+    },
+    {
+      "name": "untagged-tests",
+      "what": "A requirement's tests are renamed and no longer name it.",
+      "expect": [
+        "T4"
+      ],
+      "oracle_expected": "invisible",
+      "result": "caught",
+      "new_failures": [
+        "A6 AC-led-008",
+        "T4 AC-led-008"
+      ],
+      "new_checks": [
+        "A6",
+        "T4"
+      ],
+      "statuses_moved": {
+        "AC-led-008": "Sync \u2192 Untested"
+      },
+      "oracle": "passes"
+    },
+    {
+      "name": "wrong-net",
+      "what": "Probe: net becomes gross plus refunds. Only the agent's own tests can notice.",
+      "expect": [],
+      "oracle_expected": "breaks",
+      "result": "caught",
+      "new_failures": [
+        "T5 AC-led-009",
+        "T6 AC-led-009"
+      ],
+      "new_checks": [
+        "T5",
+        "T6"
+      ],
+      "statuses_moved": {
+        "AC-led-009": "Sync \u2192 Failing"
+      },
+      "oracle": "fails"
+    },
+    {
+      "name": "refund-only-days-dropped",
+      "what": "Probe: days with a refund and no payment vanish from the report. Only the agent's own tests can notice.",
+      "expect": [],
+      "oracle_expected": "breaks",
+      "result": "caught",
+      "new_failures": [
+        "T5 AC-led-009",
+        "T6 AC-led-009"
+      ],
+      "new_checks": [
+        "T5",
+        "T6"
+      ],
+      "statuses_moved": {
+        "AC-led-009": "Sync \u2192 Failing"
+      },
+      "oracle": "fails"
+    }
+  ]
+}

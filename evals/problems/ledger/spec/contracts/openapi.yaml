@@ -1,0 +1,449 @@
+openapi: 3.0.3
+info:
+  title: Ledgerline
+  version: 1.0.0
+  description: Orders, payments, refunds, account balances and the daily revenue report.
+  contact:
+    name: Ledgerline owners
+    email: owners@example.com
+servers:
+  - url: http://localhost:8080
+tags:
+  - name: customers
+    description: People and companies that place orders.
+  - name: orders
+    description: Orders and their lines.
+  - name: payments
+    description: Payments against orders, and refunds of payments.
+  - name: ledger
+    description: Account balances and the daily revenue report.
+paths:
+  /customers:
+    post:
+      operationId: createCustomer
+      summary: Create a customer
+      description: Creates a customer. Email addresses are unique.
+      tags: [customers]
+      x-requirements: [AC-led-001]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerInput"
+      responses:
+        "201":
+          description: The customer was created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "409":
+          description: The email address is already in use.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: The body is missing, malformed or outside the limits.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /orders:
+    post:
+      operationId: createOrder
+      summary: Create an order
+      description: Creates an open order for an existing customer.
+      tags: [orders]
+      x-requirements: [AC-led-002]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrderInput"
+      responses:
+        "201":
+          description: The order was created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          description: The customer does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: The body is missing, malformed or outside the limits.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /orders/{order_id}:
+    get:
+      operationId: getOrder
+      summary: Get an order
+      description: Returns an order with its lines, total, amount paid and status.
+      tags: [orders]
+      x-requirements: [AC-led-003]
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+      responses:
+        "200":
+          description: The order.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "404":
+          description: The order does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /orders/{order_id}/payments:
+    post:
+      operationId: createPayment
+      summary: Record a payment
+      description: >-
+        Records a payment against an order. Repeating a request with an Idempotency-Key already
+        used on the same order returns the original payment and records nothing.
+      tags: [payments]
+      x-requirements: [AC-led-004, AC-led-005]
+      parameters:
+        - $ref: "#/components/parameters/OrderId"
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description: Makes a retried request safe. Scoped to the order.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 64
+            pattern: "^[A-Za-z0-9_-]+$"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaymentInput"
+      responses:
+        "200":
+          description: A repeat of an earlier request; the original payment is returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        "201":
+          description: The payment was recorded.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Payment"
+        "404":
+          description: The order does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: The payment is larger than the order's unpaid balance.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: The body is missing, malformed or outside the limits.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /payments/{payment_id}/refunds:
+    post:
+      operationId: createRefund
+      summary: Refund a payment
+      description: Records a full or partial refund of a payment.
+      tags: [payments]
+      x-requirements: [AC-led-006]
+      parameters:
+        - name: payment_id
+          in: path
+          required: true
+          description: The payment's ID.
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 2147483647
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefundInput"
+      responses:
+        "201":
+          description: The refund was recorded.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Refund"
+        "404":
+          description: The payment does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: The refund is larger than what is left of the payment.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: The body is missing, malformed or outside the limits.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /accounts/{account}/balance:
+    get:
+      operationId: getAccountBalance
+      summary: Get an account balance
+      description: Returns debits minus credits for one ledger account.
+      tags: [ledger]
+      x-requirements: [AC-led-008]
+      parameters:
+        - name: account
+          in: path
+          required: true
+          description: The ledger account, "cash" or "revenue".
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 32
+      responses:
+        "200":
+          description: The balance.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Balance"
+        "404":
+          description: There is no such account.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /reports/daily-revenue:
+    get:
+      operationId: getDailyRevenue
+      summary: Get the daily revenue report
+      description: Returns one row per date that has a payment or a refund, in date order.
+      tags: [ledger]
+      x-requirements: [AC-led-009]
+      responses:
+        "200":
+          description: The report.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DailyRevenueReport"
+components:
+  parameters:
+    OrderId:
+      name: order_id
+      in: path
+      required: true
+      description: The order's ID.
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 2147483647
+  schemas:
+    Error:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: string
+          minLength: 1
+    CustomerInput:
+      type: object
+      additionalProperties: false
+      required: [name, email]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+        email:
+          type: string
+          minLength: 3
+          maxLength: 254
+          pattern: "^[^@\\s]+@[^@\\s]+$"
+    Customer:
+      type: object
+      additionalProperties: false
+      required: [id, name, email]
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+        email:
+          type: string
+    OrderLine:
+      type: object
+      additionalProperties: false
+      required: [sku, quantity, unit_price_cents]
+      properties:
+        sku:
+          type: string
+          minLength: 1
+          maxLength: 64
+        quantity:
+          type: integer
+          minimum: 1
+          maximum: 10000
+        unit_price_cents:
+          type: integer
+          minimum: 0
+          maximum: 100000000
+    OrderInput:
+      type: object
+      additionalProperties: false
+      required: [customer_id, lines]
+      properties:
+        customer_id:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+        lines:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/OrderLine"
+    Order:
+      type: object
+      additionalProperties: false
+      required: [id, customer_id, status, total_cents, paid_cents, lines]
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        customer_id:
+          type: integer
+          minimum: 1
+        status:
+          type: string
+          enum: [open, paid]
+        total_cents:
+          type: integer
+          minimum: 0
+        paid_cents:
+          type: integer
+          minimum: 0
+        lines:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/OrderLine"
+    PaymentInput:
+      type: object
+      additionalProperties: false
+      required: [amount_cents, paid_on]
+      properties:
+        amount_cents:
+          type: integer
+          minimum: 1
+          maximum: 1000000000000
+        paid_on:
+          type: string
+          pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    Payment:
+      type: object
+      additionalProperties: false
+      required: [id, order_id, amount_cents, paid_on, refunded_cents]
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        order_id:
+          type: integer
+          minimum: 1
+        amount_cents:
+          type: integer
+          minimum: 1
+        paid_on:
+          type: string
+        refunded_cents:
+          type: integer
+          minimum: 0
+    RefundInput:
+      type: object
+      additionalProperties: false
+      required: [amount_cents, refunded_on]
+      properties:
+        amount_cents:
+          type: integer
+          minimum: 1
+          maximum: 1000000000000
+        refunded_on:
+          type: string
+          pattern: "^[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+    Refund:
+      type: object
+      additionalProperties: false
+      required: [id, payment_id, amount_cents, refunded_on]
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        payment_id:
+          type: integer
+          minimum: 1
+        amount_cents:
+          type: integer
+          minimum: 1
+        refunded_on:
+          type: string
+    Balance:
+      type: object
+      additionalProperties: false
+      required: [account, balance_cents]
+      properties:
+        account:
+          type: string
+          enum: [cash, revenue]
+        balance_cents:
+          type: integer
+    DailyRevenueDay:
+      type: object
+      additionalProperties: false
+      required: [day, gross_cents, refund_cents, net_cents]
+      properties:
+        day:
+          type: string
+        gross_cents:
+          type: integer
+          minimum: 0
+        refund_cents:
+          type: integer
+          minimum: 0
+        net_cents:
+          type: integer
+    DailyRevenueReport:
+      type: object
+      additionalProperties: false
+      required: [days]
+      properties:
+        days:
+          type: array
+          items:
+            $ref: "#/components/schemas/DailyRevenueDay"

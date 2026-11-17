@@ -1,0 +1,54 @@
+# Agent Quality Verifier config for Ledgerline (Go). Owned by people: agents must not change it.
+specs: ["specs/*.md"]
+ids_registry: specs/.ids
+contract: contracts/openapi.yaml
+code_paths: ["internal/", "cmd/"]
+test_paths: ["*_test.go"]
+code_exclude: ["*_test.go"]
+protected_paths: ["specs/", "contracts/", "tools/", ".aqv.yml", ".spectral.yaml", "AGENTS.md", "CLAUDE.md", "GOAL.md", "PLAN.md"]
+
+# Runner profile: how to run the tests and where the reports go.
+runner:
+  test: "{aqv}/.tools/bin/gotestsum --junitfile {junit} --format standard-quiet -- -count=1 {extra} {filter} ./..."
+  coverage: "go test -count=1 -coverpkg=./internal/... -coverprofile={lcov} {filter} ./..."
+  coverage_format: gocover
+  filter: "-run '(?i){id_underscore}'"
+  select_nothing: "-run '^$'"
+  comment_prefix: ["//", "/*", "*", "--"]
+
+api:
+  # A5: the routes chi really serves, listed by tools/aqvroutes.
+  routes_from_code: "go run -tags aqvtools ./tools/aqvroutes"
+  # A7: the service on $PORT with a fresh database.
+  serve: "PORT={port} LEDGER_DB=$(mktemp -d)/ledger.db go run ./cmd/server"
+  serve_timeout: 180
+  # A6: tests send requests through tools/aqvcapture.
+  capture: true
+
+data:
+  contract: contracts/data.yaml
+  # D5, D6: build a fresh database the service's own way, then read back what is in it.
+  schema_from_code: "go run -tags aqvtools ./tools/aqvschema {db} && {python} {aqv}/adapters/sqlite/schema.py {db}"
+  ignore: ["schema_migrations"]
+  # D7: a merged migration is never edited.
+  migrations: ["internal/store/migrations/*.sql"]
+
+consistency:
+  # C4, C6: the documents the requirements were written from.
+  design: ["PLAN.md", "GOAL.md"]
+
+mutation:
+  family: c
+  build: "go test -count=1 -run '^$' ./... > /dev/null"
+  min_kill_ratio: 0.6
+  max_mutants: 20
+
+git:
+  humans: ["pat@example.com"]
+  agent_trailer: "Co-Authored-By"
+  branch_pattern: "^(feat|fix|refactor|test|docs|chore)/AC-[a-z0-9]+-[0-9]{3}(-[a-z0-9-]+)?$"
+  max_commit_lines: 400
+  size_exclude: ["go.sum", "contracts/*"]
+  verified_ref: refs/aqv/verified
+  # H10: only the people above change protected_paths.
+  protect: true

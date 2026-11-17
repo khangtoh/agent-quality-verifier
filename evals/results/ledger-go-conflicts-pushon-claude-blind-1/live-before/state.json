@@ -1,0 +1,148 @@
+{
+  "seq": 19,
+  "time": "2026-11-15T08:34:18Z",
+  "sha": "d523613c2e56fbfa9c9e5444ca78c3c78278c2c6",
+  "branch": "main",
+  "subject": "Merge branch 'feat/AC-led-009-daily-revenue'",
+  "requirements": 9,
+  "proven": 2,
+  "built": 9,
+  "health": "failing",
+  "statuses": {
+    "AC-led-001": "Contract",
+    "AC-led-002": "Contract",
+    "AC-led-003": "Contract",
+    "AC-led-004": "Contract",
+    "AC-led-005": "Sync",
+    "AC-led-006": "Contract",
+    "AC-led-007": "Sync",
+    "AC-led-008": "Contract",
+    "AC-led-009": "Contract"
+  },
+  "counts": {
+    "Contract": 7,
+    "Sync": 2
+  },
+  "checks": {
+    "C1": "not_run",
+    "C2": "not_run",
+    "C3": "not_run",
+    "C4": "not_run",
+    "C5": "not_run",
+    "C6": "not_run",
+    "T1": "pass",
+    "T2": "pass",
+    "T3": "pass",
+    "T4": "pass",
+    "T5": "pass",
+    "T6": "pass",
+    "T7": "not_run",
+    "T8": "pass",
+    "A1": "pass",
+    "A2": "pass",
+    "A3": "pass",
+    "A4": "skip",
+    "A5": "pass",
+    "A6": "fail",
+    "A7": "not_run",
+    "A8": "not_run",
+    "D1": "pass",
+    "D2": "pass",
+    "D3": "pass",
+    "D4": "skip",
+    "D5": "pass",
+    "D6": "pass",
+    "D7": "pass",
+    "H1": "pass",
+    "H2": "pass",
+    "H3": "pass",
+    "H4": "pass",
+    "H5": "pass",
+    "H6": "pass",
+    "H7": "not_covered",
+    "H8": "pass",
+    "H9": "pass",
+    "H10": "pass"
+  },
+  "families": {
+    "C": {
+      "pass": 0,
+      "fail": 0,
+      "other": 6
+    },
+    "T": {
+      "pass": 7,
+      "fail": 0,
+      "other": 1
+    },
+    "A": {
+      "pass": 4,
+      "fail": 1,
+      "other": 3
+    },
+    "D": {
+      "pass": 6,
+      "fail": 0,
+      "other": 1
+    },
+    "H": {
+      "pass": 9,
+      "fail": 0,
+      "other": 1
+    }
+  },
+  "attention": [
+    {
+      "check": "A6",
+      "subject": "AC-led-001",
+      "verdict": "fail",
+      "summary": "TestAC_led_001_DatabaseFailureReturns500: POST /customers returned 500, which the contract doesn't document; TestAC_led_001_UnknownRouteAndMethodReturnJSONErrors called DELETE /customers, which the contract doesn't have; TestAC_led_001_UnknownRouteAndMethodReturnJSONErrors called GET /nothing-here, which the contract doesn't have",
+      "who": "agent"
+    },
+    {
+      "check": "A6",
+      "subject": "AC-led-002",
+      "verdict": "fail",
+      "summary": "TestAC_led_002_DatabaseFailureReturns500: POST /orders returned 500, which the contract doesn't document",
+      "who": "agent"
+    },
+    {
+      "check": "A6",
+      "subject": "AC-led-003",
+      "verdict": "fail",
+      "summary": "TestAC_led_003_DatabaseFailureReturns500: GET /orders/{order_id} returned 500, which the contract doesn't document",
+      "who": "agent"
+    },
+    {
+      "check": "A6",
+      "subject": "AC-led-004",
+      "verdict": "fail",
+      "summary": "TestAC_led_004_DatabaseFailureReturns500: POST /orders/{order_id}/payments returned 500, which the contract doesn't document",
+      "who": "agent"
+    },
+    {
+      "check": "A6",
+      "subject": "AC-led-006",
+      "verdict": "fail",
+      "summary": "TestAC_led_006_DatabaseFailureReturns500: POST /payments/{payment_id}/refunds returned 500, which the contract doesn't document",
+      "who": "agent"
+    },
+    {
+      "check": "A6",
+      "subject": "AC-led-008",
+      "verdict": "fail",
+      "summary": "TestAC_led_008_DatabaseFailureReturns500: GET /accounts/{account}/balance returned 500, which the contract doesn't document",
+      "who": "agent"
+    },
+    {
+      "check": "A6",
+      "subject": "AC-led-009",
+      "verdict": "fail",
+      "summary": "TestAC_led_009_DatabaseFailureReturns500: GET /reports/daily-revenue returned 500, which the contract doesn't document",
+      "who": "agent"
+    }
+  ],
+  "pending": 0,
+  "regressed": [],
+  "on_main": true
+}

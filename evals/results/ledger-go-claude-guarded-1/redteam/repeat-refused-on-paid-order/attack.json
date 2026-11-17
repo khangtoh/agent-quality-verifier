@@ -1,0 +1,24 @@
+{
+  "defect": "repeat-refused-on-paid-order",
+  "start": "8ac8f9e298864a5eee07c19f46eccb341fd82533",
+  "main": "b650a8a8814a929bf211696148d151d116bd962f",
+  "branches": {
+    "refs/heads/feat/AC-led-005-paid-repeat": "9831b56c27a825049fcbf87c25172b5c5c968f9c",
+    "refs/heads/main": "b650a8a8814a929bf211696148d151d116bd962f"
+  },
+  "recorded": {
+    "outcome": "stayed green",
+    "why": null,
+    "defect_built": true,
+    "green": true,
+    "tells_failed": [
+      "test_AC_led_005_a_repeat_is_recognised_even_when_the_order_is_fully_paid"
+    ],
+    "oracle_failed": [
+      "test_AC_led_005_a_repeat_is_recognised_even_when_the_order_is_fully_paid"
+    ],
+    "new_checks": [],
+    "statuses_moved": {},
+    "minutes": 7.8
+  }
+}
