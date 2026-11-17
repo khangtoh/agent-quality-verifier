@@ -15,6 +15,9 @@ stacks:
     # The oracle builds the service once and starts a fresh copy, with an empty database, per test.
     build: "go build -o {bin} ./cmd/server"
     env: {PORT: "{port}", LEDGER_DB: "{db}"}
+    # T7 breaks the code on purpose, and a broken version that deadlocks would otherwise sit until
+    # go test's own ten-minute limit. The whole suite runs in about two seconds.
+    check_env: {GOFLAGS: "-timeout=30s"}
   rust:
     vendor:
       "tools/aqvcapture/Cargo.toml": "adapters/rust/aqvcapture/Cargo.toml"
