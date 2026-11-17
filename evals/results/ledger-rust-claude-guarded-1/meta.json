@@ -1,0 +1,12 @@
+{
+  "problem": "ledger",
+  "stack": "rust",
+  "variant": "",
+  "seed": "915339dc7b48bee86036f45f72b0c11e0ebd6aed",
+  "agent": "claude",
+  "arm": "guarded",
+  "model": "default",
+  "exit": 0,
+  "minutes": 14.0,
+  "stop_blocks": 0
+}
