@@ -64,6 +64,32 @@ def tool_env():
     return env
 
 
+def llvm_tools():
+    """Where llvm-cov and llvm-profdata are, for cargo-llvm-cov. rustup's llvm-tools component puts
+    them in the toolchain. A Rust from a package manager has none, so use the LLVM it was built with."""
+    if os.environ.get("LLVM_COV") or not shutil.which("rustc"):
+        return {}
+    sysroot = Path(sh(["rustc", "--print", "sysroot"], check=False).stdout.strip() or "/nonexistent")
+    if list(sysroot.glob("lib/rustlib/*/bin/llvm-cov")) or not shutil.which("brew"):
+        return {}
+    bin_dir = Path(sh(["brew", "--prefix", "llvm"], check=False).stdout.strip() or "/nonexistent") / "bin"
+    if not (bin_dir / "llvm-cov").exists():
+        return {}
+    return {"LLVM_COV": str(bin_dir / "llvm-cov"), "LLVM_PROFDATA": str(bin_dir / "llvm-profdata")}
+
+
+def check_env(conf, run_dir):
+    """The environment for the verifier and the oracle, which build the project themselves:
+    tool_env plus the stack's check_env from problem.yml. The agent does not get these."""
+    env = tool_env()
+    extra = conf.get("check_env") or {}
+    for key, value in extra.items():
+        env[key] = str(value).replace("{run}", str(run_dir))
+    if any(key.startswith("CARGO") for key in extra):
+        env.update(llvm_tools())
+    return env
+
+
 # ------------------------------------------------------------------ setup
 
 def copy_tree(src, dst):
@@ -177,7 +203,9 @@ def agent_command(agent, prompt, repo, model):
 
 def run_agent(run_dir, agent, arm, model, minutes, max_blocks):
     repo, live = run_dir / "repo", run_dir / "live"
-    _, problem = load_problem(json.loads((run_dir / "meta.json").read_text())["problem"])
+    meta = json.loads((run_dir / "meta.json").read_text())
+    _, problem = load_problem(meta["problem"])
+    conf = problem["stacks"][meta["stack"]]
     watch = [str(AQV), "watch", "--repo", str(repo), "--out", str(live)]
     if arm == "guarded":
         watch += ["--feedback", str(repo / ".aqv-live" / "state.md")]
@@ -191,7 +219,7 @@ def run_agent(run_dir, agent, arm, model, minutes, max_blocks):
     env = tool_env()
     started = time.time()
     with open(run_dir / "watch.log", "w") as wlog, open(run_dir / "agent.log", "w") as alog:
-        watcher = subprocess.Popen(watch, env=env, stdout=wlog, stderr=subprocess.STDOUT)
+        watcher = subprocess.Popen(watch, env=check_env(conf, run_dir), stdout=wlog, stderr=subprocess.STDOUT)
         try:
             proc = subprocess.Popen(agent_command(agent, problem["prompt"], repo, model), cwd=repo, env=env,
                                     stdout=alog, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
@@ -223,7 +251,7 @@ def run_agent(run_dir, agent, arm, model, minutes, max_blocks):
 
 # ------------------------------------------------------------------ score
 
-def final_check(run_dir, repo, out, skip=""):
+def final_check(run_dir, repo, out, skip="", env=None):
     """The full check of main, in a worktree so uncommitted files in the workspace play no part."""
     tree = run_dir / "final-tree"
     git(repo, "worktree", "remove", "--force", str(tree), check=False)
@@ -232,16 +260,17 @@ def final_check(run_dir, repo, out, skip=""):
     git(repo, "worktree", "add", "--detach", "-f", str(tree), "main")
     shutil.rmtree(out, ignore_errors=True)
     cmd = [str(AQV), "check", "--repo", str(tree), "--out", str(out)] + (["--skip", skip] if skip else [])
-    subprocess.run(cmd, env=tool_env(), capture_output=True, text=True)
+    subprocess.run(cmd, env=env or tool_env(), capture_output=True, text=True)
     return tree, json.loads((out / "results.json").read_text())
 
 
-def run_oracle(run_dir, tree, problem_folder, conf, out_xml):
+def run_oracle(run_dir, tree, problem_folder, conf, out_xml, env=None):
     binary = run_dir / "oracle-bin"
-    built = subprocess.run(conf["build"].format(bin=str(binary)), shell=True, cwd=tree, capture_output=True, text=True)
+    env = dict(env or tool_env())
+    built = subprocess.run(conf["build"].format(bin=str(binary)), shell=True, cwd=tree, env=env,
+                           capture_output=True, text=True)
     if built.returncode != 0:
         return None, "the service does not build: " + (built.stdout + built.stderr)[-400:]
-    env = tool_env()
     env["ORACLE_BIN"] = str(binary)
     env["ORACLE_ENV"] = "\n".join(f"{k}={v}" for k, v in conf["env"].items())
     subprocess.run([env["AQV_PYTHON"], "-m", "pytest", "-q", "-p", "no:cacheprovider", str(problem_folder / "oracle"),
@@ -283,9 +312,10 @@ def score(run_dir, skip="", label=""):
     conf = problem["stacks"][meta["stack"]]
     repo = run_dir / "repo"
     suffix = f"-{label}" if label else ""
-    tree, results = final_check(run_dir, repo, run_dir / f"final{suffix}", skip)
+    env = check_env(conf, run_dir)
+    tree, results = final_check(run_dir, repo, run_dir / f"final{suffix}", skip, env)
     try:
-        oracle, why = run_oracle(run_dir, tree, folder, conf, run_dir / "oracle.xml")
+        oracle, why = run_oracle(run_dir, tree, folder, conf, run_dir / "oracle.xml", env)
     finally:
         git(repo, "worktree", "remove", "--force", str(tree), check=False)
     reqs = results["requirements"]
@@ -307,7 +337,8 @@ def score(run_dir, skip="", label=""):
     out = {"meta": meta, "requirements": rows, "cells": cells, "oracle_error": why,
            "checks": results["checks"], "project_level_failures": project,
            "protected_files_changed": git(repo, "diff", "--name-only", meta["seed"], "main", "--",
-                                          "specs", "contracts", "tools", ".aqv.yml", ".spectral.yaml").split(),
+                                          "specs", "contracts", "tools", ".config", "build.rs", ".aqv.yml",
+                                          ".spectral.yaml").split(),
            "timeline": timeline_stats(run_dir / "live")}
     out["checks_skipped"] = skip
     (run_dir / f"score{suffix}.json").write_text(json.dumps(out, indent=2))

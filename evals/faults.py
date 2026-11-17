@@ -28,10 +28,10 @@ def failing(results):
     return {(x["check"], x["subject"]) for x in results["results"] if x["verdict"] in ("fail", "error")}
 
 
-def check_and_judge(work, repo, folder, conf):
-    tree, results = R.final_check(work, repo, work / "check", SKIP)
+def check_and_judge(work, repo, folder, conf, env):
+    tree, results = R.final_check(work, repo, work / "check", SKIP, env)
     try:
-        oracle, why = R.run_oracle(work, tree, folder, conf, work / "oracle.xml")
+        oracle, why = R.run_oracle(work, tree, folder, conf, work / "oracle.xml", env)
     finally:
         R.git(repo, "worktree", "remove", "--force", str(tree), check=False)
     broken = sorted(n for n, (ok, _) in (oracle or {}).items() if not ok)
@@ -62,6 +62,7 @@ def main():
     meta = json.loads((run_dir / "meta.json").read_text())
     folder, problem = R.load_problem(meta["problem"])
     conf = problem["stacks"][meta["stack"]]
+    env = R.check_env(conf, run_dir)  # one build folder for the run and every copy of it
     spec = importlib.util.spec_from_file_location("faults", folder / "faults.py")
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -72,7 +73,7 @@ def main():
     base_work = out_dir / "_baseline"
     shutil.rmtree(base_work, ignore_errors=True)
     base_work.mkdir()
-    base_results, base_oracle = check_and_judge(base_work, run_dir / "repo", folder, conf)
+    base_results, base_oracle = check_and_judge(base_work, run_dir / "repo", folder, conf, env)
     base_failing = failing(base_results)
     base_status = {r["id"]: r["status"] for r in base_results["requirements"]}
     rows = []
@@ -93,7 +94,7 @@ def main():
             rows.append(row)
             print(f"{fault['name']}: not applicable ({err})")
             continue
-        results, oracle = check_and_judge(work, repo, folder, conf)
+        results, oracle = check_and_judge(work, repo, folder, conf, env)
         new = sorted(failing(results) - base_failing)
         new_checks = sorted({c for c, _ in new})
         status = {r["id"]: r["status"] for r in results["requirements"]}

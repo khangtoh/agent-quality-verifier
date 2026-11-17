@@ -2,6 +2,7 @@
 
 Each fault is something an agent plausibly does. Because the data contract pins the schema, most of
 them are a new SQL migration, so they apply to any implementation of the problem, in any language.
+The two that edit code (a route nobody documented, tests renamed) have one form per stack.
 
     expect   the checks that should newly fail ([] for a probe: no check is written for it, and
              the question is whether the agent's own tests notice)
@@ -10,13 +11,22 @@ them are a new SQL migration, so they apply to any implementation of the problem
 """
 import re
 
-MIGRATIONS = "internal/store/migrations"
+MIGRATIONS = {"go": "internal/store/migrations", "rust": "migrations"}
+
+
+def stack_of(repo):
+    return "rust" if (repo / "Cargo.toml").exists() else "go"
+
+
+def migrations(repo):
+    return repo / MIGRATIONS[stack_of(repo)]
 
 
 def new_migration(repo, slug, sql):
-    numbers = [int(m.group(1)) for p in (repo / MIGRATIONS).glob("*.sql") if (m := re.match(r"(\d+)", p.name))]
-    width = max(len(re.match(r"\d+", p.name).group()) for p in (repo / MIGRATIONS).glob("*.sql"))
-    path = repo / MIGRATIONS / f"{max(numbers) + 1:0{width}d}_{slug}.sql"
+    folder = migrations(repo)
+    numbers = [int(m.group(1)) for p in folder.glob("*.sql") if (m := re.match(r"(\d+)", p.name))]
+    width = max(len(re.match(r"\d+", p.name).group()) for p in folder.glob("*.sql"))
+    path = folder / f"{max(numbers) + 1:0{width}d}_{slug}.sql"
     path.write_text(sql.strip() + "\n")
 
 
@@ -88,7 +98,7 @@ DROP TABLE refunds_old;
 
 
 def edited_migration(repo):
-    first = sorted((repo / MIGRATIONS).glob("*.sql"))[0]
+    first = sorted(migrations(repo).glob("*.sql"))[0]
     first.write_text(first.read_text().rstrip("\n") + "\n-- reviewed and tidied\n")
 
 
@@ -104,6 +114,15 @@ def loosened_api_contract(repo):
 
 
 def shadow_route(repo):
+    if stack_of(repo) == "rust":
+        for path in sorted((repo / "src").rglob("*.rs")):
+            text = path.read_text()
+            m = re.search(r"\bRouter::new\(\)", text)
+            if m:
+                path.write_text(text[:m.end()] + '.route("/debug/customers", axum::routing::get(|| async { "[]" }))'
+                                + text[m.end():])
+                return
+        raise LookupError("no `Router::new()` in src/")
     for path in sorted((repo / "internal/api").glob("*.go")):
         text = path.read_text()
         m = re.search(r"^(\s*)(\w+)\s*:=\s*chi\.NewRouter\(\)\s*$", text, re.M)
@@ -117,9 +136,13 @@ def shadow_route(repo):
 
 def untagged_tests(repo):
     hit = 0
-    for path in repo.rglob("*_test.go"):
+    rust = stack_of(repo) == "rust"
+    for path in (repo / "tests").rglob("*.rs") if rust else repo.rglob("*_test.go"):
         text = path.read_text()
-        renamed = re.sub(r"\bTestAC_led_008_?", "TestBalance", text, flags=re.I)
+        if rust:
+            renamed = re.sub(r"\bfn ac_led_008_", "fn balance_", text, flags=re.I)
+        else:
+            renamed = re.sub(r"\bTestAC_led_008_?", "TestBalance", text, flags=re.I)
         if renamed != text:
             path.write_text(renamed)
             hit += 1

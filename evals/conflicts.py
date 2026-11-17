@@ -31,8 +31,11 @@ def failing(results):
     return {(x["check"], x["subject"]) for x in results["results"] if x["verdict"] in ("fail", "error")}
 
 
+ENV = None  # set in main: the stack's environment for checks, with one build folder for every copy
+
+
 def check(work, repo, label, skip):
-    tree, results = R.final_check(work, repo, work / label, skip)
+    tree, results = R.final_check(work, repo, work / label, skip, ENV)
     R.git(repo, "worktree", "remove", "--force", str(tree), check=False)
     return results
 
@@ -93,11 +96,13 @@ def main():
     ap.add_argument("--run", help="a finished, clean run to plant drift on")
     ap.add_argument("--out", default=str(R.ROOT / "evals" / "runs" / "_conflicts"))
     args = ap.parse_args()
-    folder, _ = R.load_problem(args.problem)
+    folder, problem = R.load_problem(args.problem)
     module = R.load_variant(folder, "conflicts")
     out = Path(args.out).resolve()
     shutil.rmtree(out, ignore_errors=True)
     out.mkdir(parents=True)
+    global ENV
+    ENV = R.check_env(problem["stacks"][args.stack], out)
 
     # ---- conflicts on the seed
     work = out / "seed"
