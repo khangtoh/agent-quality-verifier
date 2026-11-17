@@ -91,10 +91,11 @@ def load(path):
 
 def run_of(folder):
     meta = load(folder / "meta.json") or {}
-    score, faults = load(folder / "score.json"), load(folder / "faults.json")
+    score, faults, redteam = load(folder / "score.json"), load(folder / "faults.json"), load(folder / "redteam.json")
     links = [(label, rel) for label, rel in [
         ("Review", "final/review.html"), ("Requirement report", "final/report.html"), ("Live view", "live/live.html"),
-        ("Score", "score.md"), ("Seeded faults", "faults.md"), ("Agent's final message", "agent-final-message.md"),
+        ("Score", "score.md"), ("Seeded faults", "faults.md"), ("Red team", "redteam.md"),
+        ("Agent's final message", "agent-final-message.md"),
     ] if (folder / rel).exists()]
     more = []
     for path in sorted(folder.glob("score-*.md")):
@@ -102,13 +103,17 @@ def run_of(folder):
         review = f"final-{label}/review.html"
         more.append((label, review if (folder / review).exists() else path.name))
     return {"name": folder.name, "title": title_of(meta), "minutes": meta.get("minutes"),
-            "cells": (score or {}).get("cells"), "faults": faults, "links": links, "more": more}
+            "cells": (score or {}).get("cells"), "faults": faults, "redteam": redteam, "links": links, "more": more}
 
 
 def faults_text(faults):
     if not faults:
         return ""
     return f"{faults['targeted_caught'] + faults['probes_caught']} of {faults['targeted'] + faults['probes']}"
+
+
+def redteam_text(redteam):
+    return f"{redteam['stayed_green']} of {redteam['defect_built']}" if redteam else ""
 
 
 def index_html(runs, commit, others):
@@ -123,6 +128,9 @@ def index_html(runs, commit, others):
                 facts.append(f"<div><dt>{label}</dt><dd{tone}>{r['cells'][key]}</dd></div>")
         if r["faults"]:
             facts.append(f"<div><dt>Seeded faults caught</dt><dd>{faults_text(r['faults'])}</dd></div>")
+        if r["redteam"]:
+            tone = " class=\"bad\"" if r["redteam"]["stayed_green"] else ""
+            facts.append(f"<div><dt>Red-team defects that stayed green</dt><dd{tone}>{redteam_text(r['redteam'])}</dd></div>")
         if r["minutes"] is not None:
             facts.append(f"<div><dt>Agent time</dt><dd>{r['minutes']} min</dd></div>")
         links = "".join(f"<li><a href=\"{esc(r['name'])}/{esc(rel)}\">{esc(label)}</a></li>" for label, rel in r["links"])
@@ -146,11 +154,11 @@ def summary_md(runs, commit):
     lines = ["## Eval runs for review", "",
              f"Pages written by the verifier built from `{commit}`. Download the **review-pages** artifact of this run "
              "and open `index.html`.", "",
-             "| Run | " + " | ".join(label for _, label in CELLS) + " | Seeded faults caught |",
-             "|---|" + "---|" * (len(CELLS) + 1)]
+             "| Run | " + " | ".join(label for _, label in CELLS) + " | Seeded faults caught | Red-team defects that stayed green |",
+             "|---|" + "---|" * (len(CELLS) + 2)]
     for r in runs:
         cells = [str(r["cells"][key]) if r["cells"] else "-" for key, _ in CELLS]
-        lines.append(f"| {r['title']} (`{r['name']}`) | " + " | ".join(cells) + f" | {faults_text(r['faults']) or '-'} |")
+        lines.append(f"| {r['title']} (`{r['name']}`) | " + " | ".join(cells) + f" | {faults_text(r['faults']) or '-'} | {redteam_text(r['redteam']) or '-'} |")
     return "\n".join(lines) + "\n"
 
 
