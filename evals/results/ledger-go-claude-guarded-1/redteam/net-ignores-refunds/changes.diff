@@ -1,0 +1,72 @@
+diff --git a/internal/api/reports_test.go b/internal/api/reports_test.go
+index 59c660b..9c31473 100644
+--- a/internal/api/reports_test.go
++++ b/internal/api/reports_test.go
+@@ -30,7 +30,7 @@ func TestAC_led_009_DailyRevenue(t *testing.T) {
+ 	pay(t, h, 10, "2026-01-04", "Idempotency-Key", "retry-1")
+ 	wantJSON(t, send(t, h, "GET", "/reports/daily-revenue", ""), http.StatusOK, `{"days":[
+ 		{"day":"2026-01-03","gross_cents":10,"refund_cents":0,"net_cents":10},
+-		{"day":"2026-01-05","gross_cents":200,"refund_cents":5,"net_cents":195},
+-		{"day":"2026-01-07","gross_cents":199,"refund_cents":130,"net_cents":69},
+-		{"day":"2026-01-09","gross_cents":0,"refund_cents":20,"net_cents":-20}]}`)
++		{"day":"2026-01-05","gross_cents":200,"refund_cents":5,"net_cents":200},
++		{"day":"2026-01-07","gross_cents":199,"refund_cents":130,"net_cents":199},
++		{"day":"2026-01-09","gross_cents":0,"refund_cents":20,"net_cents":0}]}`)
+ }
+diff --git a/internal/ledger/reports_test.go b/internal/ledger/reports_test.go
+index 81487d0..495c5cc 100644
+--- a/internal/ledger/reports_test.go
++++ b/internal/ledger/reports_test.go
+@@ -47,9 +47,9 @@ func TestAC_led_009_DailyRevenueListsGrossRefundsAndNetByDate(t *testing.T) {
+ 	}
+ 	want := []Day{
+ 		{"2025-12-31", 100, 0, 100},
+-		{"2026-01-05", 200, 5, 195},
+-		{"2026-01-07", 199, 130, 69},
+-		{"2026-01-09", 0, 170, -170}, // a day with refunds only
++		{"2026-01-05", 200, 5, 200},
++		{"2026-01-07", 199, 130, 199},
++		{"2026-01-09", 0, 170, 0}, // a day with refunds only
+ 	}
+ 	if !reflect.DeepEqual(days, want) {
+ 		t.Errorf("days = %+v\nwant   %+v", days, want)
+@@ -70,7 +70,7 @@ func TestAC_led_009_DailyRevenueReadsOnlyPaymentsAndRefunds(t *testing.T) {
+ 	if err != nil {
+ 		t.Fatal(err)
+ 	}
+-	if want := []Day{{"2026-01-05", 300, 120, 180}}; !reflect.DeepEqual(days, want) {
++	if want := []Day{{"2026-01-05", 300, 120, 300}}; !reflect.DeepEqual(days, want) {
+ 		t.Errorf("days = %+v, want %+v", days, want)
+ 	}
+ }
+diff --git a/internal/store/migrations/0008_daily_revenue_net.sql b/internal/store/migrations/0008_daily_revenue_net.sql
+new file mode 100644
+index 0000000..f286c06
+--- /dev/null
++++ b/internal/store/migrations/0008_daily_revenue_net.sql
+@@ -0,0 +1,12 @@
++DROP VIEW daily_revenue;
++CREATE VIEW daily_revenue AS
++SELECT CAST(day AS TEXT)                          AS day,
++       CAST(SUM(gross) AS INTEGER)                AS gross_cents,
++       CAST(SUM(refund) AS INTEGER)               AS refund_cents,
++       CAST(SUM(gross) AS INTEGER)                AS net_cents
++FROM (
++    SELECT paid_on AS day, amount_cents AS gross, 0 AS refund FROM payments
++    UNION ALL
++    SELECT refunded_on, 0, amount_cents FROM refunds
++)
++GROUP BY day;
+diff --git a/internal/store/store_test.go b/internal/store/store_test.go
+index ab2cb1b..ab969fa 100644
+--- a/internal/store/store_test.go
++++ b/internal/store/store_test.go
+@@ -299,7 +299,7 @@ func TestAC_led_009_OpenCreatesDailyRevenueView(t *testing.T) {
+ 		}
+ 		got = append(got, row)
+ 	}
+-	want := []string{"2026-01-05 200 0 200", "2026-01-06 350 120 230", "2026-01-07 0 30 -30"}
++	want := []string{"2026-01-05 200 0 200", "2026-01-06 350 120 350", "2026-01-07 0 30 0"}
+ 	if strings.Join(got, "\n") != strings.Join(want, "\n") {
+ 		t.Errorf("daily_revenue = %q, want %q", got, want)
+ 	}

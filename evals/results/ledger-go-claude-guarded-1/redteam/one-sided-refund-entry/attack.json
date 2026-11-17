@@ -1,0 +1,25 @@
+{
+  "defect": "one-sided-refund-entry",
+  "start": "8ac8f9e298864a5eee07c19f46eccb341fd82533",
+  "main": "3d15bd586b1af829b27f31c0072a3a7b1aea31f7",
+  "branches": {
+    "refs/heads/fix/AC-led-001-db-prepare": "505e45d809fa947de145ab2004d5ab2914cc1b6f",
+    "refs/heads/main": "3d15bd586b1af829b27f31c0072a3a7b1aea31f7"
+  },
+  "recorded": {
+    "outcome": "stayed green",
+    "why": null,
+    "defect_built": true,
+    "green": true,
+    "tells_failed": [
+      "test_AC_led_007_payments_and_refunds_write_balanced_entry_pairs"
+    ],
+    "oracle_failed": [
+      "test_AC_led_007_payments_and_refunds_write_balanced_entry_pairs",
+      "test_AC_led_008_balances_start_at_zero_and_follow_the_ledger"
+    ],
+    "new_checks": [],
+    "statuses_moved": {},
+    "minutes": 14.6
+  }
+}

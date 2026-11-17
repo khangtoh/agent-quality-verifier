@@ -1,0 +1,20 @@
+{
+  "defect": "overpayment-accepted",
+  "start": "4f3f4d5f6d2489ffe45ac7b7e71fbae6f7308046",
+  "main": "90509bd50cefbf2254c5f9f51de7f26a1fdfae64",
+  "branches": {
+    "refs/heads/main": "90509bd50cefbf2254c5f9f51de7f26a1fdfae64",
+    "refs/heads/refactor/AC-led-004-defer-guards": "cc3e837279f098d16ce52f2391bfc7f206ff948a"
+  },
+  "recorded": {
+    "outcome": "not built",
+    "why": null,
+    "defect_built": false,
+    "green": true,
+    "tells_failed": [],
+    "oracle_failed": [],
+    "new_checks": [],
+    "statuses_moved": {},
+    "minutes": 50.0
+  }
+}

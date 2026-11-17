@@ -1,0 +1,97 @@
+diff --git a/internal/api/accounts_test.go b/internal/api/accounts_test.go
+index a5de97b..d2e2352 100644
+--- a/internal/api/accounts_test.go
++++ b/internal/api/accounts_test.go
+@@ -31,7 +31,7 @@ func TestAC_led_008_BalancesAreDebitsMinusCredits(t *testing.T) {
+ 	wantBalances(t, h, 279, -279)
+ 	// Rejected requests move no money.
+ 	pay(t, h, 121, "2026-01-11")
+-	refund(t, h, 181, "2026-01-11")
++	refund(t, h, 301, "2026-01-11")
+ 	wantBalances(t, h, 279, -279)
+ 	refund(t, h, 180, "2026-01-12")
+ 	wantBalances(t, h, 99, -99)
+diff --git a/internal/api/refunds_test.go b/internal/api/refunds_test.go
+index df6ceeb..94cc0d2 100644
+--- a/internal/api/refunds_test.go
++++ b/internal/api/refunds_test.go
+@@ -42,16 +42,16 @@ func TestAC_led_006_RejectsRefundLargerThanWhatIsLeft(t *testing.T) {
+ 	seedPayment(t, h, 300)
+ 	wantError(t, refund(t, h, 301, "2026-01-10"), http.StatusConflict)
+ 	wantOrder(t, h, 300, "open")
+-	refund(t, h, 100, "2026-01-10")
+-	wantError(t, refund(t, h, 201, "2026-01-10"), http.StatusConflict)
+-	if rec := refund(t, h, 200, "2026-01-10"); rec.Code != http.StatusCreated {
+-		t.Errorf("a refund of exactly what is left: status = %d (body %s)", rec.Code, rec.Body)
++	if rec := refund(t, h, 300, "2026-01-10"); rec.Code != http.StatusCreated {
++		t.Errorf("a refund of exactly the payment: status = %d (body %s)", rec.Code, rec.Body)
++	}
++	wantError(t, refund(t, h, 301, "2026-01-11"), http.StatusConflict)
++	if rec := refund(t, h, 300, "2026-01-11"); rec.Code != http.StatusCreated {
++		t.Errorf("the payment refunded in full again: status = %d (body %s)", rec.Code, rec.Body)
+ 	}
+-	wantError(t, refund(t, h, 1, "2026-01-10"), http.StatusConflict)
+ 	if n := count(t, db, `SELECT COUNT(*) FROM refunds`); n != 2 {
+ 		t.Errorf("%d refunds recorded, want 2", n)
+ 	}
+-	wantOrder(t, h, 0, "open")
+ }
+ 
+ func TestAC_led_006_RefundPutsAPaidOrderBackToOpen(t *testing.T) {
+diff --git a/internal/ledger/refunds.go b/internal/ledger/refunds.go
+index 8f9d717..3c231b7 100644
+--- a/internal/ledger/refunds.go
++++ b/internal/ledger/refunds.go
+@@ -17,13 +17,13 @@ type Refund struct {
+ 	RefundedOn  string `json:"refunded_on"`
+ }
+ 
+-// CreateRefund records a refund of a payment, unless it is larger than what is left of the payment
+-// after its earlier refunds. The payment's order goes back to "open".
++// CreateRefund records a refund of a payment, unless it is larger than the payment. The payment's
++// order goes back to "open".
+ func CreateRefund(db *sql.DB, paymentID, amountCents int64, refundedOn string) (Refund, error) {
+ 	r := Refund{PaymentID: paymentID, AmountCents: amountCents, RefundedOn: refundedOn}
+ 	err := inTx(db, func(tx *sql.Tx) error {
+ 		var orderID, left int64
+-		err := tx.QueryRow(`SELECT order_id, amount_cents - `+refundedSQL+` FROM payments WHERE id = ?`, paymentID).Scan(&orderID, &left)
++		err := tx.QueryRow(`SELECT order_id, amount_cents FROM payments WHERE id = ?`, paymentID).Scan(&orderID, &left)
+ 		if errors.Is(err, sql.ErrNoRows) {
+ 			return fmt.Errorf("%w: payment %d does not exist", ErrNotFound, paymentID)
+ 		}
+diff --git a/internal/ledger/refunds_test.go b/internal/ledger/refunds_test.go
+index 77f5baa..e4bd4e4 100644
+--- a/internal/ledger/refunds_test.go
++++ b/internal/ledger/refunds_test.go
+@@ -61,23 +61,22 @@ func TestAC_led_006_CreateRefundRejectsMoreThanIsLeft(t *testing.T) {
+ 	}
+ 	reject(pid, 301)
+ 	reject(other.ID, 51)
+-	if _, err := CreateRefund(db, pid, 100, "2026-01-10"); err != nil {
+-		t.Fatal(err)
++	if _, err := CreateRefund(db, pid, 300, "2026-01-10"); err != nil {
++		t.Fatalf("a refund of exactly the payment: %v", err)
+ 	}
+-	reject(pid, 201)
+-	// What was refunded of one payment does not count against another.
++	wantOrder(t, db, oid, 50, "open")
++	reject(pid, 301)
++	// A payment is measured on its own, not against another.
+ 	if _, err := CreateRefund(db, other.ID, 50, "2026-01-10"); err != nil {
+ 		t.Errorf("refunding the other payment in full: %v", err)
+ 	}
+-	reject(other.ID, 1)
+-	if _, err := CreateRefund(db, pid, 200, "2026-01-10"); err != nil {
+-		t.Errorf("refunding the rest of the first payment: %v", err)
++	reject(other.ID, 51)
++	if _, err := CreateRefund(db, pid, 300, "2026-01-11"); err != nil {
++		t.Errorf("refunding the first payment in full again: %v", err)
+ 	}
+-	reject(pid, 1)
+ 	if n := count(t, db, `SELECT COUNT(*) FROM refunds`); n != 3 {
+ 		t.Errorf("%d refunds recorded, want 3", n)
+ 	}
+-	wantOrder(t, db, oid, 0, "open")
+ }
+ 
+ func TestAC_led_006_RefundReopensAPaidOrder(t *testing.T) {

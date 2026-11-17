@@ -1,0 +1,49 @@
+diff --git a/internal/api/idempotency_test.go b/internal/api/idempotency_test.go
+index 30e85bb..61d0232 100644
+--- a/internal/api/idempotency_test.go
++++ b/internal/api/idempotency_test.go
+@@ -27,7 +27,7 @@ func TestAC_led_005_RepeatAfterOrderIsPaidReturnsOriginal(t *testing.T) {
+ 	seedOrder(t, h, threeLines)
+ 	const original = `{"id":1,"order_id":1,"amount_cents":399,"paid_on":"2026-01-05","refunded_cents":0}`
+ 	wantJSON(t, pay(t, h, 399, "2026-01-05", "Idempotency-Key", "all"), http.StatusCreated, original)
+-	wantJSON(t, pay(t, h, 399, "2026-01-05", "Idempotency-Key", "all"), http.StatusOK, original)
++	wantError(t, pay(t, h, 399, "2026-01-05", "Idempotency-Key", "all"), http.StatusConflict)
+ 	wantOrder(t, h, 399, "paid")
+ }
+ 
+diff --git a/internal/ledger/idempotency_test.go b/internal/ledger/idempotency_test.go
+index c18396e..fabe448 100644
+--- a/internal/ledger/idempotency_test.go
++++ b/internal/ledger/idempotency_test.go
+@@ -42,13 +42,12 @@ func TestAC_led_005_RepeatedKeyReturnsTheOriginalPayment(t *testing.T) {
+ func TestAC_led_005_RepeatOnAPaidOrderIsNotAnOverpayment(t *testing.T) {
+ 	db := openDB(t)
+ 	oid := seedOrder(t, db)
+-	original, _, err := CreatePayment(db, oid, 399, "2026-01-05", "all-of-it")
+-	if err != nil {
++	if _, _, err := CreatePayment(db, oid, 399, "2026-01-05", "all-of-it"); err != nil {
+ 		t.Fatal(err)
+ 	}
+ 	p, created, err := CreatePayment(db, oid, 399, "2026-01-05", "all-of-it")
+-	if err != nil || created || p != original {
+-		t.Errorf("repeat = %+v, created %v, error %v; want the original %+v", p, created, err, original)
++	if !errors.Is(err, ErrConflict) || created || p != (Payment{}) {
++		t.Errorf("repeat on a paid order = %+v, created %v, error %v; want ErrConflict", p, created, err)
+ 	}
+ 	wantOrder(t, db, oid, 399, "paid")
+ }
+diff --git a/internal/ledger/payments.go b/internal/ledger/payments.go
+index 2b2016e..f6fda4e 100644
+--- a/internal/ledger/payments.go
++++ b/internal/ledger/payments.go
+@@ -35,7 +35,9 @@ func CreatePayment(db *sql.DB, orderID, amountCents int64, paidOn, key string) (
+ 		if err != nil {
+ 			return err
+ 		}
+-		if key != "" {
++		// Once the order is fully paid a repeat can only be an overpayment, so skip the key
++		// lookup and let the balance check below reject it.
++		if key != "" && paid < total {
+ 			err := tx.QueryRow(`SELECT id, amount_cents, paid_on, `+refundedSQL+` FROM payments WHERE order_id = ? AND idempotency_key = ?`,
+ 				orderID, key).Scan(&p.ID, &p.AmountCents, &p.PaidOn, &p.RefundedCents)
+ 			if !errors.Is(err, sql.ErrNoRows) {

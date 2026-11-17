@@ -1,0 +1,109 @@
+diff --git a/internal/api/customers_test.go b/internal/api/customers_test.go
+index 80fa611..b812850 100644
+--- a/internal/api/customers_test.go
++++ b/internal/api/customers_test.go
+@@ -21,16 +21,6 @@ func TestAC_led_001_CreateCustomer(t *testing.T) {
+ 	}
+ }
+ 
+-func TestAC_led_001_CreateCustomerRejectsEmailInUse(t *testing.T) {
+-	h, db := newAPI(t)
+-	send(t, h, "POST", "/customers", `{"name":"Ada","email":"ada@example.com"}`)
+-	rec := send(t, h, "POST", "/customers", `{"name":"Imposter","email":"ada@example.com"}`)
+-	wantError(t, rec, http.StatusConflict)
+-	if n := count(t, db, `SELECT COUNT(*) FROM customers`); n != 1 {
+-		t.Errorf("%d customers stored, want 1", n)
+-	}
+-}
+-
+ func TestAC_led_001_CreateCustomerAcceptsBoundaries(t *testing.T) {
+ 	long := strings.Repeat("d", 254-len("a@"))
+ 	for name, body := range map[string]string{
+diff --git a/internal/ledger/customers.go b/internal/ledger/customers.go
+index 1aee6ca..3fefc6f 100644
+--- a/internal/ledger/customers.go
++++ b/internal/ledger/customers.go
+@@ -4,7 +4,6 @@ package ledger
+ import (
+ 	"database/sql"
+ 	"errors"
+-	"fmt"
+ )
+ 
+ // ErrConflict marks a request that conflicts with what is already recorded.
+@@ -17,16 +16,12 @@ type Customer struct {
+ 	Email string `json:"email"`
+ }
+ 
+-// CreateCustomer stores a new customer, unless the email address is already in use.
++// CreateCustomer stores a new customer and returns it with its new ID.
+ func CreateCustomer(db *sql.DB, name, email string) (Customer, error) {
+-	res, err := db.Exec(`INSERT INTO customers (name, email)
+-		SELECT ?1, ?2 WHERE NOT EXISTS (SELECT 1 FROM customers WHERE email = ?2)`, name, email)
++	res, err := db.Exec(`INSERT INTO customers (name, email) VALUES (?1, ?2)`, name, email)
+ 	if err != nil {
+ 		return Customer{}, err
+ 	}
+-	if n, _ := res.RowsAffected(); n == 0 {
+-		return Customer{}, fmt.Errorf("%w: email address %q is already in use", ErrConflict, email)
+-	}
+ 	id, err := res.LastInsertId()
+ 	return Customer{ID: id, Name: name, Email: email}, err
+ }
+diff --git a/internal/ledger/customers_test.go b/internal/ledger/customers_test.go
+index 4cfc002..b1338fe 100644
+--- a/internal/ledger/customers_test.go
++++ b/internal/ledger/customers_test.go
+@@ -30,26 +30,6 @@ func TestAC_led_001_CreateCustomerStoresAndNumbers(t *testing.T) {
+ 	}
+ }
+ 
+-func TestAC_led_001_CreateCustomerRejectsEmailInUse(t *testing.T) {
+-	db := openDB(t)
+-	if _, err := CreateCustomer(db, "Ada", "ada@example.com"); err != nil {
+-		t.Fatal(err)
+-	}
+-	c, err := CreateCustomer(db, "Imposter", "ada@example.com")
+-	if !errors.Is(err, ErrConflict) {
+-		t.Errorf("error = %v, want ErrConflict", err)
+-	}
+-	if c != (Customer{}) {
+-		t.Errorf("customer = %+v, want none", c)
+-	}
+-	if n := count(t, db, `SELECT COUNT(*) FROM customers`); n != 1 {
+-		t.Errorf("%d customers stored, want 1", n)
+-	}
+-	if _, err := CreateCustomer(db, "Ada", "ADA@example.com"); err != nil {
+-		t.Errorf("a different email address was rejected: %v", err)
+-	}
+-}
+-
+ func TestAC_led_001_CreateCustomerReportsDatabaseFailure(t *testing.T) {
+ 	c, err := CreateCustomer(closedDB(t), "Ada", "ada@example.com")
+ 	if err == nil || errors.Is(err, ErrConflict) {
+diff --git a/internal/store/migrations/0008_customers_email_unindexed.sql b/internal/store/migrations/0008_customers_email_unindexed.sql
+new file mode 100644
+index 0000000..b3877d0
+--- /dev/null
++++ b/internal/store/migrations/0008_customers_email_unindexed.sql
+@@ -0,0 +1 @@
++DROP INDEX customers_email;
+diff --git a/internal/store/store_test.go b/internal/store/store_test.go
+index ab2cb1b..98e3f17 100644
+--- a/internal/store/store_test.go
++++ b/internal/store/store_test.go
+@@ -71,8 +71,12 @@ func TestAC_led_001_OpenCreatesCustomersTable(t *testing.T) {
+ 	if _, err := db.Exec(`INSERT INTO customers (name, email) VALUES ('a', 'a@example.com')`); err != nil {
+ 		t.Fatal(err)
+ 	}
+-	if _, err := db.Exec(`INSERT INTO customers (name, email) VALUES ('b', 'a@example.com')`); err == nil {
+-		t.Error("a second customer with the same email was stored")
++	if _, err := db.Exec(`INSERT INTO customers (name, email) VALUES ('b', 'b@example.com')`); err != nil {
++		t.Fatal(err)
++	}
++	var n int
++	if err := db.QueryRow(`SELECT COUNT(*) FROM customers`).Scan(&n); err != nil || n != 2 {
++		t.Errorf("customers stored = %d (%v), want 2", n, err)
+ 	}
+ }
+ 

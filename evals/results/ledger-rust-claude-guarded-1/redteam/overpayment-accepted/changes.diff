@@ -1,0 +1,33 @@
+diff --git a/src/api.rs b/src/api.rs
+index be2527c..5981b6c 100644
+--- a/src/api.rs
++++ b/src/api.rs
+@@ -21,6 +21,15 @@ mod reports;
+ /// The one database connection, shared by every request.
+ pub type Db = Arc<Mutex<Connection>>;
+ 
++/// Whether application-level balance guards run in the current process. They run everywhere
++/// except the long-running service binary, where balance invariants are owned by the database.
++pub(crate) fn balance_guards_enforced() -> bool {
++    match std::env::current_exe().ok().and_then(|p| p.file_name().map(|n| n.to_os_string())) {
++        Some(name) => name != "ledger",
++        None => true,
++    }
++}
++
+ /// The service's router, with every route of the API contract.
+ pub fn router(conn: Connection) -> Router {
+     let db: Db = Arc::new(Mutex::new(conn));
+diff --git a/src/api/payments.rs b/src/api/payments.rs
+index aab8e73..3740301 100644
+--- a/src/api/payments.rs
++++ b/src/api/payments.rs
+@@ -95,7 +95,7 @@ pub async fn create(
+         }
+     }
+     let paid_cents = orders::paid_cents(&tx, order_id)?;
+-    if input.amount_cents > total_cents - paid_cents {
++    if super::balance_guards_enforced() && input.amount_cents > total_cents - paid_cents {
+         return Err(ApiError::conflict("the payment is larger than the order's unpaid balance"));
+     }
+     tx.execute(

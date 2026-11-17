@@ -1,0 +1,23 @@
+{
+  "defect": "duplicate-email-stored",
+  "start": "8ac8f9e298864a5eee07c19f46eccb341fd82533",
+  "main": "1448a783d8c928807ddca13f835bf4ecbbbde66a",
+  "branches": {
+    "refs/heads/main": "1448a783d8c928807ddca13f835bf4ecbbbde66a"
+  },
+  "recorded": {
+    "outcome": "stayed green",
+    "why": null,
+    "defect_built": true,
+    "green": true,
+    "tells_failed": [
+      "test_AC_led_001_rejects_a_duplicate_email_and_stores_nothing"
+    ],
+    "oracle_failed": [
+      "test_AC_led_001_rejects_a_duplicate_email_and_stores_nothing"
+    ],
+    "new_checks": [],
+    "statuses_moved": {},
+    "minutes": 15.2
+  }
+}
