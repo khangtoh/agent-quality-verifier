@@ -5,12 +5,12 @@ time, on scripted mistakes. It does not show that the verifier is *effective*: t
 agent builds real software from a spec, the verifier's picture of the work is true.
 
 This document says what "effective" means, lists the evals that measure it, and describes the ones
-that are built: a real agent (Claude Code or Codex) builds a spec'd service in Go while the
+that are built: a real agent (Claude Code or Codex) builds a spec'd service in Go or Rust while the
 verifier watches, and the verifier's verdicts are then compared with held-out acceptance tests and
 with faults planted on purpose.
 
-Scope: the evals target **Go and Rust** implementations. The Go stack runs end to end. The Rust
-stack is not written yet ([what's missing](#what-is-not-built-yet)).
+Scope: the evals target **Go and Rust** implementations. Both stacks run end to end
+([what differs in Rust](#the-rust-stack)).
 
 ## What "effective" means
 
@@ -95,9 +95,9 @@ published promises.
 | `spec/specs/ledger.md` | 9 requirements, each tagged with its API operations and datasets | People |
 | `spec/contracts/openapi.yaml` | 7 operations, closed response schemas, documented errors | People |
 | `spec/contracts/data.yaml` | 6 source tables and 1 derived view with column-level lineage | People |
-| `stacks/go/` | `.aqv.yml`, `AGENTS.md`, and the small helpers the checks call | People |
+| `stacks/go/`, `stacks/rust/` | Per language: `.aqv.yml`, `AGENTS.md`, and the small helpers the checks call | People |
 | `oracle/` | 24 held-out acceptance tests, named after the requirements | Never shown to the agent |
-| `faults.py` | 11 seeded faults | Never shown to the agent |
+| `faults.py` | 11 seeded faults (9 are SQL or document edits and fit any stack; 2 edit code and have a form per stack) | Never shown to the agent |
 
 The spec and both contracts are **given** to the agent and protected: the agent builds to them and
 may not edit them. That is what lets one oracle judge any implementation. (The other mode, where
@@ -262,12 +262,41 @@ It is hooked into the agent in two ways, both set up by the eval harness:
   fully proven, and hands it `state.md` as the reason. It gives up after 6 refusals so a stuck agent
   still ends.
 
+## The Rust stack
+
+`stacks/rust/` gives the same problem, contracts, oracle and checks to a Rust build: axum 0.8 on
+tokio, rusqlite with its bundled SQLite, cargo-nextest for the test report and cargo-llvm-cov for
+coverage. The spec, the contracts, the oracle and nine of the eleven seeded faults are used
+unchanged. What differs is how each check reaches the code:
+
+| Check | Go | Rust |
+|---|---|---|
+| A5, the routes served | The router lists them itself (`chi.Walk`) | Read from the source, because axum can't list its routes. `AGENTS.md` fixes how a route is written, and only the methods chained inside the `.route(...)` call count |
+| A6, A8, responses seen in tests | `aqvcapture.Do` | `aqvcapture::send`, a small crate in `tools/aqvcapture` (from `adapters/rust/aqvcapture/`) |
+| D5, D6, the real schema | `go run -tags aqvtools ./tools/aqvschema` | `cargo run --features aqvtools --bin aqvschema` |
+| D7 and the migration faults | Migrations embedded with `embed.FS` | Embedded with `include_dir!`. The seed's `build.rs` tells cargo to rebuild when the folder changes; without it a new migration file is not in the next build |
+| T7, a mutant that doesn't compile | A build command before the tests | nextest's exit code 101 |
+| Build output | Go's own cache | One `CARGO_TARGET_DIR` per run, shared by the watcher, the final check, the oracle and the fault copies, so a fresh checkout does not compile every dependency again. The agent keeps its own |
+
+Limits:
+
+- **A5 is a partial check in Rust.** A route registered through `nest`, `merge`, `route_service`,
+  or with its path in a constant is not seen. `AGENTS.md` forbids these, and nothing enforces it.
+- **Tests must be integration tests under `tests/`.** A `#[cfg(test)]` module inside `src/` would
+  be counted as the requirement's own code.
+- **`aqv init` has no Rust profile.** The stack here is written by hand for this problem.
+- cargo-llvm-cov needs `llvm-cov` and `llvm-profdata`. With rustup they come from the
+  `llvm-tools` component. For a Rust installed by Homebrew, `evals/run.py` points at Homebrew's
+  LLVM; anywhere else, set `LLVM_COV` and `LLVM_PROFDATA`.
+
 ## Running it
 
 ```bash
 scripts/setup.sh                                  # once: bin/aqv, .venv, Spectral, oasdiff, gotestsum
+WITH_RUST=1 scripts/setup.sh                      # also cargo-nextest and cargo-llvm-cov, for --stack rust
 .venv/bin/python evals/run.py run --problem ledger --stack go --agent claude --arm guarded
 .venv/bin/python evals/run.py run --problem ledger --stack go --agent codex  --arm blind
+.venv/bin/python evals/run.py run --problem ledger --stack rust --agent claude --arm guarded
 .venv/bin/python evals/faults.py --run evals/runs/<name>
 .venv/bin/python evals/conflicts.py --run evals/runs/<a finished, clean run>
 .venv/bin/python evals/run.py run --variant conflicts-pushon --arm blind     # an agent on a conflicted spec
@@ -283,13 +312,21 @@ committed: it holds each run's workspace (a git repository), its signing key and
 check's pages and `results.json`, the watcher's timeline and per-commit pages, and the agent's final
 message.
 
+**Reviewing a run on GitHub.** On every push and pull request the `review` workflow writes the pages
+of every kept run again with the verifier built from that commit and uploads them as the artifact
+`review-pages`; download it from the workflow run and open `index.html`. The run's summary shows each
+run's score without downloading anything. `python scripts/review_bundle.py --out review-bundle`
+builds the same folder locally.
+
 The agent runs on your machine with file and shell access inside the workspace, and uses your
 agent account. A Ledgerline run takes on the order of an hour.
 
 ## Results so far
 
-One run, on 2026-11-15: Claude Code, guarded arm, Go stack (`ledger-go-claude-guarded-1`). One run
-shows the harness works end to end; it is not a measurement of the verifier.
+One clean run per stack, both Claude Code in the guarded arm: Go on 2026-11-15
+(`ledger-go-claude-guarded-1`) and Rust on 2026-11-17 (`ledger-rust-claude-guarded-1`, after the Go
+results below). One run per stack shows the harness works end to end; it is not a measurement of
+the verifier.
 
 **E1, verdict against oracle**
 
@@ -331,6 +368,31 @@ defects, not because the verifier was tested and held.
   fault than intended: it proves D5 fires but not that D5 alone would have caught it.
 
 Full tables: `evals/results/ledger-go-claude-guarded-1/score.md` and `faults.md`.
+
+**The same two evals on the Rust stack** (`evals/results/ledger-rust-claude-guarded-1/`)
+
+| | Go | Rust |
+|---|---|---|
+| E1: confirmed / false assurance / caught / unproven but working | 9 / 0 / 0 / 0 | 9 / 0 / 0 / 0 |
+| Held-out tests passing | 24 of 24 | 24 of 24 |
+| Checks failing in the final full check (T7 and A7 included) | 0 | 0 |
+| Agent time, commits on main, tests of its own | 38.7 min, 14, 99 | 14.0 min, 9, 66 |
+| Commits the watcher checked, and those with failing health | 33, 5 | 19, 0 |
+| E2: targeted faults caught | 9 of 9 | 9 of 9 |
+| E2: probes caught | 2 of 2 | 2 of 2 |
+| E2: caught while the held-out tests still pass | 8 of 11 | 8 of 11 |
+
+- Every check reached the Rust code: tagged tests and coverage through nextest and llvm-cov, 105
+  of 108 mutants killed (T7), 216 calls from tagged tests matched to the contract (A6), the running
+  service (A7), and the schema and lineage read back from a database the binary built (D5, D6).
+- Like the Go run, the agent made no mistake that survived to main, so this run also says nothing
+  about false assurance on real mistakes.
+- The two faults that edit code were rewritten for Rust (a `.route(...)` nobody documented, tests
+  renamed) and both were caught. The other nine were used as they are.
+- The route rule has a cost the agent pointed out itself: because `fallback` is not allowed, a
+  wrong method on a known path gets axum's 405 with an empty body, which the contract does not
+  document. No check failed on it.
+- The times are not a comparison of the languages: one run each, on different days.
 
 **E9, conflicting documents** (`evals/results/_conflicts/conflicts.md`)
 
@@ -396,9 +458,9 @@ requirements fail them (AC-led-002, 003, 004, 006).
 
 ## What is not built yet
 
-- **Rust stack.** `evals/problems/ledger/stacks/rust/` needs an `.aqv.yml` (cargo-nextest,
-  cargo-llvm-cov), the capture helper and a schema tool, as `stacks/go/` has. The oracle, the
-  contracts, the data checks and most seeded faults already apply unchanged.
+- **Rust beyond one clean run.** The Rust stack has the guarded run and the seeded faults. The
+  conflict evals (E9, E10) and the blind arm have only been run on Go, and `aqv init` writes a Go
+  profile only.
 - **More problems.** One problem is an anecdote. Candidates that stress other things: a job queue
   with retries (no HTTP surface), a multi-tenant API (authorization in the contract), an importer
   with a bronze/silver/gold pipeline (deeper lineage).

@@ -32,7 +32,7 @@ listed on [index.html](index.html), the site home (also the GitHub Pages root).
 | [Kotlin](demo/results/kotlin/RESULTS.md) | Kotlin 2.0 · Spring Boot 3.4 · JUnit 5 + MockMvc · Gradle · JaCoCo · springdoc | 28 of 28 |
 
 **Evaluating it on real agents.** [docs/evals.md](docs/evals.md) describes the evals that measure
-whether the verifier is right when a real agent (Claude Code or Codex) builds a spec'd Go service:
+whether the verifier is right when a real agent (Claude Code or Codex) builds a spec'd Go or Rust service:
 its verdicts against held-out acceptance tests, and against faults planted on purpose. The same
 document covers the data guardrail (D1–D7: the database matches its data contract, lineage included)
 `aqv watch`, which follows an agent's commits and shows the state and health of the work live, and
@@ -283,6 +283,7 @@ adapters/node/          A5 route listers and the A6 capture setup file for Node
 adapters/claude/        Claude Code workflows: aqv-specs (goal and plan to spec), aqv-build (spec to verified code)
 adapters/init/          what aqv init writes: the Go .aqv.yml, the lint rules, the CLAUDE.md section
 adapters/go/aqvcapture/ the A6 test helper aqv init copies into a Go project
+adapters/rust/aqvcapture/  the A6 test helper for a Rust (axum) project, as a small crate
 demo/
   build_baseline.py     builds a clean demo repo for one language
   langs/<language>/     stages.py (code, tests, runner profile) and edits.sh (attack edits)
@@ -310,8 +311,9 @@ adapters/sqlite/        schema.py: reads a SQLite database's schema and its view
 evals/run.py            one eval run: workspace, watcher, agent, final check, oracle, score
 evals/faults.py         plants known faults in a finished run and reports which were caught
 evals/keep.py           copies a run's scores and pages from evals/runs/ (ignored) to evals/results/
+scripts/review_bundle.py  the review artifact CI uploads: every kept run's pages behind one index page
 evals/conflicts.py      plants disagreeing documents and after-the-build changes, with the new checks off and on
-evals/problems/ledger/  the Ledgerline problem: goal, plan, spec, contracts, Go stack, oracle, faults
+evals/problems/ledger/  the Ledgerline problem: goal, plan, spec, contracts, Go and Rust stacks, oracle, faults
 evals/results/          what each eval run left worth keeping: scores, review and live pages, timelines
 evals/results/conflicts-page/  the conflict results page, with the review and live pages it links to
 docs/evals.md           what the evals measure, how to run them, results
