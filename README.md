@@ -33,7 +33,10 @@ listed on [index.html](index.html), the site home (also the GitHub Pages root).
 
 **Evaluating it on real agents.** [docs/evals.md](docs/evals.md) describes the evals that measure
 whether the verifier is right when a real agent (Claude Code or Codex) builds a spec'd Go or Rust service:
-its verdicts against held-out acceptance tests, and against faults planted on purpose. The same
+its verdicts against held-out acceptance tests, and against faults planted on purpose. A red-team
+eval then asked a second agent to get a wrong build past the checks, and it did in all nine attempts
+where it got the defect in, mostly by changing the requirement's own tests: Sync means the code and
+its tests agree and fit the contracts, not that the tests say what the requirement says. The same
 document covers the data guardrail (D1–D7: the database matches its data contract, lineage included)
 `aqv watch`, which follows an agent's commits and shows the state and health of the work live, and
 the consistency guardrail (C1–C7, A8), which finds requirements, contracts and design documents that
@@ -310,6 +313,7 @@ internal/aqv/review.go  review.html: verdict, who must act, the facts behind eac
 adapters/sqlite/        schema.py: reads a SQLite database's schema and its views' lineage (D5, D6)
 evals/run.py            one eval run: workspace, watcher, agent, final check, oracle, score
 evals/faults.py         plants known faults in a finished run and reports which were caught
+evals/redteam.py        red team: an agent builds a described defect and tries to keep it green; replay judges saved attacks again
 evals/keep.py           copies a run's scores and pages from evals/runs/ (ignored) to evals/results/
 scripts/review_bundle.py  the review artifact CI uploads: every kept run's pages behind one index page
 evals/conflicts.py      plants disagreeing documents and after-the-build changes, with the new checks off and on
@@ -317,6 +321,7 @@ evals/problems/ledger/  the Ledgerline problem: goal, plan, spec, contracts, Go 
 evals/results/          what each eval run left worth keeping: scores, review and live pages, timelines
 evals/results/conflicts-page/  the conflict results page, with the review and live pages it links to
 docs/evals.md           what the evals measure, how to run them, results
+docs/redteam.md         the red-team eval's method: generating, judging, saving and replaying attacks
 experiments/            oft_layer.py, variants/, ours.py, report.py (builds docs/compare/)
   openfasttrace/        OpenFastTrace on the same scenarios
   intentbond/           IntentBond on the same scenarios
