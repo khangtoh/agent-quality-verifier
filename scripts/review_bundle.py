@@ -173,7 +173,8 @@ def main():
     shutil.rmtree(out, ignore_errors=True)
     shutil.copytree(RESULTS, out)
     rendered = render_all(out)
-    commit = os.environ.get("GITHUB_SHA") or subprocess.run(
+    # In a pull request GITHUB_SHA is a merge commit nobody pushed, so CI passes the branch's own.
+    commit = os.environ.get("REVIEW_COMMIT") or os.environ.get("GITHUB_SHA") or subprocess.run(
         ["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
     commit = commit[:7] or "unknown"
     runs = [run_of(folder) for folder in sorted(out.iterdir()) if (folder / "meta.json").exists()]

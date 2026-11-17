@@ -24,6 +24,8 @@ jobs:
           python-version: "3.11"
       - run: go build -o bin/aqv ./cmd/aqv
       - name: Review pages
+        env:
+          REVIEW_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
         run: python scripts/review_bundle.py --out review-bundle --summary "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v4
         with:
